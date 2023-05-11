@@ -1,0 +1,107 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+
+      <div class="card text-white bg-info mb-10" >
+        {% if lockers.iloc[0]['known_as'] =='_' %}
+          <div class="card-header">{{provider}}</div>
+
+        {% else %}
+          <div class="card-header">{{ lockers.iloc[0]['known_as'] }} <br/> {{provider}}</div>
+
+        {% endif %}
+        <div class="card-body">
+            <h4 class="card-title">CRV Locked : {{ "{:,.2f}".format(lockers['balance_adj'].head(1).sum()) }}</h4>
+            <h4 class="card-title">Final Lock Time : {{ lockers.iloc[0]['final_lock_time'] }}</h4>
+            <h5 class="card-title">Locking Events : {{ lockers.shape[0] }}</h5>
+
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart" class="chart"></div>
+            {# <div id="chart2" class="chart2"></div> #}
+
+
+        </div>
+
+              
+    </div>
+
+
+
+
+        {# <div class="card-header">Header</div>
+        <div class="card-body">
+          <h4 class="card-title">Info card title</h4>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div> #}
+        <a href="{{ url_for('locker_bp.index') }}">
+          <button type="button" class="btn btn-info">All Locks</button>
+        </a>
+
+      <div id="lock_table"></div>
+
+
+
+
+
+    </div>
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'known_as', name: 'Known As' },
+          { id: 'address', name: 'Address' },
+          { id: 'balance_adj', name: 'Balance Adj' },
+          { id: 'final_lock_time', name: 'Final Lock Time' },
+          { id: 'timestamp', name: 'Last Locked' },
+          { id: 'period', name: 'period' },
+
+        ],
+        data: [
+          {% for index, row in lockers.iterrows() %}
+            {
+              'known_as': '{{ row['known_as'] }}',
+              'address': '{{ row['provider'] }}',
+              'balance_adj': '{{ row['balance_adj_formatted'] }}',
+              'final_lock_time': '{{ row['final_lock_time'] }}',
+              'timestamp': '{{ row['timestamp'] }}',
+              'period': '{{ row['period'] }}',
+
+            },
+          {% endfor %}
+        ],
+        fixedHeader: true,
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('lock_table'));
+</script>
+
+
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+{% endblock %}

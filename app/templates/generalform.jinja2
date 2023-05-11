@@ -1,0 +1,49 @@
+{% extends "layout.jinja2" %}
+
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+  <div class="form-wrapper">
+
+    {% for message in get_flashed_messages() %}
+      <div class="alert alert-warning">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert">
+          x
+        </button>
+        {{ message }}
+      </div>
+    {% endfor %}
+
+    <h1>{{ title }}</h1>
+
+    <form method="POST" action="{{ url_for(request.endpoint) }}">
+      {{ form.csrf_token }}
+      {% for field in form %}
+        {% if field.type != "SubmitField" and field.type != "csrf_token" %}
+
+          <div class="form-group">
+          <fieldset class="form-field">
+            {{ field.label }}
+            {{ field() }}
+            {% if field.name.errors %}
+              <ul class="errors">
+                {% for error in field.name.errors %}
+                  <li>{{ error }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+          </fieldset>
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class=class="btn btn-success">
+        {{ form.submit }}
+      </div>
+
+    </form>
+
+  </div>
+
+{% endblock %}

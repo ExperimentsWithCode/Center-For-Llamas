@@ -1,0 +1,152 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="row">
+
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total CRV Locked :  </div>
+        <div class="card-body">
+          <h4 class="card-title">{{ "{:,.2f}".format(lockers['balance_adj'].sum()) }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Current Lockers : </div>
+        <div class="card-body">
+          <h4 class="card-title">{{ lockers.shape[0] }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+    </div>
+    <div class="row">
+      <div class="card text-white bg-info mb-10"  style="max-width: 50%;">
+        <div class="card-header">Total CRV Locked </div>
+        <div class="card-body">
+            <h4 class="card-title"></h4>
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart" class="chart"></div>
+
+        </div>              
+    </div>
+    <div class="card text-white bg-primary mb-10"  style="max-width: 50%;">
+      <div class="card-header">Whitelisted Lockers</div>
+      <div class="card-body">
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+          <div id="chart2" class="chart2"></div>
+
+      </div>              
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card text-white bg-primary mb-10"  style="max-width: 50%;">
+      <div class="card-header">Curve Locked</div>
+      <div class="card-body">
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+          <div id="chart4" class="chart4"></div>
+
+      </div>              
+    </div>
+
+    <div class="card text-white bg-secondary mb-10"  style="max-width: 50%;">
+      <div class="card-header">Whitelisted Lockers</div>
+      <div class="card-body">
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+          <div id="chart3" class="chart3"></div>
+
+      </div>              
+    </div>
+  </div>
+  <div class="row">
+
+    <div id="lock_table"></div>
+
+  </div>
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'known_as', name: 'Known As' },
+          { id: 'address', name: 'Address' },
+          { id: 'balance_adj', name: 'Balance Adj',
+            {# formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` #}
+          },
+          { id: 'final_lock_time', name: 'Final Lock Time' },
+          { id: 'timestamp', name: 'Last Locked' },
+          { id: 'period', name: 'period' },
+          { id: 'actions', 
+            name: 'Actions',
+            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
+          },
+        ],
+        data: [
+          {% for index, row in lockers.iterrows() %}
+            {
+              'known_as': '{{ row['known_as'] }}',
+              'address': '{{ row['provider'] }}',
+              {# 'balance_adj': '{{ row['balance_adj']|round(2) }}', #}
+              'balance_adj': '{{ row['balance_adj_formatted'] }}',
+              'final_lock_time': '{{ row['final_lock_time'] }}',
+              'timestamp': '{{ row['timestamp'] }}',
+              'period': '{{ row['period'] }}',
+              'actions': null
+
+            },
+          {% endfor %}
+        ],
+        fixedHeader: true,
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('lock_table'));
+</script>
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs3 = {{graphJSON3 | safe}};
+  Plotly.plot('chart3',graphs3,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs4 = {{graphJSON4 | safe}};
+  Plotly.plot('chart4',graphs4,{});
+</script>
+
+
+{% endblock %}

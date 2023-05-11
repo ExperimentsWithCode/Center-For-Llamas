@@ -1,0 +1,63 @@
+{% extends "layout.jinja2" %}
+
+{#
+{% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %}
+#}
+
+{% block content %}
+
+  {% include "navigation0.jinja2" %}
+  <div class="row">
+
+       <div class="card border-info mb-3" >
+        <div class="card-body">
+          <h1 class="card-title">{{ title }}</h1>
+          <h4 class="card-title">{{ subtitle }}</h4>
+
+        </div>
+      </div>  
+
+  </div>
+  <div class="row">
+
+    <div class="card border-info mb-3" style="max-width: 30rem;">
+      <div class="card-header">made w/ <3 </div>
+      <div class="card-body">
+        <h4 class="card-title">A Curve Governance Explorer</h4>
+        <p class="card-text">This site is intended to act as a Curve governance explorer. 
+          To act as a granular view of the intracacies of the most active governance in DeFi.</p>
+      </div>
+    </div>
+
+    <div class="card border-primary mb-3" style="max-width: 30rem;">
+      <div class="card-header">Philosophy</div>
+      <div class="card-body">
+        <h4 class="card-title">A collection of parts create a whole</h4>
+        <p class="card-text">Curve governance is continuous. Actions persist. As such this project aims to isolate specific parts, and then combine them.</p>
+        <p class="card-text">Locks are independent of votes, are independent of rounds.</p>
+        <p class="card-text">As this project develops it will spawn more meta dashboards which combine aspects</p>
+      </div>
+    </div>
+
+  </div>
+
+  </div>
+  <div class="row">
+    
+
+
+  </div>
+
+    {# <div class="resource-links">
+      <p class="resource-link">Github repo found <a href="https://github.com/BlockEnthusiast/Treasury_Management/tree/main/app">here.</a></p>
+      <!-- <p class="resource-link">Tutorial found <a href="https://hackersandslackers.com/flask-blueprints/">here.</a></p> -->
+    </div> #}
+
+
+
+
+{% endblock %}

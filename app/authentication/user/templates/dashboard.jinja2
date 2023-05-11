@@ -1,0 +1,60 @@
+{% extends "layout.jinja2" %}
+
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+  <div class="bs-docs-section">
+    <div class="row">
+          <h2> User Info:</h2>
+          <h1 class="text-primary">{{ current_user.name }}
+          </h1>
+
+            <h2 class="text-info"> Linked Simulations: </h2>
+            <table class="table table-hover">
+              {% if current_user.simulations %}
+                <tr class="table-dark" scope="col">
+                  <th>id</th>
+                  <th>name</th>
+                  <th>days</th>
+                  <th>active</th>
+                  <th>AMMs</th>
+                  <th>Options</th>
+                </tr>
+                {% for sim in current_user.simulations %}
+                    {% if sim.active %}
+                      <tr class="table-success">
+                    {% else %}
+                      <tr >
+                    {% endif %}
+                      <th scope="row">{{ sim.id }}</th>
+                      <th>{{ sim.sim_name }}</th>
+                      <th>{{ sim.days }}</th>
+                      <th>{{ sim.active }}</th>
+                      <th>{{ sim.amms|length }}</th>
+                      <th> <a href="{{ url_for('simulator_bp.activate', id=sim.id) }}">
+                              <button type="button" class="btn btn-outline-success">Activate</button>
+                            </a>
+                            <a href="{{ url_for('simulator_bp.delete', id=sim.id) }}">
+                              <button type="button" class="btn btn-outline-danger">Delete</button>
+                            </a>
+                      </th>
+                    </tr>
+                {% endfor %}
+              {% else %}
+                <p> Don't have any simulations added... </p>
+              {% endif %}
+          </table>
+          {% if current_user.simulations|length > 0 %}
+          <a href="{{ url_for('space_bp.index') }}">
+            <button type="button" class="btn btn-success">Active Simulation</button>
+          </a>
+          {% endif %}
+          <a href="{{ url_for('simulator_bp.new') }}">
+            <button type="button" class="btn btn-info">New Simulation</button>
+          </a>
+          </div>
+        </div>
+
+
+{% endblock %}

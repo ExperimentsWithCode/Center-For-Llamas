@@ -1,0 +1,10 @@
+.env
+config.py
+venv/
+trash/
+*.pyc
+
+*.csv
+*.json
+*.ipynb
+app/static/fonts/*

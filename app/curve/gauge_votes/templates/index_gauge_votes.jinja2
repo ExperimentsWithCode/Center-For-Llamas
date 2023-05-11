@@ -1,0 +1,136 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="row">
+ 
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+      <div class="card-header">All Active Votes</div>
+      <div class="card-body">
+          <h4 class="card-title">{{ votes.shape[0] }}</h4>
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+
+      </div>
+    </div>
+
+        <div class="card text-white bg-warning mb-3" style="max-width: 50%;" >
+          <div class="card-header">Notes:</div>
+          <div class="card-body">
+              <p class="card-text">Currently this view doesn't have a sense of locks. 
+              Locks are independent of votes and votes can change in vote power between rounds without any change in vote.
+              As such it is intentional that no lock value is displayed. However still need to filter out votes which no longer have locked CRV.
+              Additionally, this is only votes > 0. Votes set to no voting power are not counted as an active vote.
+              </p>
+
+          </div>
+        </div>
+
+    </div>
+    <div class="row">
+
+        <div class="card text-white bg-primary mb-3" >
+        <div class="card-header">Current Voters</div>
+        <div class="card-body">
+            <div id="chart" class="chart"></div>
+
+        </div>
+        </div>
+
+    </div>
+    {# <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" >
+        <div class="card-header">Current Votes</div>
+        <div class="card-body">
+            <div id="chart2" class="chart2"></div>
+
+        </div>
+        </div>
+    </div> #}
+
+
+
+        <div id="vote_table"></div>
+
+
+
+
+
+    </div>
+
+  
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'period', name: 'Period' },
+          { id: 'period_end_date', name: 'Period End' },
+          { id: 'known_as', name: 'Known As' },
+          { id: 'user', name: 'User' },
+          { id: 'symbol', name: 'Symbol' },
+          { id: 'weight', name: 'Weight' },
+          { id: 'gauge_addr', name: 'Gauge Address' },
+          { id: 'time', name: 'Timestamp' },
+          { id: 'actions', 
+            name: 'Actions',
+            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[3].data}'>More</a>`)
+          },
+        ],
+        data: [
+          {% for index, row in votes.iterrows() %}
+            {
+              'period': '{{ row['period'] }}',
+              'period_end_date': '{{ row['period_end_date'] }}',
+              'known_as': '{{ row['known_as'] }}',
+              'user': '{{ row['user'] }}',
+              'symbol': '{{ row['symbol'] }}',
+              'weight': '{{ row['weight'] }}',
+              'gauge_addr': '{{ row['gauge_addr'] }}',
+              'time': '{{ row['time'] }}',
+              'actions': null
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('vote_table'));
+</script>
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script>
+{% endblock %}
