@@ -15,7 +15,11 @@ for x in temp_split:
     else:
         cwd += "/"+x
 
+if temp_split[-1] == 'Musings':
+    cwd += '/center-for-llamas'
+
 def read_csv(filename, path='source'):
+    print(cwd)
     try:
         data = []
         with open(cwd+"/app/data/"+ path+ "/"+ filename+".csv", newline='') as f:
@@ -26,7 +30,7 @@ def read_csv(filename, path='source'):
         return data
     except Exception as e:
         print(e)
-        traceback.format_exc() 
+        traceback.format_exc()
         return False
 
 def write_csv(filename, data, path='output'):
@@ -66,13 +70,13 @@ def write_dataframe_csv(filename, df):
     print(cwd+"/app/data/output/"+ filename+'.csv')
     try:
         full_filename = cwd+"/app/data/output/"+ filename+'.csv'
-        df.to_csv(full_filename) 
+        df.to_csv(full_filename)
         return True
     except Exception as e:
         print(e)
-        traceback.format_exc() 
+        traceback.format_exc()
         return False
-    
+
 
 def write_dfs_to_xlsx(filename, dfs, titles=None):
     with pd.ExcelWriter(cwd+"/app/data/output/"+ filename+'.xlsx') as writer:

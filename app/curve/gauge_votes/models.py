@@ -3,8 +3,8 @@ from flask import current_app as app
 # from ... import db
 from app.data.local_storage import (
     pd,
-    read_json, 
-    read_csv,  
+    read_json,
+    read_csv,
     write_dataframe_csv,
     write_dfs_to_xlsx
     )
@@ -16,10 +16,10 @@ import ast
 from datetime import datetime as dt
 
 from app.utilities.utility import get_period, get_period_end_date
-from app.data.reference import ( 
-    known_large_curve_holders, 
-    gauge_names, 
-    gauge_symbols,  
+from app.data.reference import (
+    known_large_curve_holders,
+    gauge_names,
+    gauge_symbols,
     current_file_title,
     fallback_file_title,
 )
@@ -31,7 +31,7 @@ class Voter():
     def __init__(self, address):
         self.address = address
         self.votes = []
-        self.active_votes = {}       
+        self.active_votes = {}
         self.known_as = "_"
         if self.address in known_large_curve_holders:
             self.known_as = known_large_curve_holders[self.address]
@@ -92,10 +92,10 @@ class Voter():
             sum_weight += vote.weight
         weight_data = {
             'known_as': self.known_as,
-            'voter': self.address, 
+            'voter': self.address,
             'sum_weight': sum_weight, }
         return output_data, weight_data
-    
+
     def format_output(self):
         output_data = []
         for vote in self.votes:
@@ -104,12 +104,12 @@ class Voter():
         return output_data
 
 
-    
+
     # def format_output(self):
 
 
 
-            
+
 
 
 class Vote():
@@ -154,9 +154,9 @@ class Vote():
             "symbol": self.symbol,
             "period": get_period(self.week_num, self.week_day, self.time),
             "period_end_date": get_period_end_date(self.time)
-            
+
         }
-    
+
 
 
     # def is_valid(self):
@@ -164,7 +164,7 @@ class Vote():
     #     start_time = dt.strptime(self.proposal.proposal_start_time,'%Y-%m-%d %H:%M:%S.%f')
     #     end_time = dt.strptime(self.proposal.proposal_end_time,'%Y-%m-%d %H:%M:%S.%f')
     #     # end_time = dt(temp_end.year, temp_end.month, temp_end.day)
-    #     if vote_time >= start_time: 
+    #     if vote_time >= start_time:
     #         if vote_time < end_time:
     #             if self.voter.known_as == 'Votium':
     #                 print( self.proposal.proposal_title)
@@ -180,7 +180,7 @@ class VoterRegistry():
     def __init__(self):
         self.voters = {}
 
-        
+
     def format_active_output(self):
         output_data = []
         out_weight_data = []
@@ -219,7 +219,7 @@ class VoterRegistry():
 #         period = vote.get_period()
 #         if not period in self.periods:
 #             self.periods[period] = {}
-        
+
 # class Period():
 #     def __init__(self):
 #         self.period
@@ -232,13 +232,13 @@ class VoterRegistry():
 
 def get_df_gauge_votes():
     try:
-        filename = 'curve_gauge_votes_'+ current_file_title
+        filename = 'curve_gauge_votes' #+ current_file_title
         resp_dict = read_csv(filename, 'source')
         df_gauge_votes = pd.json_normalize(resp_dict)
 
     except:
-        filename = 'curve_gauge_votes_'+ fallback_file_title
-        resp_dict = read_csv(filename, 'source')    
+        filename = 'curve_gauge_votes' #+ fallback_file_title
+        resp_dict = read_csv(filename, 'source')
         df_gauge_votes = pd.json_normalize(resp_dict)
     df_gauge_votes = df_gauge_votes.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df_gauge_votes
@@ -253,7 +253,7 @@ def get_votes_formatted(vr):
     vote_data = vr.format_output()
     df_gauge_votes_formatted = pd.json_normalize(vote_data)
     df_gauge_votes_formatted = df_gauge_votes_formatted.sort_values("time", axis = 0, ascending = True)
-    return df_gauge_votes_formatted   
+    return df_gauge_votes_formatted
 
 def get_current_votes(df_gauge_votes_formatted):
     df_current_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()

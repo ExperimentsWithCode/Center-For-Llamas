@@ -3,8 +3,8 @@ from flask import current_app as app
 # from ... import db
 from app.data.local_storage import (
     pd,
-    read_json, 
-    read_csv,  
+    read_json,
+    read_csv,
     write_dataframe_csv,
     write_dfs_to_xlsx
     )
@@ -16,7 +16,7 @@ from datetime import datetime as dt
 
 from app.utilities.utility import get_period, get_period_end_date
 from app.data.reference import (
-    known_large_curve_holders, 
+    known_large_curve_holders,
     current_file_title,
     fallback_file_title
 )
@@ -38,13 +38,58 @@ class Govenor():
             self.known_as = known_large_curve_holders[self.address]
         else:
             self.known_as = "_"
-        
+
     def add_action(self, row):
-        event_name = row['EVENT_NAME']
-        if row['DECODED_LOG'] == None:
-            print("No Action!")
-            return
-        log = ast.literal_eval(row['DECODED_LOG'])
+        try:
+            # Manual CSV download
+            event_name = row['EVENT_NAME']
+            if row['DECODED_LOG'] == None:
+                print("No Action!")
+                return
+            log = ast.literal_eval(row['DECODED_LOG'])
+        except:
+            # API sourced data
+            event_name = row['event_name']
+            log = {}
+            if 'decoded_log.prevSupply' in row:
+                if row['decoded_log.prevSupply'] != '' :
+                    log['prevSupply'] = int(row['decoded_log.prevSupply'].split('.')[0])
+
+            if 'decoded_log.supply' in row:
+                if row['decoded_log.supply'] != '' :
+                    log['supply'] = int(row['decoded_log.supply'].split('.')[0])
+
+            if 'decoded_log.locktime' in row:
+                if row['decoded_log.locktime'] != '' :
+                    log['locktime'] = int(row['decoded_log.locktime'].split('.')[0])
+
+            if 'decoded_log.provider' in row:
+                if row['decoded_log.provider'] != '' :
+                    log['provider'] = row['decoded_log.provider']
+
+            if 'decoded_log.ts' in row:
+                if row['decoded_log.ts'] != '' :
+                    log['ts'] = int(row['decoded_log.ts'].split('.')[0])
+
+            if 'decoded_log.type' in row:
+                log['type'] = row['decoded_log.type']
+
+            if 'decoded_log.value' in row:
+                if row['decoded_log.value'] != '' :
+                    log['value'] =int(row['decoded_log.value'].split('.')[0])
+
+            if 'decoded_log.admin' in row:
+                log['admin'] = row['decoded_log.admin']
+
+            if 'block_timestamp' in row:
+                try:
+                    split = row['block_timestamp'].split("T")
+                    row['block_timestamp'] = split[0]+" "+split[1][:-1]
+                except:
+                    pass
+                # print(row['block_timestamp'])
+
+
         if event_name == 'Deposit':
             action = Deposit(row, log)
             self.deposit_list.append(action)
@@ -63,9 +108,13 @@ class Govenor():
             print("No Action")
             # print(row)
             return
-        self.actions[row['TX_HASH']] = action
+        try:
+            self.actions[row['TX_HASH']] = action
+        except:
+            self.actions[row['tx_hash']] = action
+
         self.actions_list.append(action)
-        if not event_name == 'Supply': 
+        if not event_name == 'Supply':
             self.history.append({
                 'address': self.address,
                 'known_as': self.known_as,
@@ -86,8 +135,8 @@ class Govenor():
                         'withdraw': self.format_output_withdraw() }
         # print (output_data)
         return output_data
- 
-    
+
+
     def format_output_deposit(self):
         output_data = []
 
@@ -95,14 +144,14 @@ class Govenor():
             output_data.append(deposit.format_output())
         # print(output_data)
         return output_data
-    
+
     def format_output_withdraw(self):
         output_data = []
         for withdraw in self.withdraw_list:
             output_data.append(withdraw.format_output())
         # print(output_data)
         return output_data
-    
+
     def format_output_supply(self):
         output_data = []
         for supply in self.supply_list:
@@ -112,17 +161,30 @@ class Govenor():
 
 class Deposit():
     def __init__(self, row, log):
-        self.block_number = row['BLOCK_NUMBER']
-        self.block_timestamp = row['BLOCK_TIMESTAMP']
-        self.address = row['ORIGIN_FROM_ADDRESS']
+        try:
+            self.block_number = row['BLOCK_NUMBER']
+            self.block_timestamp = row['BLOCK_TIMESTAMP']
+            self.address = row['ORIGIN_FROM_ADDRESS']
 
-        self.locktime = log['locktime']
-        self.provider = log['provider']
-        self.ts = log['ts']
-        self.type = log['type']
-        self.value = log['value']
-        self.week_num = int(row['WEEK_NUMBER'])
-        self.week_day = int(row['WEEK_DAY'])
+            self.locktime = log['locktime']
+            self.provider = log['provider']
+            self.ts = log['ts']
+            self.type = log['type']
+            self.value = log['value']
+            self.week_num = int(row['WEEK_NUMBER'])
+            self.week_day = int(row['WEEK_DAY'])
+        except:
+            self.block_number = row['block_number']
+            self.block_timestamp = row['block_timestamp']
+            self.address = row['origin_from_address']
+
+            self.locktime = log['locktime']
+            self.provider = log['provider']
+            self.ts = log['ts']
+            self.type = log['type']
+            self.value = log['value']
+            self.week_num = int(row['week_number'])
+            self.week_day = int(row['week_day'])
 
     def format_output(self):
         return {
@@ -142,13 +204,27 @@ class Deposit():
 
 class Supply():
     def __init__(self, row, log):
-        self.block_number = row['BLOCK_NUMBER']
-        self.block_timestamp = row['BLOCK_TIMESTAMP']
-        self.address = row['ORIGIN_FROM_ADDRESS']
-        self.previous_supply = log['prevSupply']
-        self.supply =log['supply']
-        self.week_num = int(row['WEEK_NUMBER'])
-        self.week_day = int(row['WEEK_DAY'])
+        try:
+            self.block_number = row['BLOCK_NUMBER']
+            self.block_timestamp = row['BLOCK_TIMESTAMP']
+            self.address = row['ORIGIN_FROM_ADDRESS']
+
+            self.previous_supply = log['prevSupply']
+            self.supply =log['supply']
+
+            self.week_num = int(row['WEEK_NUMBER'])
+            self.week_day = int(row['WEEK_DAY'])
+
+        except:
+            self.block_number = row['block_number']
+            self.block_timestamp = row['block_timestamp']
+            self.address = row['origin_from_address']
+
+            self.previous_supply = log['prevSupply']
+            self.supply =log['supply']
+
+            self.week_num = int(row['week_number'])
+            self.week_day = int(row['week_day'])
 
     def format_output(self):
         return {
@@ -160,17 +236,30 @@ class Supply():
             'period': get_period(self.week_num, self.week_day, self.block_timestamp),
         }
 
-            
+
 class Withdraw():
     def __init__(self, row, log):
-        self.block_number = row['BLOCK_NUMBER']
-        self.block_timestamp = row['BLOCK_TIMESTAMP']
-        self.address = row['ORIGIN_FROM_ADDRESS']
-        self.provider = log['provider']
-        self.ts = log['ts']
-        self.value = log['value']
-        self.week_num = int(row['WEEK_NUMBER'])
-        self.week_day = int(row['WEEK_DAY'])
+        try:
+            self.block_number = row['BLOCK_NUMBER']
+            self.block_timestamp = row['BLOCK_TIMESTAMP']
+            self.address = row['ORIGIN_FROM_ADDRESS']
+
+
+            self.provider = log['provider']
+            self.ts = log['ts']
+            self.value = log['value']
+
+            self.week_num = int(row['WEEK_NUMBER'])
+            self.week_day = int(row['WEEK_DAY'])
+        except:
+            self.block_number = row['block_number']
+            self.block_timestamp = row['block_timestamp']
+            self.address = row['origin_from_address']
+            self.provider = log['provider']
+            self.ts = log['ts']
+            self.value = log['value']
+            self.week_num = int(row['week_number'])
+            self.week_day = int(row['week_day'])
 
     def format_output(self):
         return {
@@ -188,13 +277,19 @@ class Withdraw():
 class Locker():
     def __init__(self):
         self.govenors = {}
-        
+
     def new_govenor(self, row):
-        address = row['ORIGIN_FROM_ADDRESS']
-        if not row['DECODED_LOG'] == None:
-            log = ast.literal_eval(row['DECODED_LOG'])
-            if 'provider' in log:
-                address = log['provider']
+        try:
+            address = row['ORIGIN_FROM_ADDRESS']
+            if not row['DECODED_LOG'] == None:
+                log = ast.literal_eval(row['DECODED_LOG'])
+                if 'provider' in log:
+                    address = log['provider']
+        except:
+            address = row['origin_from_address']
+            if  'decoded_log.provider' in row:
+                address = row['decoded_log.provider']
+
         if not address in self.govenors:
             g = Govenor(address)
             self.govenors[address] = g
@@ -207,7 +302,7 @@ class Locker():
                 a = g.add_action(row)
             else:
                 print("")
-        
+
     def format_output(self):
         output_data = {'supply': [],
                         'deposit': [],
@@ -236,15 +331,19 @@ class Locker():
 
 def get_df_locker():
     try:
-        filename = 'curve_locker_through_'+ current_file_title
+        filename = 'curve_locker'#+ current_file_title
         locker_dict = read_csv(filename, 'source')
         df_locker = pd.json_normalize(locker_dict)
 
     except:
-        filename = 'curve_locker_through_'+ fallback_file_title
-        locker_dict = read_csv(filename, 'source')    
+        filename = 'curve_locker'#+ fallback_file_title
+        locker_dict = read_csv(filename, 'source')
         df_locker = pd.json_normalize(locker_dict)
-    df_locker = df_locker.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+    try:
+        df_locker = df_locker.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+    except:
+        df_locker = df_locker.sort_values("block_timestamp", axis = 0, ascending = True)
+
     return df_locker
 
 
@@ -257,7 +356,7 @@ def get_history(locker):
     history_data = locker.format_history_output()
     df_history_data = pd.json_normalize(history_data)
     df_history_data = df_history_data.sort_values("timestamp", axis = 0, ascending = True)
-    return df_history_data   
+    return df_history_data
 
 
 def get_current_locks(df_history_data):

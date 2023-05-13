@@ -1,7 +1,7 @@
 from app.data.local_storage import (
     pd,
-    read_json, 
-    read_csv,  
+    read_json,
+    read_csv,
     write_dataframe_csv,
     write_dfs_to_xlsx
     )
@@ -13,7 +13,7 @@ from datetime import datetime as dt
 
 from app.utilities.utility import get_period, get_period_end_date
 from app.data.reference import (
-    known_large_curve_holders, 
+    known_large_curve_holders,
     current_file_title,
     fallback_file_title,
 )
@@ -101,7 +101,7 @@ class Snapshot():
                         if row_of_data:
                             output_data.append(row_of_data)
         return output_data
-    
+
     def format_final_choice_output(self):
         output_data = []
         for network_name in self.networks:
@@ -180,13 +180,13 @@ class Space():
                 if 'Gauge Weight' in p.proposal_title and not 'TEST' in p.proposal_title:
                     self.gauge_list.append(p)
                     self.gauge_map[p.proposal_id] = p
-                    
+
             else:
                 p = self.proposals[row['PROPOSAL_ID']]
-                
+
             return p
         return None
-    
+
     def new_voter(self,row):
         if 'VOTER' in row:
             if not row['VOTER'] in self.voters:
@@ -196,11 +196,11 @@ class Space():
                 v = self.voters[row['VOTER']]
             return v
         return None
-    
+
     def process_vote(self, p, voter, row):
         if p:
             vote = p.new_vote(voter, row)
-        
+
 
 class Proposal():
     def __init__(self, space, row):
@@ -237,7 +237,7 @@ class Proposal():
                     self.voter_choices[vote.voter] = vote
             return vote
         return None
-    
+
 
     # def get_choices(self):
     #     choices = self
@@ -249,7 +249,7 @@ class Voter():
         self.space = space
         self.address = row['VOTER']
         self.address_name = row['ADDRESS_NAME']
-        
+
         self.label_type = row['LABEL_TYPE']
         self.label_subtype = row['LABEL_SUBTYPE']
         self.label = row['LABEL']
@@ -281,7 +281,7 @@ class Voter():
 ### ISSUE HERE RECOGNIZING GAUGE VS NON GAUGE FILTERING
 
     def calc_vote_change_per_proposal(self, vote):
-        p_list = self.space.gauge_list 
+        p_list = self.space.gauge_list
         if vote.proposal.proposal_id in p_list:
             x = p_list.index(vote.proposal.proposal_id)
         else:
@@ -336,7 +336,7 @@ class Voter():
                                 'delta_percent': last_vote_by_choice[choice]['vote_percent'] * -1,
                                 'delta_power': last_vote_by_choice[choice]['vote_power'] * - 1,
                                 'available_power': alt_choice[choice]['available_power'],
-                                }                 
+                                }
 
             else:
                 if this_vote_by_choice:
@@ -356,7 +356,7 @@ class Voter():
                             'delta_percent': this_vote_by_choice[choice]['vote_percent'],
                             'delta_power': this_vote_by_choice[choice]['vote_power'],
                             'available_power': this_vote_by_choice[choice]['available_power'],
-                        }  
+                        }
                 else:
                     print(this_vote_by_choice)
                     print("Not Found")
@@ -366,7 +366,7 @@ class Voter():
             print(traceback.format_exc())
             print('failed')
         # if not output:
-        #     print(last_vote)            
+        #     print(last_vote)
         return output
 
 
@@ -390,7 +390,7 @@ class Vote():
         if not options or not choices:
             print("Error")
             return None
-        
+
         if type(options) == dict:
             total_weight = 0
             for key in options.keys():
@@ -407,12 +407,12 @@ class Vote():
                 weight = int(option)
                 total_weight += weight
                 this_choice = Choice(self,
-                                     self.proposal, 
-                                     self.voter, 
-                                     choice, 
+                                     self.proposal,
+                                     self.voter,
+                                     choice,
                                      int(key),
-                                     weight, 
-                                     self.voting_power, 
+                                     weight,
+                                     self.voting_power,
                                      self.vote_timestamp,
                                      self.vote_id)
                 self.voter.choices.append(this_choice)
@@ -431,7 +431,7 @@ class Vote():
                     print(f'\tkey {index} of {len(options)} not found in choices: {len(choices)}')
                     print(index)
                     print(choices)
-                    continue    
+                    continue
                 if option == 'NA':
                     weight = 0
                 else:
@@ -439,12 +439,12 @@ class Vote():
                 total_weight += weight
                 this_choice = Choice(
                     self,
-                    self.proposal, 
-                    self.voter, 
-                    choice, 
+                    self.proposal,
+                    self.voter,
+                    choice,
                    int(index),  #choice_id
-                    weight, 
-                    self.voting_power, 
+                    weight,
+                    self.voting_power,
                     self.vote_timestamp,
                     self.vote_id
                 )
@@ -473,9 +473,9 @@ class Vote():
                 print("\tvote")
                 print(traceback.format_exc())
             self.proposal.fails_logged += 1
-            return None        
+            return None
         return choices
-        
+
     def get_vote_options_new(self):
         try:
             if self.vote_option[0][0] == '[' or self.vote_option[0][0] == '{':
@@ -492,9 +492,9 @@ class Vote():
                 print(type(self.vote_option))
                 print(traceback.format_exc())
             self.proposal.fails_logged += 1
-            return None        
+            return None
         return options
-        
+
 
     def get_vote_options(self):
         try:
@@ -556,7 +556,7 @@ class Vote():
                     output[c] = {'vote_percent': percent,
                                 'vote_power': percent * float(self.voting_power),
                                 'available_power': float(self.voting_power),
-                                }     
+                                }
         except Exception as e:
             if self.proposal.fails_logged < 3:
                 print("== Failed")
@@ -567,7 +567,7 @@ class Vote():
                 print(traceback.format_exc())
                 print(e)
             self.proposal.fails_logged += 1
-            return None   
+            return None
         # print(output)
         return output
 
@@ -576,7 +576,7 @@ class Vote():
         start_time = dt.strptime(self.proposal.proposal_start_time,'%Y-%m-%d %H:%M:%S.%f')
         end_time = dt.strptime(self.proposal.proposal_end_time,'%Y-%m-%d %H:%M:%S.%f')
         # end_time = dt(temp_end.year, temp_end.month, temp_end.day)
-        if vote_time >= start_time: 
+        if vote_time >= start_time:
             if vote_time < end_time:
                 # if self.voter.known_as == 'Votium':
                 #     print( self.proposal.proposal_title)
@@ -606,7 +606,7 @@ class Choice():
             return self.voting_weight / self.total_vote_weight
         else:
             return 0
-    
+
     def choice_power(self):
         return float( self.choice_percent() * self.available_power)
 
@@ -617,11 +617,11 @@ class Choice():
     #     vote_time = dt.strptime(self.ts,'%Y-%m-%d %H:%M:%S.%f')
     #     start_time = dt.strptime(self.proposal.proposal_start_time,'%Y-%m-%d %H:%M:%S.%f')
     #     end_time = dt.strptime(self.proposal.proposal_end_time,'%Y-%m-%d %H:%M:%S.%f')
-    #     if vote_time >= start_time: 
+    #     if vote_time >= start_time:
     #         if vote_time < end_time:
     #             return True
     #     return False
-    
+
     def format_output(self):
         return {
             'proposal_title': self.proposal.proposal_title,
@@ -653,13 +653,13 @@ class Choice():
 
 def get_df_snapshot():
     try:
-        filename = 'convex_snapshot_' + current_file_title
+        filename = 'convex_snapshot_votes' # + current_file_title
         snapshot_dict = read_json(filename, 'source')
         df_snapshot = pd.json_normalize(snapshot_dict)
 
     except:
-        filename = 'convex_snapshot_' + fallback_file_title
-        snapshot_dict = read_json(filename, 'source')        
+        filename = 'convex_snapshot_votes' #+ fallback_file_title
+        snapshot_dict = read_json(filename, 'source')
         df_snapshot = pd.json_normalize(snapshot_dict)
     return df_snapshot.sort_values("VOTE_TIMESTAMP", axis = 0, ascending = True)
 
@@ -687,7 +687,7 @@ def get_aggregates(df_vote_choice):
     df_vote_aggregates = df_vote_choice.groupby(
         ['proposal_end', 'proposal_title', 'choice']
         )['choice_power'].agg(['sum','count']).reset_index()
-    
+
     df_vote_aggregates = df_vote_aggregates.rename(columns={
         "sum": 'total_vote_power',
         'count': 'vlcvx_voter_count'})
