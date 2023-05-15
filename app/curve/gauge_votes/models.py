@@ -37,51 +37,99 @@ class Voter():
             self.known_as = known_large_curve_holders[self.address]
 
     def new_vote(self, row):
-        tx_hash = row['TX_HASH']
-        try:
-            decoded_log = ast.literal_eval(row['DECODED_LOG'])
-            gauge_addr = decoded_log['gauge_addr']
-            time = dt.fromtimestamp(decoded_log['time'])
-            user = decoded_log['user']
-            weight = decoded_log['weight']
-            if 'NAME' in row:
-                name = row['NAME']
-                if name == 'null':
-                    if gauge_addr in gauge_names:
-                        name = gauge_names[gauge_addr]
-                    else:
-                        temp_name = gauge_registry.get_gauge_name(gauge_addr)
-                        name = temp_name if temp_name else ""
-            elif gauge_addr in gauge_names:
-                name = gauge_names[gauge_addr]
-            else:
-                name = ""
-            if 'SYMBOL' in row:
-                symbol = row['SYMBOL']
-                if symbol == 'null':
-                    if gauge_addr in gauge_symbols:
-                        symbol = gauge_symbols[gauge_addr]
-                    else:
-                        temp_symbol = gauge_registry.get_gauge_symbol(gauge_addr)
-                        symbol = temp_symbol if temp_symbol else ""
+        if 'TX_HASH' in row:
+            tx_hash = row['TX_HASH']
+            try:
+                decoded_log = ast.literal_eval(row['DECODED_LOG'])
+                gauge_addr = decoded_log['gauge_addr']
+                time = dt.fromtimestamp(decoded_log['time'])
+                user = decoded_log['user']
+                weight = decoded_log['weight']
+                if 'NAME' in row:
+                    name = row['NAME']
+                    if name == 'null':
+                        if gauge_addr in gauge_names:
+                            name = gauge_names[gauge_addr]
+                        else:
+                            temp_name = gauge_registry.get_gauge_name(gauge_addr)
+                            name = temp_name if temp_name else ""
+                elif gauge_addr in gauge_names:
+                    name = gauge_names[gauge_addr]
+                else:
+                    name = ""
+                if 'SYMBOL' in row:
+                    symbol = row['SYMBOL']
+                    if symbol == 'null':
+                        if gauge_addr in gauge_symbols:
+                            symbol = gauge_symbols[gauge_addr]
+                        else:
+                            temp_symbol = gauge_registry.get_gauge_symbol(gauge_addr)
+                            symbol = temp_symbol if temp_symbol else ""
 
-            elif gauge_addr in gauge_symbols:
-                symbol = gauge_symbols[gauge_addr]
-            else:
-                symbol = ""
-            if 'WEEK_NUMBER' in row:
-                week_num = int(row['WEEK_NUMBER'])
-                week_day = int(row['WEEK_DAY'])
-            else:
-                week_num = -1
-                week_day = -1
+                elif gauge_addr in gauge_symbols:
+                    symbol = gauge_symbols[gauge_addr]
+                else:
+                    symbol = ""
+                if 'WEEK_NUMBER' in row:
+                    week_num = int(row['WEEK_NUMBER'])
+                    week_day = int(row['WEEK_DAY'])
+                else:
+                    week_num = -1
+                    week_day = -1
 
-            v = Vote(self, gauge_addr, time, user, weight, name, symbol, week_num, week_day)
-            self.votes.append(v)
-            self.active_votes[gauge_addr] = v
-        except Exception as e:
-            print(e)
-            print(row['DECODED_LOG'])
+                v = Vote(self, gauge_addr, time, user, weight, name, symbol, week_num, week_day)
+                self.votes.append(v)
+                self.active_votes[gauge_addr] = v
+            except Exception as e:
+                print(e)
+                print(row['DECODED_LOG'])
+        else:
+            tx_hash = row['tx_hash']
+            try:
+                # decoded_log = ast.literal_eval(row['DECODED_LOG'])
+                gauge_addr = row['decoded_log.gauge_addr']
+                time = dt.fromtimestamp(int(row['decoded_log.time']))
+                user = row['decoded_log.user']
+                weight = int(row['decoded_log.weight'])
+                if 'name' in row:
+                    name = row['name']
+                    if name == 'null':
+                        if gauge_addr in gauge_names:
+                            name = gauge_names[gauge_addr]
+                        else:
+                            temp_name = gauge_registry.get_gauge_name(gauge_addr)
+                            name = temp_name if temp_name else ""
+                elif gauge_addr in gauge_names:
+                    name = gauge_names[gauge_addr]
+                else:
+                    name = ""
+                if 'symbol' in row:
+                    symbol = row['symbol']
+                    if symbol == 'null':
+                        if gauge_addr in gauge_symbols:
+                            symbol = gauge_symbols[gauge_addr]
+                        else:
+                            temp_symbol = gauge_registry.get_gauge_symbol(gauge_addr)
+                            symbol = temp_symbol if temp_symbol else ""
+
+                elif gauge_addr in gauge_symbols:
+                    symbol = gauge_symbols[gauge_addr]
+                else:
+                    symbol = ""
+                if 'week_number' in row:
+                    week_num = int(row['week_number'])
+                    week_day = int(row['week_day'])
+                else:
+                    week_num = -1
+                    week_day = -1
+
+                v = Vote(self, gauge_addr, time, user, weight, name, symbol, week_num, week_day)
+                self.votes.append(v)
+                self.active_votes[gauge_addr] = v
+            except Exception as e:
+                # print(e)
+                pass
+                # print(row.keys())
 
     def active_format_output(self):
         output_data = []
@@ -154,7 +202,6 @@ class Vote():
             "symbol": self.symbol,
             "period": get_period(self.week_num, self.week_day, self.time),
             "period_end_date": get_period_end_date(self.time)
-
         }
 
 
@@ -193,7 +240,6 @@ class VoterRegistry():
 
     def format_output(self):
         output_data = []
-        out_weight_data = []
         for voter in self.voters:
             voter_data = self.voters[voter].format_output()
             output_data += voter_data
@@ -203,8 +249,10 @@ class VoterRegistry():
     def process(self, df):
 
         for index, row in df.iterrows():
-            voter_address = row['VOTE_ADDR']
-
+            if 'VOTE_ADDR' in row:
+                voter_address = row['VOTE_ADDR']
+            else:
+                voter_address = row['decoded_log.user']
             if not voter_address in self.voters:
                 self.voters[voter_address] = Voter(voter_address)
             voter = self.voters[voter_address]
@@ -235,12 +283,14 @@ def get_df_gauge_votes():
         filename = 'curve_gauge_votes' #+ current_file_title
         resp_dict = read_csv(filename, 'source')
         df_gauge_votes = pd.json_normalize(resp_dict)
+        df_gauge_votes = df_gauge_votes.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
 
     except:
         filename = 'curve_gauge_votes' #+ fallback_file_title
         resp_dict = read_csv(filename, 'source')
         df_gauge_votes = pd.json_normalize(resp_dict)
-    df_gauge_votes = df_gauge_votes.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+        df_gauge_votes = df_gauge_votes.sort_values("block_timestamp", axis = 0, ascending = True)
+
     return df_gauge_votes
 
 

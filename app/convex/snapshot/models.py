@@ -23,6 +23,7 @@ import traceback
 
 from app.data.reference import known_large_cvx_holders_addresses
 
+
 class Snapshot():
     def __init__(self):
         self.networks = {}
@@ -30,6 +31,16 @@ class Snapshot():
 
     def process(self, df):
         for index, row in df.iterrows():
+            if 'vote_timestamp' in row:
+                try:
+                    split = row['vote_timestamp'].split("T")
+                    row['vote_timestamp'] = split[0]+" "+split[1][:-1]
+                    split = row['proposal_start_time'].split("T")
+                    row['proposal_start_time'] = split[0]+" "+split[1][:-1]
+                    split = row['proposal_end_time'].split("T")
+                    row['proposal_end_time'] = split[0]+" "+split[1][:-1]
+                except:
+                    pass
             # find network
             if 'NETWORK' in row:
                 if not row['NETWORK'] in self.networks:
@@ -40,6 +51,17 @@ class Snapshot():
                 # get space
                 s = n.new_space(n, row)
                 s.process_row(row)
+            else:
+                # find network
+                if 'network' in row:
+                    if not row['network'] in self.networks:
+                        n = Network(row['network'])
+                        self.networks[n.network] = n
+                    else:
+                        n = self.networks[row['network']]
+                    # get space
+                    s = n.new_space(n, row)
+                    s.process_row(row)
 
 
     def vote_power(self, network_id, space_id, size=20):
@@ -148,6 +170,12 @@ class Network():
                 self.spaces[s.space_id] = s
             else:
                 s = self.spaces[row['SPACE_ID']]
+        else:
+            if not row['space_id'] in self.spaces:
+                s = Space(network, row['space_id'])
+                self.spaces[s.space_id] = s
+            else:
+                s = self.spaces[row['space_id']]
         return s
 
 
@@ -185,6 +213,19 @@ class Space():
                 p = self.proposals[row['PROPOSAL_ID']]
 
             return p
+        else:
+            if not row['proposal_id'] in self.proposals:
+                p = Proposal(self, row)
+                self.proposals[p.proposal_id] = p
+                self.proposal_list.append(p)
+                if 'Gauge Weight' in p.proposal_title and not 'TEST' in p.proposal_title:
+                    self.gauge_list.append(p)
+                    self.gauge_map[p.proposal_id] = p
+
+            else:
+                p = self.proposals[row['proposal_id']]
+
+            return p
         return None
 
     def new_voter(self,row):
@@ -194,6 +235,13 @@ class Space():
                 self.voters[v.address] = v
             else:
                 v = self.voters[row['VOTER']]
+            return v
+        else:
+            if not row['voter'] in self.voters:
+                v = Voter(self, row)
+                self.voters[v.address] = v
+            else:
+                v = self.voters[row['voter']]
             return v
         return None
 
@@ -205,17 +253,32 @@ class Space():
 class Proposal():
     def __init__(self, space, row):
         self.space = space
-        self.proposal_id = row['PROPOSAL_ID']
-        self.proposal_author = row['PROPOSAL_AUTHOR']
-        self.proposal_title = row['PROPOSAL_TITLE']
-        self.proposal_text = row['PROPOSAL_TEXT']
-        self.delay = row['DELAY']
-        self.quorum = row['QUORUM']
-        self.vote_option = row['VOTE_OPTION']
-        self.choices = row['CHOICES']
-        self.voting_period = row['VOTING_PERIOD']
-        self.proposal_start_time = row['PROPOSAL_START_TIME']
-        self.proposal_end_time = row['PROPOSAL_END_TIME']
+
+        try:
+            self.proposal_id = row['PROPOSAL_ID']
+            self.proposal_author = row['PROPOSAL_AUTHOR']
+            self.proposal_title = row['PROPOSAL_TITLE']
+            # self.proposal_text = row['PROPOSAL_TEXT']
+            # self.delay = row['DELAY']
+            self.quorum = row['QUORUM']
+            self.vote_option = row['VOTE_OPTION']
+            self.choices = row['CHOICES']
+            self.voting_period = row['VOTING_PERIOD']
+            self.proposal_start_time = row['PROPOSAL_START_TIME']
+            self.proposal_end_time = row['PROPOSAL_END_TIME']
+        except:
+            self.proposal_id = row['proposal_id']
+            self.proposal_author = row['proposal_author']
+            self.proposal_title = row['proposal_title']
+            # self.proposal_text = row['PROPOSAL_TEXT']
+            # self.delay = row['delay']
+            self.quorum = row['quorum']
+            self.vote_option = row['vote_option']
+            self.choices = row['choices']
+            self.voting_period = row['voting_period']
+            self.proposal_start_time = row['proposal_start_time']
+            self.proposal_end_time = row['proposal_end_time']
+
         self.fails_logged = 0
         self.votes = {}
         self.vote_id = 0
@@ -247,12 +310,20 @@ class Proposal():
 class Voter():
     def __init__(self, space, row):
         self.space = space
-        self.address = row['VOTER']
-        self.address_name = row['ADDRESS_NAME']
+        try:
+            self.address = row['VOTER']
+            self.address_name = row['ADDRESS_NAME']
 
-        self.label_type = row['LABEL_TYPE']
-        self.label_subtype = row['LABEL_SUBTYPE']
-        self.label = row['LABEL']
+            self.label_type = row['LABEL_TYPE']
+            self.label_subtype = row['LABEL_SUBTYPE']
+            self.label = row['LABEL']
+        except:
+            self.address = row['voter']
+            self.address_name = row['address_name']
+
+            self.label_type = row['label_type']
+            self.label_subtype = row['label_subtype']
+            self.label = row['label']
 
         self.votes = {}
         self.votes_per_proposal = {}
@@ -301,10 +372,10 @@ class Voter():
             if last_vote:
                 last_vote_by_choice = last_vote.get_vote_options()
                 for choice in last_vote_by_choice:
-                    # print("here")
-                    # if choice == 'eUSD+FRAXBP (0xAEda…)':
-                        # print(f'FOUND {choice}')
-                    # print(choice)
+#                     print("here")
+#                     if choice == 'eUSD+FRAXBP (0xAEda…)':
+#                         print(f'FOUND {choice}')
+#                     print(choice)
                     if this_vote_by_choice:
                         if choice in this_vote_by_choice:
                             output[choice] = {
@@ -362,9 +433,10 @@ class Voter():
                     print("Not Found")
                     print("___________")
         except Exception as e:
-            print(e)
-            print(traceback.format_exc())
-            print('failed')
+            pass
+            # print(e)
+            # print(traceback.format_exc())
+            # print('failed')
         # if not output:
         #     print(last_vote)
         return output
@@ -375,9 +447,14 @@ class Vote():
         self.proposal = proposal
         self.voter = voter
         self.vote_id = vote_id
-        self.vote_option = row['VOTE_OPTION']
-        self.voting_power = row['VOTING_POWER']
-        self.vote_timestamp = row['VOTE_TIMESTAMP']
+        try:
+            self.vote_option = row['VOTE_OPTION']
+            self.voting_power = row['VOTING_POWER']
+            self.vote_timestamp = row['VOTE_TIMESTAMP']
+        except:
+            self.vote_option = row['vote_option']
+            self.voting_power = row['voting_power']
+            self.vote_timestamp = row['vote_timestamp']
         self.choices = []
         self.process_choices()
 
@@ -388,7 +465,7 @@ class Vote():
         choices = self.get_vote_choices()
         # print(choices)
         if not options or not choices:
-            print("Error")
+            # print("Error")
             return None
 
         if type(options) == dict:
@@ -425,12 +502,12 @@ class Vote():
                 if index < len(choices):
                     # maybe do stuff here
                     choice = choices[index]
-                    print(f'key {index}  of {len(options)} found in choices {len(choices)}')
+                    # print(f'key {index}  of {len(options)} found in choices {len(choices)}')
                     pass
                 else:
-                    print(f'\tkey {index} of {len(options)} not found in choices: {len(choices)}')
-                    print(index)
-                    print(choices)
+                    # print(f'\tkey {index} of {len(options)} not found in choices: {len(choices)}')
+                    # print(index)
+                    # print(choices)
                     continue
                 if option == 'NA':
                     weight = 0
@@ -453,8 +530,9 @@ class Vote():
             for choice in self.choices:
                 choice.set_total_vote_weight(total_weight)
         else:
-            print("unexpected options")
-            print(options)
+            # print("unexpected options")
+            # print(options)
+            pass
 
     def get_vote_choices(self):
         try:
@@ -464,22 +542,33 @@ class Vote():
             else:
                 choices = self.proposal.choices
         except Exception as e:
-            if self.proposal.fails_logged < 3:
-                print("== Failed")
-                print("\tproposal")
-                print(self.proposal.proposal_title)
-                print(self.proposal.choices)
-                print(type(self.proposal.choices))
-                print("\tvote")
-                print(traceback.format_exc())
-            self.proposal.fails_logged += 1
-            return None
+            try:
+                # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
+                if self.proposal.choices[0][0] == '[':
+                    choices = ast.literal_eval(self.proposal.choices[2:-2])
+                else:
+                    choices = self.proposal.choices
+            except Exception as e:
+
+                if self.proposal.fails_logged < 3:
+                    print("== Failed")
+                    print("\tproposal")
+                    print(self.proposal.proposal_title)
+                    print(self.proposal.choices)
+                    print(type(self.proposal.choices))
+                    print("\tvote")
+                    print(traceback.format_exc())
+                self.proposal.fails_logged += 1
+                return None
         return choices
 
     def get_vote_options_new(self):
         try:
             if self.vote_option[0][0] == '[' or self.vote_option[0][0] == '{':
-                options = ast.literal_eval(self.vote_option[0])
+                try:
+                    options = ast.literal_eval(self.vote_option[0])
+                except:
+                    options = ast.literal_eval(self.vote_option[2:-2])
             else:
                 options = self.vote_option
         except Exception as e:
@@ -500,12 +589,19 @@ class Vote():
         try:
             # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
             if self.vote_option[0][0] == '[' or self.vote_option[0][0] == '{':
-                options = ast.literal_eval(self.vote_option[0])
+                try:
+                    options = ast.literal_eval(self.vote_option[0])
+                except:
+                    options = ast.literal_eval(self.vote_option[2:-2])
+
             else:
                 options = self.vote_option
 
             if self.proposal.choices[0][0] == '[':
-                choices = ast.literal_eval(self.proposal.choices[0])
+                try:
+                    choices = ast.literal_eval(self.proposal.choices[0])
+                except:
+                    choices = ast.literal_eval(self.proposal.choices[2:-2])
             else:
                 choices = self.proposal.choices
         except Exception as e:
@@ -562,8 +658,8 @@ class Vote():
                 print("== Failed")
                 print("\tproposal")
                 print(self.proposal.proposal_title)
-                print(f"O: {len(options)} || {options}")
-                print(f"C: {len(choices)} || {choices}")
+                print(f"O: {len(options)} {type(options)} || {options}")
+                print(f"C: {len(choices)} {type(choices)} || {choices}")
                 print(traceback.format_exc())
                 print(e)
             self.proposal.fails_logged += 1
@@ -654,14 +750,14 @@ class Choice():
 def get_df_snapshot():
     try:
         filename = 'convex_snapshot_votes' # + current_file_title
-        snapshot_dict = read_json(filename, 'source')
+        snapshot_dict = read_csv(filename, 'source')
         df_snapshot = pd.json_normalize(snapshot_dict)
-
+        return df_snapshot.sort_values("vote_timestamp", axis = 0, ascending = True)
     except:
         filename = 'convex_snapshot_votes' #+ fallback_file_title
         snapshot_dict = read_json(filename, 'source')
         df_snapshot = pd.json_normalize(snapshot_dict)
-    return df_snapshot.sort_values("VOTE_TIMESTAMP", axis = 0, ascending = True)
+        return df_snapshot.sort_values("VOTE_TIMESTAMP", axis = 0, ascending = True)
 
 def get_snapshot_obj(df_snapshot):
     snapshot = Snapshot()
