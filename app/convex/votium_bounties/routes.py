@@ -101,42 +101,39 @@ def index():
     graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     # # Build chart
-    fig = px.scatter(df_bounty_formatted, 
-                    x="votes_per_dollar", 
-                    y="total_vote_power", 
-                    size="bounty_value", 
-                    color="gauge_ref",
-                    hover_name="gauge_addr", 
-                    log_x=True, 
-                    size_max=60)
-    
-        # # Build Plotly object
-    graphJSON5 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-
-        # # Build chart
     fig = px.scatter(df_current_bounties, 
                     x="votes_per_dollar", 
-                    y="total_vote_power", 
+                    y="relative_vote_power", 
                     size="bounty_value", 
                     color="gauge_ref",
                     hover_name="gauge_ref", 
                     log_x=True, 
                     size_max=60,
-                    title ="Total Vote Power vs Votes Per Dollar")
+                    title ="Total Vote Power vs Votes Per Dollar",
+                    labels={
+                        "votes_per_dollar": "Votes / Dollar",
+                        "relative_vote_power": "Vote Power",
+                        "gauge_ref": "Gauge Bountied"
+                    },
+                    )
     
         # # Build Plotly object
     graphJSON5 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     fig = px.scatter(df_prior_bounties, 
                     x="votes_per_dollar", 
-                    y="total_vote_power", 
+                    y="relative_vote_power", 
                     size="bounty_value", 
                     color="gauge_ref",
                     hover_name="gauge_ref", 
                     log_x=True, 
                     size_max=60,
-                    title ="Total Vote Power vs Votes Per Dollar"
+                    title ="Total Vote Power vs Votes Per Dollar",
+                    labels={
+                        "votes_per_dollar": "Votes / Dollar",
+                        "relative_vote_power": "Vote Power",
+                        "gauge_ref": "Gauge Bountied"
+                    },
                     )
     
         # # Build Plotly object
@@ -145,7 +142,7 @@ def index():
 
     fig = px.scatter(df_bounty_formatted, 
                 x="votes_per_dollar", 
-                y="total_vote_power",
+                y="relative_vote_power",
                 animation_frame="period_end_date", 
                 animation_group="gauge_addr",
                 size="bounty_value", 
@@ -154,7 +151,12 @@ def index():
                 log_x=True, 
                 size_max=55, 
                 height=600,
-                title ="Total Vote Power vs Votes Per Dollar"
+                title ="Total Vote Power vs Votes Per Dollar",
+                labels={
+                     "votes_per_dollar": "Votes / Dollar",
+                     "relative_vote_power": "Vote Power",
+                     "gauge_ref": "Gauge Bountied"
+                 },
 
                 # range_x=[0,200], 
                 # range_y=[0,15000000]
@@ -165,7 +167,7 @@ def index():
 
     fig = px.scatter(df_bounty_formatted, 
                 x="votes_per_dollar", 
-                y="total_vote_power",
+                y="relative_vote_power",
                 animation_frame="period_end_date", 
                 animation_group="gauge_addr",
                 size="bounty_value", 
@@ -174,7 +176,12 @@ def index():
                 log_x=True, 
                 size_max=55, 
                 height=600,
-                title ="Total Vote Power vs Votes Per Dollar"
+                title ="Total Vote Power vs Votes Per Dollar",
+                labels={
+                     "votes_per_dollar": "Votes / Dollar",
+                     "relative_vote_power": "Vote Power",
+                     "token_symbol": "Bounty Token"
+                 },
 
                 # range_x=[0,200], 
                 # range_y=[0,15000000]
