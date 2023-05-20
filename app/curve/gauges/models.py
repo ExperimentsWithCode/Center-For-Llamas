@@ -94,7 +94,7 @@ class GaugeRegistry():
         return None
 
     def get_gauge_address_from_snapshot(self, gauge_reference):
-        gauge_set = self.get_gauge_set_from_snapshot()
+        gauge_set = self.get_gauge_set_from_snapshot(gauge_reference)
         if gauge_set:
             return gauge_set.gauge_addr
         return None

@@ -115,6 +115,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
+
             { id: 'proposal_end', name: 'Round' },
             { id: 'proposal_title', name: 'Title' },
             { id: 'choice', name: 'Gauge Choice' },
@@ -127,6 +128,10 @@
             name: 'Actions',
             formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[2].data}'>More</a>`)
           },
+            { id: 'period', name: 'Round' },
+            { id: 'period_end_date', name: 'Round End Date' },
+
+
         ],
         data: [
           {% for index, row in convex_snapshot_aggregate_votes.iterrows() %}
@@ -136,7 +141,10 @@
                 'choice': '{{ row['choice'] }}',
                 'total_vote_power': '{{ row['total_vote_power'] |round(2) }}',
                 'vlcvx_voter_count': '{{ row['vlcvx_voter_count'] }}',
-                'actions': null
+                'actions': null,
+                'period': {{row['period']}},
+                'period_end_date': {{row['period_end_date']}}
+
             },
           {% endfor %}
         ],

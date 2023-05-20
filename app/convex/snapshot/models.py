@@ -1,3 +1,5 @@
+from flask import current_app as app
+
 from app.data.local_storage import (
     pd,
     read_json,
@@ -11,7 +13,7 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_period_end_date
+from app.utilities.utility import get_period, get_period_end_date, get_period_direct
 from app.data.reference import (
     known_large_curve_holders,
     current_file_title,
@@ -109,7 +111,7 @@ class Snapshot():
 
             i+= 1
         return pd.DataFrame.from_dict(data_alt)
-
+    
     def format_delta_output(self):
         output_data = []
         for network_name in self.networks:
@@ -156,6 +158,19 @@ class Snapshot():
         return output_data
 
 
+    def format_choice_map_output(self):
+        output_data = {}
+        for network_name in self.networks:
+            network = self.networks[network_name]
+            for space_name in network.spaces:
+                # print('space_name')
+                space = network.spaces[space_name]
+                # print (space.proposals)
+                for proposal_id in space.proposals:
+                    proposal = space.proposals[proposal_id]
+                    # print(proposal)
+                    output_data[ get_period_direct(proposal.proposal_end_time)] = proposal.choices
+        return output_data
 
 
 class Network():
@@ -261,8 +276,10 @@ class Proposal():
             # self.proposal_text = row['PROPOSAL_TEXT']
             # self.delay = row['DELAY']
             self.quorum = row['QUORUM']
-            self.vote_option = row['VOTE_OPTION']
-            self.choices = row['CHOICES']
+            # self.vote_option = row['VOTE_OPTION']
+            self.choices = self.get_vote_choices(row['CHOICES'])
+
+            
             self.voting_period = row['VOTING_PERIOD']
             self.proposal_start_time = row['PROPOSAL_START_TIME']
             self.proposal_end_time = row['PROPOSAL_END_TIME']
@@ -273,8 +290,8 @@ class Proposal():
             # self.proposal_text = row['PROPOSAL_TEXT']
             # self.delay = row['delay']
             self.quorum = row['quorum']
-            self.vote_option = row['vote_option']
-            self.choices = row['choices']
+            # self.vote_option = row['vote_option']
+            self.choices = self.get_vote_choices(row['choices'])
             self.voting_period = row['voting_period']
             self.proposal_start_time = row['proposal_start_time']
             self.proposal_end_time = row['proposal_end_time']
@@ -300,7 +317,35 @@ class Proposal():
                     self.voter_choices[vote.voter] = vote
             return vote
         return None
+    
+    def get_vote_choices(self, _choices):
+        try:
+            # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
+            if _choices[0][0] == '[':
+                choices = ast.literal_eval(_choices[0])
+            else:
+                choices = _choices
+        except Exception as e:
+            try:
+                # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
+                if _choices[0][0] == '[':
+                    choices = ast.literal_eval(_choices[2:-2])
+                else:
+                    choices = _choices
+            except Exception as e:
 
+                if self.fails_logged < 3:
+                    print("== Failed")
+                    print("\tproposal")
+                    print(self.proposal.proposal_title)
+                    print(_choices)
+                    print(type(_choices))
+                    print("\tvote")
+                    print(traceback.format_exc())
+                self.fails_logged += 1
+                return None
+        return choices
+  
 
     # def get_choices(self):
     #     choices = self
@@ -448,11 +493,11 @@ class Vote():
         self.voter = voter
         self.vote_id = vote_id
         try:
-            self.vote_option = row['VOTE_OPTION']
+            self.vote_option = self.get_vote_options_new(row['VOTE_OPTION'])
             self.voting_power = row['VOTING_POWER']
             self.vote_timestamp = row['VOTE_TIMESTAMP']
         except:
-            self.vote_option = row['vote_option']
+            self.vote_option = self.get_vote_options_new(row['vote_option'])
             self.voting_power = row['voting_power']
             self.vote_timestamp = row['vote_timestamp']
         self.choices = []
@@ -460,9 +505,9 @@ class Vote():
 
     def process_choices(self):
         self.choices = []
-        options = self.get_vote_options_new()
+        options = self.vote_option
         # print(options)
-        choices = self.get_vote_choices()
+        choices = self.proposal.choices
         # print(choices)
         if not options or not choices:
             # print("Error")
@@ -534,51 +579,51 @@ class Vote():
             # print(options)
             pass
 
-    def get_vote_choices(self):
-        try:
-            # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
-            if self.proposal.choices[0][0] == '[':
-                choices = ast.literal_eval(self.proposal.choices[0])
-            else:
-                choices = self.proposal.choices
-        except Exception as e:
-            try:
-                # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
-                if self.proposal.choices[0][0] == '[':
-                    choices = ast.literal_eval(self.proposal.choices[2:-2])
-                else:
-                    choices = self.proposal.choices
-            except Exception as e:
+    # def get_vote_choices(self):
+    #     try:
+    #         # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
+    #         if self.proposal.choices[0][0] == '[':
+    #             choices = ast.literal_eval(self.proposal.choices[0])
+    #         else:
+    #             choices = self.proposal.choices
+    #     except Exception as e:
+    #         try:
+    #             # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
+    #             if self.proposal.choices[0][0] == '[':
+    #                 choices = ast.literal_eval(self.proposal.choices[2:-2])
+    #             else:
+    #                 choices = self.proposal.choices
+    #         except Exception as e:
 
-                if self.proposal.fails_logged < 3:
-                    print("== Failed")
-                    print("\tproposal")
-                    print(self.proposal.proposal_title)
-                    print(self.proposal.choices)
-                    print(type(self.proposal.choices))
-                    print("\tvote")
-                    print(traceback.format_exc())
-                self.proposal.fails_logged += 1
-                return None
-        return choices
+    #             if self.proposal.fails_logged < 3:
+    #                 print("== Failed")
+    #                 print("\tproposal")
+    #                 print(self.proposal.proposal_title)
+    #                 print(self.proposal.choices)
+    #                 print(type(self.proposal.choices))
+    #                 print("\tvote")
+    #                 print(traceback.format_exc())
+    #             self.proposal.fails_logged += 1
+    #             return None
+    #     return choices
 
-    def get_vote_options_new(self):
+    def get_vote_options_new(self, _vote_options):
         try:
-            if self.vote_option[0][0] == '[' or self.vote_option[0][0] == '{':
+            if _vote_options[0][0] == '[' or _vote_options[0][0] == '{':
                 try:
-                    options = ast.literal_eval(self.vote_option[0])
+                    options = ast.literal_eval(_vote_options[0])
                 except:
-                    options = ast.literal_eval(self.vote_option[2:-2])
+                    options = ast.literal_eval(_vote_options[2:-2])
             else:
-                options = self.vote_option
+                options = _vote_options
         except Exception as e:
             if self.proposal.fails_logged < 3:
                 print("== Failed")
                 print("\tproposal")
                 print(self.proposal.proposal_title)
                 print("\tvote")
-                print(self.vote_option)
-                print(type(self.vote_option))
+                print(_vote_options)
+                print(type(_vote_options))
                 print(traceback.format_exc())
             self.proposal.fails_logged += 1
             return None
@@ -586,40 +631,12 @@ class Vote():
 
 
     def get_vote_options(self):
-        try:
-            # ['["cDAI+cUSDC (0xA2B4…)","cDAI+cUSDC+USDT (0x52EA…)"
-            if self.vote_option[0][0] == '[' or self.vote_option[0][0] == '{':
-                try:
-                    options = ast.literal_eval(self.vote_option[0])
-                except:
-                    options = ast.literal_eval(self.vote_option[2:-2])
+        choices = self.proposal.choices
+        options = self.vote_option
 
-            else:
-                options = self.vote_option
-
-            if self.proposal.choices[0][0] == '[':
-                try:
-                    choices = ast.literal_eval(self.proposal.choices[0])
-                except:
-                    choices = ast.literal_eval(self.proposal.choices[2:-2])
-            else:
-                choices = self.proposal.choices
-        except Exception as e:
-            if self.proposal.fails_logged < 1:
-                print("== Failed")
-                print("\tproposal")
-                print(self.proposal.proposal_title)
-                print(self.proposal.choices)
-                print(type(self.proposal.choices))
-                print("\tvote")
-
-                print(self.vote_option)
-                print(type(self.vote_option))
-                print(traceback.format_exc())
-            self.proposal.fails_logged += 1
-            return None
         if not options or not choices:
             return None
+        
         output = {}
         try:
             if type(options) == dict:
@@ -733,7 +750,7 @@ class Choice():
             'proposal_start': self.proposal.proposal_start_time,
             'proposal_end': self.proposal.proposal_end_time,
             'period_end_date':  get_period_end_date(self.proposal.proposal_end_time),
-            # 'period': get_period(),
+            'period': get_period_direct(self.proposal.proposal_end_time),
             'valid': self.vote.is_valid(),
             'vote_id': self.vote_id,
         }
@@ -781,7 +798,7 @@ def get_aggregates(df_vote_choice):
     #     titles.append(title)
 
     df_vote_aggregates = df_vote_choice.groupby(
-        ['proposal_end', 'proposal_title', 'choice']
+        ['period', 'period_end_date', 'proposal_end', 'proposal_title', 'choice']
         )['choice_power'].agg(['sum','count']).reset_index()
 
     df_vote_aggregates = df_vote_aggregates.rename(columns={
@@ -794,13 +811,15 @@ def get_aggregates(df_vote_choice):
     return df_vote_aggregates
 
 
-
 df_snapshot = get_df_snapshot()
 snapshot = get_snapshot_obj(df_snapshot)
 df_vote_choice = get_df_vote_choice(snapshot)
 df_vote_aggregates = get_aggregates(df_vote_choice)
 
+proposal_choice_map = snapshot.format_choice_map_output()
 
 
 
-
+app.config['proposal_choice_map'] = proposal_choice_map
+app.config['df_vote_aggregates'] = df_vote_aggregates
+# print(proposal_choice_map)

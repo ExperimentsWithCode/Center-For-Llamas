@@ -19,7 +19,7 @@ if temp_split[-1] == 'Musings':
     cwd += '/center-for-llamas'
 
 def read_csv(filename, path='source'):
-    print(cwd)
+    # print(cwd)
     try:
         data = []
         with open(cwd+"/app/data/"+ path+ "/"+ filename+".csv", newline='') as f:
