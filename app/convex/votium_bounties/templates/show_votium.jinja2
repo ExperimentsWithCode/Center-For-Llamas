@@ -16,94 +16,29 @@
     </div>
     <div class="row">
 
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Total Bounties Ever </div>
-        <div class="card-body">
-          <h4 class="card-title">{{ "{:,.2f}".format(df_bounty_formatted['bounty_value'].sum()) }}</h4>
-
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
       <div class="card border-primary mb-3" style="max-width: 50%;" >
         <div class="card-header">Total_Bounties Current Round :  </div>
         <div class="card-body">
-          <h4 class="card-title">{{ "{:,.2f}".format(df_current['bounty_value'].sum()) }}</h4>
+          <h4 class="card-title">$ {{ "{:,.2f}".format(df_bounty_formatted.iloc[0]['bounty_value']) }}</h4>
 
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>
 
-
-
-    </div>
-    <div class="row">
-      <div class="card text-white bg-secondary mb-10"  style="max-width: 50%;">
-        <div class="card-header">Prior Round Vote ;Distribution</div>
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total Bounties Ever </div>
         <div class="card-body">
-            <h4 class="card-title"></h4>
-            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-            <div id="chart4" class="chart4"></div>
+          <h4 class="card-title">$ {{ "{:,.2f}".format(df_bounty_formatted['bounty_value'].sum()) }}</h4>
 
-        </div>              
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
     </div>
+
+
+  <div class="row">
     <div class="card text-white bg-primary mb-10"  style="max-width: 50%;">
-      <div class="card-header">Current Round Vote Distribution</div>
-      <div class="card-body">
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-          <div id="chart3" class="chart3"></div>
-
-      </div>              
-    </div>
-  </div>
-  <div class="row">
-    <div class="card text-white bg-secondary mb-10"  style="max-width: 50%;">
-      <div class="card-header">Prior Bounty Explorer</div>
-      <div class="card-body">
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-          <div id="chart6" class="chart6"></div>
-
-      </div>              
-    </div>
-
-    <div class="card text-white bg-primary mb-10"  style="max-width: 50%;">
-      <div class="card-header">Current Bounty Explorer</div>
-      <div class="card-body">
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-          <div id="chart5" class="chart5"></div>
-
-      </div>              
-    </div>
-
-  </div>
-
-  <div class="row">
-    <div class="card text-white bg-success mb-10" >
-      <div class="card-header">Bounty Explorer By Gauge</div>
-      <div class="card-body">
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-          <div id="chart7" class="chart7"></div>
-
-      </div>              
-    </div>
-
-
-  </div>
-
-  <div class="row">
-    <div class="card text-white bg-danger mb-10" >
-      <div class="card-header">Bounty Explorer by Bounty Token</div>
-      <div class="card-body">
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-          <div id="chart8" class="chart8"></div>
-
-      </div>              
-    </div>
-
-
-  </div>
-
-  <div class="row">
-    <div class="card text-white bg-info mb-10"  style="max-width: 50%;">
       <div class="card-header">Vote Power Per Round</div>
       <div class="card-body">
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -112,7 +47,7 @@
       </div>              
     </div>
 
-    <div class="card text-white bg-warning mb-10"  style="max-width: 50%;">
+    <div class="card text-white bg-secondary mb-10"  style="max-width: 50%;">
       <div class="card-header">Votes Per Dollar Bounties</div>
       <div class="card-body">
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -228,23 +163,5 @@
   Plotly.plot('chart4',graphs4,{});
 </script>
 
-<script type='text/javascript'>
-  var graphs5 = {{graphJSON5 | safe}};
-  Plotly.plot('chart5',graphs5,{});
-</script>
 
-<script type='text/javascript'>
-  var graphs6 = {{graphJSON6 | safe}};
-  Plotly.plot('chart6',graphs6,{});
-</script>
-
-<script type='text/javascript'>
-  var graphs7 = {{graphJSON7 | safe}};
-  Plotly.plot('chart7',graphs7,{});
-</script>
-
-<script type='text/javascript'>
-  var graphs8 = {{graphJSON8 | safe}};
-  Plotly.plot('chart8',graphs8,{});
-</script>
 {% endblock %}

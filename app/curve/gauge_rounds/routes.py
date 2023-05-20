@@ -48,7 +48,7 @@ def index():
     fig = px.bar(df_meta_gauge_aggregate,
                     x=df_meta_gauge_aggregate['period_end_date'],
                     y=df_meta_gauge_aggregate['total_vote_power'],
-                    color='gauge_addr',
+                    color='symbol',
                     title='Gauge Round Vote Weights',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
@@ -59,19 +59,19 @@ def index():
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    periods = df_meta_gauge_aggregate.this_period.unique()
+    periods = df_meta_gauge_aggregate.period_end_date.unique()
     periods.sort()
     current_period = periods[-1]
     prior_period = periods[-2]
-    df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == current_period]
-    df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == prior_period]
+    df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['period_end_date'] == current_period]
+    df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['period_end_date'] == prior_period]
 
     # # Build chart
     fig = px.pie(df_current_votes, 
                 values=df_current_votes['total_vote_power'],
-                names=df_current_votes['gauge_addr'],
+                names=df_current_votes['symbol'],
                 title=f"Current Round Vote Distribution {current_period}",
-                hover_data=['symbol'], labels={'symbol':'symbol'}
+                hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
         # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -83,9 +83,9 @@ def index():
     # # Build chart
     fig = px.pie(df_prior_votes, 
                 values=df_prior_votes['total_vote_power'],
-                names=df_prior_votes['gauge_addr'],
+                names=df_prior_votes['symbol'],
                 title=f"Prior Round Vote Distribution {prior_period}",
-                hover_data=['symbol'], labels={'symbol':'symbol'}
+                hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
         # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -123,8 +123,8 @@ def show(gauge_addr):
     local_df_gauge_rounds = df_all_by_user[df_all_by_user['gauge_addr'] == gauge_addr]
     local_df_gauge_rounds = local_df_gauge_rounds.sort_values(["this_period", 'vote_power'], axis = 0, ascending = False)
 
-    max_value = local_df_gauge_rounds['this_period'].max()
-    df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['this_period'] == max_value]
+    max_value = local_df_gauge_rounds['period_end_date'].max()
+    df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == max_value]
     
     # # Build chart
     fig = px.pie(df_current_votes, 

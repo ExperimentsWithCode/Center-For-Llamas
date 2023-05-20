@@ -162,7 +162,7 @@
         data: [
           {% for index, row in df_gauge_round_by_user.iterrows() %}
             {
-                'this_period': '{{ row['this_period'] |round(2) }}',
+                'this_period': '{{ row['this_period']  }}',
                 'period_end_date': '{{ row['period_end_date'] }}',
                 'known_as': '{{ row['known_as_x'] }}',
                 'user': '{{ row['user'] }}',

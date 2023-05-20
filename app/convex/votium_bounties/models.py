@@ -72,7 +72,7 @@ class Bounty():
         self.bounty_token_address = row['bounty_token_address']
         self.origin_from_address = row['origin_from_address']
         self.period = get_convex_period_direct(row['block_timestamp'])
-        self.period_end_date = None # get_period_end_date(row['block_timestamp'])
+        self.period_end_date = get_period_end_date(row['block_timestamp'])
 
         self.gauge_ref = self.get_gauge_ref()
         self.gauge_address = self.get_gauge_address()

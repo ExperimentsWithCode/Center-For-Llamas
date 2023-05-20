@@ -18,11 +18,11 @@ def get_period(week_num, week_day, time, target=5):
             week_num = week_num
         if week_num < 10 or week_num == 0:
             week_num = f"0{week_num}"
-        return float(f"{vote_year}.{week_num}")
+        return f"{vote_year}.{week_num}"
     print('WEEK NOT FOUND')
     print(week_day)
     print(week_num)
-    return 0
+    return "0"
 
 
 # Slight issue on splitting years will split period despite single period.
@@ -38,7 +38,7 @@ def get_period_direct(time, target=5):
         week_num = week_num + 1
     else:
         week_num = week_num
-    if week_num < 10 or week_num == 0:
+    if week_num < 10:
         week_num = f"0{week_num}"
     # elif week_num % 10 = 0:
     return f"{vote_year}.{week_num}"

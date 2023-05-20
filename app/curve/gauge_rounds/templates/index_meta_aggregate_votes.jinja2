@@ -134,7 +134,7 @@
         data: [
           {% for index, row in meta_gauge_aggregate_votes.iterrows() %}
             {
-                'this_period': '{{ row['this_period'] |round(2) }}',
+                'this_period': '{{ row['this_period']  }}',
                 'period_end_date': '{{ row['period_end_date'] }}',
 
                 'gauge_addr': '{{ row['gauge_addr'] }}',
