@@ -151,12 +151,16 @@
             formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
           },
 
-          { id: 'total_vote_power', name: 'Vote Power',
+          { id: 'relative_vote_power', name: 'Relative Vote Power',
             formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
           },
 
-          { id: 'voter_count', name: 'Voter Count',
+          { id: 'total_vote_power', name: 'Total Vote Power',
             formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+          },
+
+          { id: 'voter_count', name: 'Voter Count',
+            formatter: (_, row) =>  `${row.cells[9].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
           },
 
           { id: 'actions', 
@@ -180,6 +184,8 @@
               'price_per_vote': '{{ row['price_per_vote']| round(6) }}',
               'votes_per_dollar': '{{ row['votes_per_dollar'] | round(2)}}',
               
+              'relative_vote_power': '{{ row['relative_vote_power'] | round(2) }}',
+
               'total_vote_power': '{{ row['total_vote_power'] | round(2) }}',
 
               'voter_count': '{{ row['total_vote_count'] }}',

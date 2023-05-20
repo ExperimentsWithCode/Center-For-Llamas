@@ -34,8 +34,10 @@ df_vote_aggregates = app.config['df_vote_aggregates']
 class VBRegistry():
     def __init__(self):
         self.bounty_list = []
+        self.bounty_map = {}
 
     def process_bounties(self, df):
+        # Load Bounties
         for i, row in df.iterrows():
             try:
                 b = Bounty(row)
@@ -45,9 +47,25 @@ class VBRegistry():
                 print(e)
                 print(row)
                 print(traceback.format_exc())
+            if not b.period in self.bounty_map:
+                self.bounty_map[b.period] = {}
+            # Group Bounties
+            if not b.choice_index in self.bounty_map[b.period]:
+                self.bounty_map[b.period][b.choice_index] = []
+            self.bounty_map[b.period][b.choice_index].append(b)
+        # Process relative bounty influence on vote weight
+        for period in self.bounty_map:
+            for choice_index in self.bounty_map[period]:
+                like_bounty_list = self.bounty_map[period][choice_index]
+                total_bounty_value = 0
+                for bounty in like_bounty_list:
+                    total_bounty_value += bounty.bounty_value
 
-
-    
+                if total_bounty_value > 0:
+                    for bounty in like_bounty_list:
+                            relative_bounty_weight = bounty.bounty_value / total_bounty_value
+                            bounty.update_derrived_stats(relative_bounty_weight)
+        
     def format_output(self):
         output_data = []
         for b in self.bounty_list:
@@ -78,13 +96,19 @@ class Bounty():
         self.gauge_address = self.get_gauge_address()
         self.total_vote_power = 0
         self.voter_count = 0
+        
+        self.relative_vote_power = 0
+        self.votes_per_dollar = 0
+        self.price_per_vote = 0
+        
         self.get_meta()
-        if self.bounty_value > 100 and self.total_vote_power >100:
-            self.votes_per_dollar = self.total_vote_power / self.bounty_value 
-            self.price_per_vote = self.bounty_value / self.total_vote_power
-        else:
-            self.votes_per_dollar = 0
-            self.price_per_vote = 0
+        
+
+    def update_derrived_stats(self, relative_bounty_weight):
+        self.relative_vote_power = relative_bounty_weight * self.total_vote_power
+        if self.bounty_value > 100 and self.relative_vote_power >100:
+            self.votes_per_dollar = self.relative_vote_power / self.bounty_value 
+            self.price_per_vote = self.bounty_value / self.relative_vote_power
 
 
     def get_gauge_ref(self):
@@ -95,10 +119,14 @@ class Bounty():
                 print("_"*50)
                 print (self.period)
                 print (len(proposal_choice_map[self.period]))
-                return "Not Found"
+        return "Not Found"
         
     def get_gauge_address(self):
-        return gauge_registry.get_gauge_address_from_snapshot(self.gauge_ref)
+        try: 
+            gauge_address = gauge_registry.get_gauge_address_from_snapshot(self.gauge_ref)
+        except:
+            gauge_address = "0xNotFound"
+        return gauge_address
 
     def get_meta(self):
         try:
@@ -109,11 +137,17 @@ class Bounty():
             # self.period = df_aggs.iloc[0]['period']
             self.period_end_date = df_aggs.iloc[0]['period_end_date']
         except Exception as e:
-            print(self.period)
-            print(self.gauge_ref)
-            print(df_vote_aggregates.choice)
-            print(e)
-            print(traceback.format_exc())
+            try:
+                df_aggs = df_vote_aggregates[(df_vote_aggregates['period']== self.period) ]
+                # self.period = df_aggs.iloc[0]['period']
+                self.period_end_date = df_aggs.iloc[0]['period_end_date']
+            except Exception as e:
+                pass
+                # print(self.period)
+                # print(self.gauge_ref)
+                # # print(df_vote_aggregates['choice'])
+                # print(e)
+                # print(traceback.format_exc())
 
 
     def format_output(self):
@@ -131,6 +165,7 @@ class Bounty():
             'votes_per_dollar': self.votes_per_dollar,
             'total_vote_power': self.total_vote_power,
             'total_vote_count': self.voter_count,
+            'relative_vote_power': self.relative_vote_power,
         }
     # def fill_in(self, proposals):
     #     proposals.search
@@ -150,6 +185,8 @@ def get_df_bounty_formatted(df):
     temp = vbr.format_output()
     # print(temp)
     df_bounty_formatted = pd.json_normalize(temp)
+    df_bounty_formatted = df_bounty_formatted[(df_bounty_formatted['block_timestamp'] > "2022-12-18")]
+
     return df_bounty_formatted.sort_values("block_timestamp", axis = 0, ascending = False)
 
 
