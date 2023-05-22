@@ -30,7 +30,7 @@ def index():
     # Build chart
     fig = px.bar(df_bounty_formatted,
                     x=df_bounty_formatted['period_end_date'],
-                    y=df_bounty_formatted['total_vote_power'],
+                    y=df_bounty_formatted['relative_vote_power'],
                     color='gauge_ref',
                     title='Vote Power Per Round',
                     # facet_row=facet_row,
@@ -59,7 +59,7 @@ def index():
                     # facet_col_wrap=facet_col_wrap
                     )
 
-    # # Build Plotly object
+    # # Build Plotly object 
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
@@ -108,7 +108,7 @@ def index():
                     color="gauge_ref",
                     hover_name="gauge_ref", 
                     log_x=True, 
-                    size_max=60,
+                    # size_max=60,
                     title ="Total Vote Power vs Votes Per Dollar",
                     labels={
                         "votes_per_dollar": "Votes / Dollar",
@@ -127,7 +127,7 @@ def index():
                     color="gauge_ref",
                     hover_name="gauge_ref", 
                     log_x=True, 
-                    size_max=60,
+                    # size_max=60,
                     title ="Total Vote Power vs Votes Per Dollar",
                     labels={
                         "votes_per_dollar": "Votes / Dollar",
@@ -144,12 +144,12 @@ def index():
                 x="votes_per_dollar", 
                 y="relative_vote_power",
                 animation_frame="period_end_date", 
-                animation_group="gauge_addr",
+                animation_group="gauge_ref",
                 size="bounty_value", 
                 color="gauge_ref", 
                 hover_name="gauge_ref",
                 log_x=True, 
-                size_max=55, 
+                # size_max=60, 
                 height=600,
                 title ="Total Vote Power vs Votes Per Dollar",
                 labels={
@@ -169,12 +169,12 @@ def index():
                 x="votes_per_dollar", 
                 y="relative_vote_power",
                 animation_frame="period_end_date", 
-                animation_group="gauge_addr",
+                animation_group="gauge_ref",
                 size="bounty_value", 
                 color="token_symbol", 
                 hover_name="gauge_ref",
                 log_x=True, 
-                size_max=55, 
+                # size_max=60,
                 height=600,
                 title ="Total Vote Power vs Votes Per Dollar",
                 labels={
