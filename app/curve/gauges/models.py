@@ -30,7 +30,9 @@ class GaugeRegistry():
         self.gauges = {}
         self.pools = {}
         self.tokens = {}
+        self.shorthand_gauges = {}
         self.shorthand_pools = {}
+        self.shorthand_tokens = {}
 
         self.process_df(df)
         self.process_list(core_pools)
@@ -38,23 +40,23 @@ class GaugeRegistry():
 
     def process_df(self, df):
         for i, row in df.iterrows():
-            gs = Gauge_Set(row)
-            self.gauges[gs.gauge_addr] = gs
-            if gs.pool_addr:
-                self.pools[gs.pool_addr] = gs
-            if gs.token_addr:
-                self.tokens[gs.token_addr] = gs
+            self.process_row(row)
 
     def process_list(self, core_pools):
         for row in core_pools:
-            # print(row)
-            gs = Gauge_Set(row)
-            self.gauges[gs.gauge_addr] = gs
-            if gs.pool_addr:
-                self.pools[gs.pool_addr] = gs
-                self.shorthand_pools[gs.pool_addr[:6]] = gs
-            if gs.token_addr:
-                self.tokens[gs.token_addr] = gs
+            self.process_row(row)
+
+    def process_row(self, row):
+        gs = Gauge_Set(row)
+        self.gauges[gs.gauge_addr] = gs
+        if gs.gauge_addr:
+            self.shorthand_gauges[gs.gauge_addr[:6].lower()] = gs
+        if gs.pool_addr:
+            self.pools[gs.pool_addr] = gs
+            self.shorthand_pools[gs.pool_addr[:6].lower()] = gs
+        if gs.token_addr:
+            self.tokens[gs.token_addr] = gs
+            self.shorthand_tokens[gs.token_addr[:6].lower()] = gs
 
 
     def format_output(self):
@@ -88,16 +90,20 @@ class GaugeRegistry():
     def get_gauge_set_from_snapshot(self, gauge_reference):
         if len(gauge_reference) > 8:
             partial_addr = gauge_reference[-8:-2].lower()
-            if partial_addr in self.shorthand_pools:
-                return self.shorthand_pools[partial_addr]
-
+        else:
+            partial_addr = gauge_reference
+        if partial_addr in self.shorthand_pools:
+            return self.shorthand_pools[partial_addr]
+        elif partial_addr in self.shorthand_tokens:
+            return self.shorthand_tokens[partial_addr]
+        elif partial_addr in self.shorthand_gauges:
+            return self.shorthand_gauges[partial_addr]
         return None
 
     def get_gauge_address_from_snapshot(self, gauge_reference):
-        if gauge_reference:
-            gauge_set = self.get_gauge_set_from_snapshot(gauge_reference)
-            if gauge_set:
-                return gauge_set.gauge_addr
+        gauge_set = self.get_gauge_set_from_snapshot(gauge_reference)
+        if gauge_set:
+            return gauge_set.gauge_addr
         return None
 
     def get_gauge_name(self, gauge_reference):
@@ -180,7 +186,10 @@ def get_df_gauge_pool_map():
     return df_gauge_pool_map
 
 gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
-df_gauge_registry = pd.json_normalize(gauge_registry.format_output())
+df_curve_gauge_registry = pd.json_normalize(gauge_registry.format_output())
 
-app.config['df_curve_gauge_registry'] = df_gauge_registry
-app.config['gauge_registry'] = gauge_registry
+try:
+    app.config['df_curve_gauge_registry'] = df_curve_gauge_registry
+    app.config['gauge_registry'] = gauge_registry
+except:
+    print("could not register in app.config\n\tGauges")

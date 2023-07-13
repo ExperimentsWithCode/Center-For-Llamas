@@ -1,4 +1,3 @@
-<div class="row">
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('home_bp.home') }}">The Center For Llamas Who Want To Curve Good</a>
@@ -32,6 +31,7 @@
         </a>
         </li>
         </ul>
+        </div>
         <div class="d-flex">
             <a class="nav-link active" href="">StakeDAO Bounties
             <span class="visually-hidden">(current)</span>
@@ -54,25 +54,25 @@
       <a class="navbar-brand" href="">Convex</a>
       <div class="collapse navbar-collapse" id="navbarColor01">
       <ul class="navbar-nav me-auto">
-        <li>
+        {# <li>
           <a class="nav-link active" href="{{ url_for('locker_bp.index') }}">Vote Locker
             <span class="visually-hidden">(current)</span>
           </a>
-        </li>
+        </li> #}
         <li>
           <a class="nav-link active" href="{{ url_for('convex_snapshot_bp.index') }}">Snapshot
             <span class="visually-hidden">(current)</span>
           </a>
         </li>
 
-        <li>
+        {# <li>
           <a class="nav-link active" href="">Delegations
             <span class="visually-hidden">(current)</span>
           </a>
-        </li>
+        </li> #}
         </ul>
         <div class="d-flex">
-            <a class="nav-link active" href="">Votium Bounties
+            <a class="nav-link active" href="{{ url_for('votium_bounties_bp.index') }}">Votium Bounties
             <span class="visually-hidden">(current)</span>
           </a>
         </div>
@@ -87,4 +87,38 @@
         </div>
     </div>
 </nav>
-</div>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-info">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="">StakeDAO</a>
+      <div class="collapse navbar-collapse" id="navbarColor01">
+      <ul class="navbar-nav me-auto">
+        {# <li>
+          <a class="nav-link active" href="{{ url_for('locker_bp.index') }}">Vote Locker
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li> #}
+        <li>
+          <a class="nav-link active" href="{{ url_for('stakedao_snapshot_bp.index') }}">Snapshot
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li>
+
+        {# <li>
+          <a class="nav-link active" href="">Delegations
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li> #}
+        </ul>
+
+        {# <!-- <a href="{{ url_for('home_bp.home') }}">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/>
+        </a> -->
+
+          <!-- <a href="{{ url_for('transaction_bp.index') }}">Transactions</a>
+          <a href="{{ url_for('transfer_bp.index') }}">Transfers</a> --> #}
+
+        </div>
+    </div>
+</nav>

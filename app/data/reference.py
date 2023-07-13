@@ -71,6 +71,7 @@ known_large_curve_holders = {
     '0x989aeb4d175e16225e39e87d0d97a3360524ad80' : 'Convex (cvxCRV)',
     '0x847fa1a5337c7f24d7066e467f2e2a0f969ca79f' : 'Frax',
     '0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8' : 'Liquity',
+    '0x7a16ff8270133f063aab6c9977183d9e72835428' : 'CRV Founder'
     }
 
 

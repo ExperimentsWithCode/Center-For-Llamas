@@ -168,6 +168,8 @@
             formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
           },
           { id: 'period', name: 'Round' },
+          { id: 'gauge_addr', name: 'Gauge Addr' },
+
 
         ],
         data: [
@@ -191,6 +193,7 @@
               'voter_count': '{{ row['total_vote_count'] }}',
               'actions': null,
               'period': '{{ row['period'] }}',
+              'gauge_addr': '{{ row['gauge_addr'] }}',
 
 
             },

@@ -59,10 +59,10 @@ def index():
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    periods = df_meta_gauge_aggregate.period_end_date.unique()
-    periods.sort()
-    current_period = periods[-1]
-    prior_period = periods[-2]
+    period_end_dates = df_meta_gauge_aggregate.period_end_date.unique()
+    period_end_dates = sorted(period_end_dates)
+    current_period = period_end_dates[-1]
+    prior_period = period_end_dates[-2]
     df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['period_end_date'] == current_period]
     df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['period_end_date'] == prior_period]
 

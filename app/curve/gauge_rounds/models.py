@@ -1,5 +1,5 @@
-from flask import current_app as app
 
+from flask import current_app as app
 
 from datetime import datetime, timedelta
 
@@ -13,9 +13,13 @@ from app.data.local_storage import (
     )
 from app.utilities.utility import get_period
 
+try:
+    df_history_data = app.config['df_history_data']
+    df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
 
-df_history_data = app.config['df_history_data']
-df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
+except:
+    from app.curve.gauge_votes.models import df_gauge_votes_formatted
+    from app.curve.locker.models import df_history_data
 
 
 def generate_aggregation(df_lock_history, df_gauge_vote_history):
@@ -162,6 +166,13 @@ df_all_by_user = concat_all(df_combo_by_user_list, ['this_period','vote_power' ]
 df_all_by_gauge = concat_all(df_combo_by_gauge_list,  ['this_period', 'total_vote_power' ])
 
 df_meta_gauge_aggregate = df_all_by_gauge
+
+try:
+    app.config['df_gauge_rounds_all_by_user'] = df_all_by_user
+    app.config['df_gauge_rounds_all_by_gauge'] = df_all_by_gauge
+    app.config['df_gauge_rounds_aggregate'] = df_all_by_gauge
+except:
+    print("could not register in app.config\n\tGauge Rounds")
 
 # df_gauge_votes_formatted_temp = df_gauge_votes_formatted[df_gauge_votes_formatted['user']== '0x989aeb4d175e16225e39e87d0d97a3360524ad80']
 # convex_out = generate_aggregation(df_history_data, df_gauge_votes_formatted_temp)

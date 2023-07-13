@@ -18,7 +18,8 @@ import plotly.express as px
 
 
 # from .forms import AMMForm
-from .models import  df_vote_aggregates, df_vote_choice
+# from .models import  df_convex_snapshot_vote_aggregates as  df_vote_aggregates 
+# from .models import  df_convex_snapshot_vote_choice as df_vote_choice
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
@@ -32,12 +33,16 @@ convex_snapshot_bp = Blueprint(
     static_folder='static'
 )
 
+# df_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
+# df_vote_choice = app.config['df_convex_snapshot_vote_choice']
+
+
 # proposal_end	proposal_title	choice	sum	count
 
 @convex_snapshot_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    # now = datetime.now()
+    df_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
 
     # Filter Data
 
@@ -111,6 +116,8 @@ def index():
 @convex_snapshot_bp.route('/show/<string:choice>', methods=['GET'])
 # @login_required
 def show(choice):
+    df_vote_choice = app.config['df_convex_snapshot_vote_choice']
+
     # Filter Data
     # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
@@ -188,6 +195,7 @@ def show(choice):
         body="",
         df_snapshot_user = local_df_vote_choice,
         current_votes = df_current_votes.choice_power.sum(),
+        votium_bounty_registry = app.config['votium_bounty_registry'],
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,

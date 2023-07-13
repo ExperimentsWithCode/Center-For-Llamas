@@ -121,6 +121,9 @@
             },
             { id: 'timestamp', name: 'Vote Timestamp' },
             {# { id: 'choice', name: 'choice' }, #}
+            { id: 'bounty', name: 'Bounty',
+                formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` },
+            { id: 'bounty_currency', name: 'Bounty Currency' },
 
             { id: 'actions', 
             name: 'Actions',
@@ -137,6 +140,15 @@
                 'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }}',
                 'available_power': '{{ row['available_power']|round(2) }}',
                 'timestamp': '{{ row['timestamp'] }}',
+                'bounty': '${{ row['bounties_eligible'] |round(2)}}',
+                'bounty_currency': '{{ row['bounty_currencies'] }}',
+
+{# 
+                'bounty': '${{ votium_bounty_registry.get_bounty_paid(row['period'],row['choice_index'], row['choice_power']) |round(2)}}',
+                'bounty_currency': '{{ votium_bounty_registry.get_bounty_currency(row['period'],row['choice_index']) }}',
+ #}
+
+
                 'actions': null
             },
           {% endfor %}

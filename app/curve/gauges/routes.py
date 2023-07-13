@@ -10,7 +10,7 @@ import json
 import plotly
 import plotly.express as px
 
-from .models import df_gauge_registry
+from .models import df_curve_gauge_registry
 
 # Blueprint Configuration
 gauges_bp = Blueprint(

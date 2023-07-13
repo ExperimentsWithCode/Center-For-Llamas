@@ -122,7 +122,7 @@ class Govenor():
                 'balance': self.final_balance,
                 'balance_adj': self.final_balance * (10** -18),
                 'final_lock_time': dt.fromtimestamp(self.final_lock_time),
-                'timestamp': action.block_timestamp,
+                'timestamp': dt.strptime(action.block_timestamp, '%Y-%m-%d %H:%M:%S.%f'),
                 'period': get_period(action.week_num, action.week_day, action.block_timestamp),
                 'period_end_date': get_period_end_date(action.block_timestamp),
                 'balance_adj_formatted': "{:,.2f}".format(self.final_balance * (10** -18))
@@ -384,14 +384,17 @@ df_current_locks = get_current_locks(df_history_data)
 
 df_known_locks = df_current_locks.groupby(['known_as']).sum('balance_adj').reset_index()
 
-app.config['df_locker_supply'] = df_locker_supply
-app.config['df_locker_withdraw'] = df_locker_withdraw
-app.config['df_locker_deposit'] = df_locker_deposit
+try:
+    app.config['df_locker_supply'] = df_locker_supply
+    app.config['df_locker_withdraw'] = df_locker_withdraw
+    app.config['df_locker_deposit'] = df_locker_deposit
 
-app.config['df_history_data'] = df_history_data
-app.config['df_current_locks'] = df_current_locks
+    app.config['df_history_data'] = df_history_data
+    app.config['df_current_locks'] = df_current_locks
 
-app.config['df_known_locks'] = df_known_locks
+    app.config['df_known_locks'] = df_known_locks
+except:
+    print("could not register in app.config\n\tCurve Locker")
 
 
 

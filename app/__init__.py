@@ -37,6 +37,8 @@ def init_app():
         from .curve.gauge_rounds.routes import gauge_rounds_bp
         from .convex.snapshot.routes import convex_snapshot_bp
         from .convex.votium_bounties.routes import votium_bounties_bp
+        from .stakedao.snapshot.routes import stakedao_snapshot_bp
+
     
         # from .authentication.auth.routes import auth_bp
         # from .authentication.user.routes import user_bp
@@ -66,6 +68,7 @@ def init_app():
         app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
         app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
         app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
+        app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
 
         # app.register_blueprint(user_bp, url_prefix='/user')
         # app.register_blueprint(space_bp, url_prefix='/space')

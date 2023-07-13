@@ -47,9 +47,13 @@
               <span class="badge bg-primary rounded-pill">
                + {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
               </span>
+            {% elif sum_current_votes == sum_prior_votes  %}
+              <span class="badge bg-info rounded-pill">
+               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
             {% else %}
               <span class="badge bg-secondary rounded-pill">
-               - {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
               </span>
             {% endif %}
           </h4>

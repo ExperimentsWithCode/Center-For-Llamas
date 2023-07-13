@@ -19,28 +19,42 @@ This dashboard hopes to clearly present the activity of Curve Governance and exp
 
 ___
 # To Do
+### Data
+[X] Map Gauge to Pool to Name to Symbol
+
 [] Snapshot votes prior to December 22 arrive in a distinct format.
-    * Need to update to resolve:
-        - Choices: [x, y, z]
-        - Vote_Option: [x, y, z]
-    * Currently handles Vote_Option as dict.
-    > Flipside will not be retroactively updating this so need to pull prior data from Snapshot via rate limited process.
+* Need to update to resolve:
+    - Choices: [x, y, z]
+    - Vote_Option: [x, y, z]
+    
+* Currently handles Vote_Option as dict.
+
+* Flipside will not be retroactively updating this so need to pull prior data from Snapshot via rate limited process.
+
+* Flipside will not be correct this
+    
+    [] Pursue data from snapshot graphql
+
+### Views
 
 [X] Build out Snapshot Show page for specific views.
 
-[] Build out StakeDAO Bounty index/show
-
-[] Build out Votium Bounty index/show
+[X] Build out Votium Bounty index/show
 
 [] Build out StakeDAO sdCRV index/show
 
+[] Build out StakeDAO Bounty index/show
+
+
 [] Build out meta aggregation of all above. 
+
+### Bug fixes
 
 [] Fix CRV Locked Chart bar chart to include withdraw and deposit info.
 
 [] Fix Gauge Votes bar chart its not right for some reason.
 
-[] Map Gauge to Pool to Name to Symbol
+
 
 
 ___
@@ -65,7 +79,7 @@ Flask based website powered by Pandas Dataframes following a Model View Controle
 ## Model
 Each folder has `models.py` which reads data from a CSV and forms dataframes of data.
 
-**there is no database at present and csv fed dataframes seems to be plenty effective**
+**there is no database at present and csv fed dataframes seems to be plenty effective for the time being**
 
 ## View
 Each folder has a `/templates` folder which contains jinja2 template files which are hybrid html/python files. 
@@ -83,6 +97,27 @@ At present data is simply CSV's a title appendage.
 There is a jupyter notebook `load_data.ipynb` which taps calls **Flipside** by API to update these data sources. 
 
 To apply changes restart the server to precompile new dataframes. 
+
+### app.config
+A lot of data references each other. Rather than having each server refresh rebuild each model multiple times every time its referenced, models are stored in the `app.config`. 
+
+**However this can only work in the application context.**
+
+In order for the models to work locally in jupyter notebooks we import dataframes under a try except statement, first through the `app.config` and if that fails (it's running locally), import directly which will take more time as each model builds its own dependencies. 
+
+```python
+try:
+    dataframe_model = app.config['dataframe_model']
+except: 
+    from app.protocol.component.models import dataframe_model
+```
+Likewise for storing data into the `app.config` wrap that in a try except, and use a print statement to ensure we can tell that's not storing properly in web context.
+```python
+try
+    app.config['dataframe_model'] = dataframe_model
+except:
+    print(f"could not register in app.config\n\t{component}")
+```
 ___
 # General Dev Flow
 1. create component folder

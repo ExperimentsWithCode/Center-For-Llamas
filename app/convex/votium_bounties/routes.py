@@ -10,7 +10,7 @@ import json
 import plotly
 import plotly.express as px
 
-from .models import df_bounty_formatted
+from .models import df_votium_bounty_formatted as df_bounty_formatted
 
 # Blueprint Configuration
 votium_bounties_bp = Blueprint(
@@ -104,7 +104,7 @@ def index():
     fig = px.scatter(df_current_bounties, 
                     x="votes_per_dollar", 
                     y="relative_vote_power", 
-                    size="bounty_value", 
+                    # size="bounty_value", 
                     color="gauge_ref",
                     hover_name="gauge_ref", 
                     log_x=True, 
@@ -123,7 +123,7 @@ def index():
     fig = px.scatter(df_prior_bounties, 
                     x="votes_per_dollar", 
                     y="relative_vote_power", 
-                    size="bounty_value", 
+                    # size="bounty_value", 
                     color="gauge_ref",
                     hover_name="gauge_ref", 
                     log_x=True, 
@@ -145,7 +145,7 @@ def index():
                 y="relative_vote_power",
                 animation_frame="period_end_date", 
                 animation_group="gauge_ref",
-                size="bounty_value", 
+                # size="bounty_value", 
                 color="gauge_ref", 
                 hover_name="gauge_ref",
                 log_x=True, 
@@ -170,7 +170,7 @@ def index():
                 y="relative_vote_power",
                 animation_frame="period_end_date", 
                 animation_group="gauge_ref",
-                size="bounty_value", 
+                # size="bounty_value", 
                 color="token_symbol", 
                 hover_name="gauge_ref",
                 log_x=True, 
@@ -223,7 +223,7 @@ def show(gauge_ref):
     # Build chart
     fig = px.bar(local_df_bounty_formatetd,
                     x=local_df_bounty_formatetd['period_end_date'],
-                    y=local_df_bounty_formatetd['total_vote_power'],
+                    y=local_df_bounty_formatetd['relative_vote_power'],
                     color='token_symbol',
                     title='Vote Power Per Round',
                     # facet_row=facet_row,
@@ -243,10 +243,11 @@ def show(gauge_ref):
     # df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == prior_period]
 
     # # Build chart
-    fig = px.bar(local_df_bounty_formatetd,
+    fig = px.line(local_df_bounty_formatetd,
                     x=local_df_bounty_formatetd['period_end_date'],
                     y=local_df_bounty_formatetd['votes_per_dollar'],
-                    color='token_symbol',
+                    # color='token_symbol',
+                    line_shape='hv',
                     title='Votes Per Dollar Bounties',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap

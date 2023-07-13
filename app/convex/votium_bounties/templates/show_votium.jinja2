@@ -115,7 +115,7 @@
               'price_per_vote': '{{ row['price_per_vote']| round(6) }}',
               'votes_per_dollar': '{{ row['votes_per_dollar'] | round(2)}}',
               
-              'total_vote_power': '{{ row['total_vote_power'] | round(2) }}',
+              'total_vote_power': '{{ row['relative_vote_power'] | round(2) }}',
 
               'voter_count': '{{ row['total_vote_count'] }}',
               'actions': null,

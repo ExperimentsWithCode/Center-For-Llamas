@@ -23,9 +23,14 @@ from app.data.reference import (
     current_file_title,
     fallback_file_title,
 )
-df_curve_gauge_registry = app.config['df_curve_gauge_registry']
-gauge_registry = app.config['gauge_registry']
+from flask import current_app as app
 
+try:
+    # curve_gauge_registry = app.config['df_curve_gauge_registry']
+    gauge_registry = app.config['gauge_registry']
+except: 
+    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+    from app.curve.gauges.models import gauge_registry
 
 class Voter():
     def __init__(self, address):
@@ -324,8 +329,11 @@ df_gauge_votes_formatted = get_votes_formatted(vr)
 
 df_current_gauge_votes = get_current_votes(df_gauge_votes_formatted)
 
-app.config['df_active_votes'] = df_active_votes
-app.config['df_all_votes'] = df_all_votes
-app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
-app.config['df_current_gauge_votes'] = df_current_gauge_votes
+try:
+    app.config['df_active_votes'] = df_active_votes
+    app.config['df_all_votes'] = df_all_votes
+    app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
+    app.config['df_current_gauge_votes'] = df_current_gauge_votes
+except:
+    print("could not register in app.config\n\tGauge Votes")
 
