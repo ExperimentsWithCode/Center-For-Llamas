@@ -1,0 +1,154 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+
+    </div>
+
+
+    {%if local_df_processed_liquidity |length > 0 %}
+
+
+    {% endif %}
+
+    <div class="row">
+
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">{{local_all_df_processed_liquidity.iloc[0]['pool_name']}}</div>
+        <div class="card-body">
+          <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['pool_address']}}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Gauge Address</div>
+        <div class="card-body">
+          <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['gauge_address']}}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+
+        <div class="card text-white bg-info mb-3" >
+          <div class="card-header">Vote Deltas</div>
+          <div class="card-body">
+              {# <h4 class="card-title">}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart" class="chart"></div>
+          </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="card text-white bg-primary mb-3" >
+          <div class="card-header">Votes Deltas Native Units</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart2" class="chart2"></div>
+          </div>
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <h4 class="text-primary">Votes Per Round</h4>
+
+        <div id="vote_table"></div>
+    </div>
+
+
+
+
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script>
+
+{# <script type='text/javascript'>
+  var graphs3 = {{graphJSON3 | safe}};
+  Plotly.plot('chart3',graphs3,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs4 = {{graphJSON4 | safe}};
+  Plotly.plot('chart4',graphs4,{});
+</script> #}
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'date', name: 'Date' },
+            { id: 'pool_name', name: 'Pool Name' },
+            { id: 'symbol', name: 'Symbol' },
+            { id: 'liquidity_native', name: 'Liquidity Native',
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'liquidity', name: 'Liquidity USD',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'total_votes', name: 'Total Votes',
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'percent', name: 'Percent' },
+            { id: 'symbol', name: 'Symbol' },
+
+            { id: 'actions', 
+            name: 'Actions',
+            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
+          },
+        ],
+        data: [
+          {% for index, row in local_all_df_processed_liquidity.iterrows() %}
+            {
+                'date': '{{ row['date']  }}',
+                'pool_name': '{{ row['pool_name'] }}',
+                'symbol': '{{ row['symbol'] }}',
+                'liquidity_native': '{{ row['liquidity_native']|round(2) }}',
+                'liquidity': '{{ row['liquidity']|round(2) }}',
+                'total_votes': '{{ row['total_votes']|round(2) }}',
+                'percent': '{{ row['percent'] |round(3) }}',
+                'actions': null
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('vote_table'));
+</script>
+
+{% endblock %}

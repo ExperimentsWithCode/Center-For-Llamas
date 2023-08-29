@@ -22,18 +22,29 @@ except:
     from app.curve.locker.models import df_history_data
 
 
-# def calc_vote_power(self, df_combo):
-#     time_diff_lock =  df['final_lock_time'] - df['period_end_date']
-#     time_diff_4_years = df['period_end_date'] - df['final_lock_time'] 
-#     difference = df['final_lock_time'] 
+def calc_vote_utilization(current_date, vote_period_date, final_lock_time):
+    # four years forward date
+    four_years_forward = current_date + timedelta(days=(7 * 52 * 4))
+    four_years_forward = four_years_forward.date()
 
+    # Lock time
+    local_final_lock_time = final_lock_time.dt.date
 
+    # Vote end
+    period_date = vote_period_date
 
-#     df_combo["vote_power"] = (
-#             ( df_combo["weight"]) / 10000 * df_combo["balance_adj"]
-#         )
-#     return df_combo
+    # Get % of four years lock extends
+    ## Calcualted at time of lock and does not update from external activities
+    diff_lock_time = local_final_lock_time - period_date
+    diff_max_lock = four_years_forward - period_date
 
+    # print(diff_lock_time)
+    diff_lock_weeks = diff_lock_time / pd.Timedelta(days=7)
+    diff_max_weeks = diff_max_lock / pd.Timedelta(days=7)
+
+    vote_utilization = diff_lock_weeks / diff_max_weeks
+
+    return vote_utilization
 
 
 def generate_aggregation(df_lock_history, df_gauge_vote_history):
@@ -56,32 +67,48 @@ def generate_aggregation(df_lock_history, df_gauge_vote_history):
 
     while current_date <= end_date:
         this_period = get_period(0,0, current_date)
+        
         # get all votes prior to period
-        temp_lock = df_lock_history[df_lock_history['period']<= this_period ]
-        temp_vote = df_gauge_vote_history[df_gauge_vote_history['period'] <= this_period]
+        temp_lock = df_history_data[df_history_data['period']<= this_period ]
+        temp_vote = df_gauge_votes_formatted[df_gauge_votes_formatted['period'] <= this_period]
 
         # Filter for most recent vote/lock per user per gauge
-        temp_lock = temp_lock.sort_values('timestamp').groupby(['provider']).tail(1)
+        temp_lock = temp_lock.sort_values('timestamp').groupby(['provider']).tail(1000)
         temp_vote = temp_vote.sort_values('time').groupby(['user', 'gauge_addr', 'symbol']).tail(1)
 
         # combine vote and lock information
         df_combo = pd.merge(temp_vote, temp_lock, how='left', left_on = 'user', right_on = 'provider')
-        df_combo["vote_power"] = (
+        df_combo["vote_power_raw"] = (
             ( df_combo["weight"]) / 10000 * df_combo["balance_adj"]
         )
-        df_combo = df_combo[df_combo['vote_power'] > 0]
+        # To only get locks before vote.
+        df_combo = df_combo[df_combo['timestamp'] < df_combo['time']]
+        df_combo = df_combo.sort_values(['time','timestamp']).groupby(['provider', 'gauge_addr']).tail(1)
         
+        # Clear dead weight
+        df_combo = df_combo[
+            (df_combo['vote_power_raw'] > 0 ) | (df_combo['period_x'] == this_period )
+            ]
+        df_combo = df_combo[df_combo['final_lock_time'] > current_date + timedelta(days=7)]
+
+
         # Set period, handle joining with leading 0s, and cut down decimals.
         df_combo["this_period"] = this_period
         df_combo["period_end_date"] = current_date
+
+        # Calc vote weight decay
+        df_combo['vote_utilization'] = (
+            calc_vote_utilization(current_date, df_combo['period_end_date_y'], df_combo['final_lock_time'])
+            )
+        df_combo['vote_power'] = df_combo['vote_power_raw'] * df_combo['vote_utilization']
+
+
+
 
         this_period_title = str(this_period)
         if len(this_period_title) > 7:
             this_period_title = this_period_title[:7]
 
-        # str_this_period = str(this_period)
-        # if len(str_this_period) > 7:
-        #     str_this_period = str_this_period[:7]
 
         # Update Vote Percent
         df_combo["vote_percent"] = (
@@ -93,7 +120,7 @@ def generate_aggregation(df_lock_history, df_gauge_vote_history):
 
         # Aggregate info down to particular gauges
         df_vote_aggregates = df_combo[[
-            'this_period', 'period_end_date','gauge_addr', 'name', 'symbol', 'vote_power'
+            'this_period', 'period_end_date','gauge_addr', 'name', 'symbol', 'vote_power', 
             ]].groupby([
                 'this_period', 'period_end_date','gauge_addr', 'name', 'symbol',
             ])['vote_power'].agg(['sum','count']).reset_index()
@@ -101,6 +128,7 @@ def generate_aggregation(df_lock_history, df_gauge_vote_history):
         df_vote_aggregates = df_vote_aggregates.rename(columns={
             "sum": 'total_vote_power',
             'count': 'vecrv_voter_count'})
+        
         # Update Vote Percent
         df_vote_aggregates["vote_percent"] = (
             (df_vote_aggregates["total_vote_power"] / df_vote_aggregates['total_vote_power'].sum()) * 100

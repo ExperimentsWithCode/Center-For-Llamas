@@ -18,11 +18,11 @@
  
       <div class="card border-info mb-3" style="max-width: 50%;" >
       <div class="card-header">Pool Liquidity</div>
-      {# <div class="card-body"> #}
-          {# <h4 class="card-title">{{ votes.shape[0] }}</h4> #}
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+      <div class="card-body"> 
+          <h4 class="card-title">{{ df_processed_liquidity.index | length }}</h4>
+          <p class="card-text">This measures liquidity vs votes</p>
 
-      {# </div> #}
+      </div>
     </div>
 
 
@@ -62,19 +62,25 @@
         columns: [
             { id: 'date', name: 'date' },
             { id: 'pool_name', name: 'Pool Name' },
-            { id: 'liquidity', name: 'Liquidity' },
-            { id: 'liquidity_native', name: 'Liquidity Native' },
-            { id: 'tradeable_assets', name: 'Tradeable Assets' },
-
+            { id: 'liquidity', name: 'Liquidity',
+                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'liquidity_native', name: 'Liquidity Native',
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'tradeable_assets', name: 'Tradeable Assets'},
             { id: 'gauge_address', name: 'Gauge Address' },
             { id: 'symbol', name: 'Symbol' },
-            { id: 'percent', name: 'Percent' },
-            { id: 'liquidity_vs_percent', name: 'Liquidity/Percent' },
+            { id: 'percent', name: 'Percent',
+            },
+            { id: 'liquidty_vs_percent', name: 'Liquidity/Percent',
+                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
             { id: 'pool_address', name: 'Pool Address' },
 
           { id: 'actions', 
             name: 'Actions',
-            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[3].data}'>More</a>`)
+            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[5].data}'>More</a>`)
           },
         ],
         data: [
@@ -83,14 +89,14 @@
                 'date': '{{ row['date'] }}',
                 'pool_name': '{{ row['pool_name'] }}',
 
-                'liquidity': '{{ row['liquidity'] }}',
-                'liquidity_native': '{{ row['liquidity_native'] }}',
+                'liquidity': '{{ row['liquidity'] | round(2) }}',
+                'liquidity_native': '{{ row['liquidity_native']| round(2) }}',
                 'tradeable_assets': '{{ row['tradeable_assets'] }}',
 
                 'gauge_address': '{{ row['gauge_address'] }}',
                 'symbol': '{{ row['symbol'] }}',
-                'percent': '{{ row['percent'] }}',
-                'liquidity_vs_percent': '{{ row['liquidity_vs_percent'] }}',
+                'percent': '{{ row['percent'] | round(4) }}',
+                'liquidty_vs_percent': '{{ row['liquidty_vs_percent'] | round(0) }}',
                 'pool_address': '{{ row['pool_address'] }}',
 
               'actions': null

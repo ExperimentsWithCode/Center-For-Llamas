@@ -16,14 +16,15 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.curve.gauges.models import gauge_registry
-
-
 try:
-    df_history_data = app.config['df_all_by_gauge']
+    df_all_by_gauge = app.config['df_all_by_gauge']
+    gauge_registry = app.config['gauge_registry']
+
 except:
     from app.curve.gauge_rounds.models import df_all_by_gauge
+    from app.curve.gauges.models import gauge_registry
 
+    # from app.curve.locker.models import df_history_data
 
 
 def get_df_processed_liquidity(df_liquidity):
@@ -50,10 +51,10 @@ def get_df_processed_liquidity(df_liquidity):
             try:
                 vote_percent = temp_df.iloc[0]['vote_percent'] 
                 if vote_percent < 0.001:
-                    print(f"Not enough vote percent to process pool {pool_name} \n\t {pool_address}")
+                    # print(f"Not enough vote percent to process pool {pool_name} \n\t {pool_address}")
                     continue
             except Exception as e:
-                print(f"Failed to calc vote percent for process pool {pool_name} \n\t {pool_address}")
+                # print(f"Failed to calc vote percent for process pool {pool_name} \n\t {pool_address}")
                 # print(e)
                 # print(traceback.format_exc())
                 continue
@@ -70,11 +71,13 @@ def get_df_processed_liquidity(df_liquidity):
                 'percent': temp_df.iloc[0]['vote_percent'],
                 'liquidty_vs_percent': current_bal_usd / temp_df.iloc[0]['vote_percent'] ,
                 'tradeable_assets': tradeable_assets,
-                'display_name': pool_name + f" ({pool_address[0:6]})"
+                'display_name': pool_name + f" ({pool_address[0:6]})",
+                'display_symbol': temp_df.iloc[0]['symbol'] + f" ({pool_address[0:6]})"
+
 
                 })
         except Exception as e:
-            print(f"Could not process pool {pool_name} \n\t {pool_address}")
+            # print(f"Could not process pool {pool_name} \n\t {pool_address}")
             # print(e)
             # print(traceback.format_exc())
             continue
