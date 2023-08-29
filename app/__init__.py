@@ -32,11 +32,16 @@ def init_app():
         # Include local applications routing
         from .home.routes import home_bp
         from .curve.gauges.routes import gauges_bp
+
         from .curve.locker.routes import locker_bp
         from .curve.gauge_votes.routes import gauge_votes_bp
         from .curve.gauge_rounds.routes import gauge_rounds_bp
+
+        from .curve.liquidity.routes import liquidity_bp
+
         from .convex.snapshot.routes import convex_snapshot_bp
         from .convex.votium_bounties.routes import votium_bounties_bp
+
         from .stakedao.snapshot.routes import stakedao_snapshot_bp
 
     
@@ -66,9 +71,14 @@ def init_app():
         app.register_blueprint(locker_bp, url_prefix='/curve/locker')
         app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
         app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
+
+        app.register_blueprint(liquidity_bp, url_prefix='/curve/liquidity')
+
         app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
         app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
-        app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
+
+        app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot'
+                               )
 
         # app.register_blueprint(user_bp, url_prefix='/user')
         # app.register_blueprint(space_bp, url_prefix='/space')

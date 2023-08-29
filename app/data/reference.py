@@ -71,7 +71,8 @@ known_large_curve_holders = {
     '0x989aeb4d175e16225e39e87d0d97a3360524ad80' : 'Convex (cvxCRV)',
     '0x847fa1a5337c7f24d7066e467f2e2a0f969ca79f' : 'Frax',
     '0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8' : 'Liquity',
-    '0x7a16ff8270133f063aab6c9977183d9e72835428' : 'CRV Founder'
+    '0x7a16ff8270133f063aab6c9977183d9e72835428' : 'CRV Founder',
+    '0x52f737774c470e38b4f0109a2c852b129df14302': 'Wintermute(?)'
     }
 
 
@@ -81,6 +82,10 @@ gauge_names = {
     '0x6aba93e10147f86744bb9a50238d25f49ed4f342': 'Curve.fi pitchFXS-f Gauge Deposit',
     '0xbfcf63294ad7105dea65aa58f8ae5be2d9d0952a': 'Curve.fi: DAI/USDC/USDT Gauge',
     '0x555766f3da968ecbefa690ffd49a2ac02f47aa5f': 'Curve Arbitrum Bridge Wrapper',
+    '0xbb1b19495b8fe7c402427479b9ac14886cbbaaee': 'Polygon Mainnet',
+    '0xce5f24b7a95e9cba7df4b54e911b4a3dc8cdaf6f': 'Arbitrum One',
+    '0x172a5af37f69c69cc59e748d090a70615830a5dd': 'Optimism Mainnet',
+    '0xc5ae4b5f86332e70f3205a8151ee9ed9f71e0797': 'Optimism Mainent (2)'
 }
 
 gauge_symbols = {
@@ -88,7 +93,10 @@ gauge_symbols = {
     '0xa90996896660decc6e997655e065b23788857849': 'sUSDv2-3CRV-gauge',
     '0x6aba93e10147f86744bb9a50238d25f49ed4f342': 'pitchFXS-f-gauge',
     '0xbfcf63294ad7105dea65aa58f8ae5be2d9d0952a': '3CRV-gauge',
-    '0x555766f3da968ecbefa690ffd49a2ac02f47aa5f': 'ArbitrumBridge'
-
+    '0x555766f3da968ecbefa690ffd49a2ac02f47aa5f': 'ArbitrumBridge',
+    '0xbb1b19495b8fe7c402427479b9ac14886cbbaaee': 'PolygonMainnet',
+    '0xce5f24b7a95e9cba7df4b54e911b4a3dc8cdaf6f': 'ArbitrumOne',
+    '0x172a5af37f69c69cc59e748d090a70615830a5dd': 'OptimismMainnet',
+    '0xc5ae4b5f86332e70f3205a8151ee9ed9f71e0797': 'OptimismMainent(2)'
 
 }

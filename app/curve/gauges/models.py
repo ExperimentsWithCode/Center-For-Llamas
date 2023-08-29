@@ -26,7 +26,7 @@ from app.data.source.harvested_core_pools import core_pools
 
 
 class GaugeRegistry():
-    def __init__(self, df, core_pools=None):
+    def __init__(self, df, core_pools=core_pools):
         self.gauges = {}
         self.pools = {}
         self.tokens = {}
@@ -48,14 +48,14 @@ class GaugeRegistry():
 
     def process_row(self, row):
         gs = Gauge_Set(row)
-        self.gauges[gs.gauge_addr] = gs
         if gs.gauge_addr:
+            self.gauges[gs.gauge_addr.lower()] = gs
             self.shorthand_gauges[gs.gauge_addr[:6].lower()] = gs
         if gs.pool_addr:
-            self.pools[gs.pool_addr] = gs
+            self.pools[gs.pool_addr.lower()] = gs
             self.shorthand_pools[gs.pool_addr[:6].lower()] = gs
         if gs.token_addr:
-            self.tokens[gs.token_addr] = gs
+            self.tokens[gs.token_addr.lower()] = gs
             self.shorthand_tokens[gs.token_addr[:6].lower()] = gs
 
 
@@ -136,6 +136,7 @@ class Gauge_Set():
 
             self.time_gauge_registered = row['BLOCK_TIMESTAMP'] if 'BLOCK_TIMESTAMP' in row else None
         except:
+            # print(row.keys())
             self.gauge_addr = row['gauge_addr']
             self.gauge_name = row['gauge_name']
             self.gauge_symbol = row['gauge_symbol']
@@ -154,6 +155,7 @@ class Gauge_Set():
             self.type = row['type']
 
             self.time_gauge_registered = row['block_timestamp'] if 'block_timestamp' in row else None
+
 
     def format_output(self):
         return {

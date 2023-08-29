@@ -22,6 +22,20 @@ except:
     from app.curve.locker.models import df_history_data
 
 
+# def calc_vote_power(self, df_combo):
+#     time_diff_lock =  df['final_lock_time'] - df['period_end_date']
+#     time_diff_4_years = df['period_end_date'] - df['final_lock_time'] 
+#     difference = df['final_lock_time'] 
+
+
+
+#     df_combo["vote_power"] = (
+#             ( df_combo["weight"]) / 10000 * df_combo["balance_adj"]
+#         )
+#     return df_combo
+
+
+
 def generate_aggregation(df_lock_history, df_gauge_vote_history):
     dfs = []
     titles = []

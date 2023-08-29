@@ -1,0 +1,124 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="row">
+ 
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+      <div class="card-header">Pool Liquidity</div>
+      {# <div class="card-body"> #}
+          {# <h4 class="card-title">{{ votes.shape[0] }}</h4> #}
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+
+      {# </div> #}
+    </div>
+
+
+    </div>
+
+    {# <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" >
+        <div class="card-header">Current Votes</div>
+        <div class="card-body">
+            <div id="chart2" class="chart2"></div>
+
+        </div>
+        </div>
+    </div> #}
+
+
+
+        <div id="liquidity_table"></div>
+
+
+
+
+
+    </div>
+
+  
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'date', name: 'date' },
+            { id: 'pool_name', name: 'Pool Name' },
+            { id: 'liquidity', name: 'Liquidity' },
+            { id: 'liquidity_native', name: 'Liquidity Native' },
+            { id: 'tradeable_assets', name: 'Tradeable Assets' },
+
+            { id: 'gauge_address', name: 'Gauge Address' },
+            { id: 'symbol', name: 'Symbol' },
+            { id: 'percent', name: 'Percent' },
+            { id: 'liquidity_vs_percent', name: 'Liquidity/Percent' },
+            { id: 'pool_address', name: 'Pool Address' },
+
+          { id: 'actions', 
+            name: 'Actions',
+            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[3].data}'>More</a>`)
+          },
+        ],
+        data: [
+          {% for index, row in df_processed_liquidity.iterrows() %}
+            {
+                'date': '{{ row['date'] }}',
+                'pool_name': '{{ row['pool_name'] }}',
+
+                'liquidity': '{{ row['liquidity'] }}',
+                'liquidity_native': '{{ row['liquidity_native'] }}',
+                'tradeable_assets': '{{ row['tradeable_assets'] }}',
+
+                'gauge_address': '{{ row['gauge_address'] }}',
+                'symbol': '{{ row['symbol'] }}',
+                'percent': '{{ row['percent'] }}',
+                'liquidity_vs_percent': '{{ row['liquidity_vs_percent'] }}',
+                'pool_address': '{{ row['pool_address'] }}',
+
+              'actions': null
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('liquidity_table'));
+</script>
+
+{# <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script> #}
+{% endblock %}
