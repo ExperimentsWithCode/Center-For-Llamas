@@ -64,7 +64,7 @@ def show(gauge_addr):
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.update_layout(
-        title=f"Vote Deltas Filtered By: {gauge_addr}",
+        title=f"Liquidity vs Votes Filtered By: {local_all_df_processed_liquidity.iloc[0]['pool_name']} ",
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
@@ -97,12 +97,13 @@ def show(gauge_addr):
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")
 
+    
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.update_layout(
-        title=f"Vote Deltas Filtered By: {gauge_addr} [Native Units]",
+        title=f"Liquidity vs Votes Filtered By: {local_all_df_processed_liquidity.iloc[0]['pool_name']} [Native Units]",
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
@@ -148,8 +149,6 @@ def show(gauge_addr):
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
 
-
-
     )
 
 
@@ -157,50 +156,28 @@ def show(gauge_addr):
 @curve_liquidity_bp.route('/filter/<string:filter_asset>', methods=['GET'])
 # @login_required
 def filter(filter_asset):
-    now = datetime.now()
-    # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
-
+    
+    now = dt.now().date() - timedelta(days=(1))
+    print(now)
+    print(filter_asset)
     local_all_df_processed_liquidity = df_processed_liquidity[
         df_processed_liquidity['tradeable_assets'].str.contains(filter_asset)
         ]
 
-    local_all_df_processed_liquidity = local_all_df_processed_liquidity.sort_values(
+    local_df_processed_liquidity = local_df_processed_liquidity.sort_values(
         ["date", 'liquidity'], axis = 0, ascending = False
         )
 
+    local_df_processed_liquidity.head(10)
+
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # fig = go.Figure()
     fig.update_layout(
-        title=f"Vote Deltas Filtered By: {filter_asset}",
-        #     xaxis_title="X Axis Title",
-        #     yaxis_title="Y Axis Title",
-        #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
-        height= 1000,
-    )
-    fig = px.bar(local_df_processed_liquidity,
-                    x=local_df_processed_liquidity.pool_name,
-                    y=local_df_processed_liquidity.liquidity,
-                    color=local_df_processed_liquidity['pool_address'],
-                title=f"Leader Board: Power delta in vote power >> period_list[{period_id}]",
-                # line_shape='hvh'
-                height=600
-
-                )
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.update_layout(
-        title=f"Vote Deltas Filtered By: {filter_asset} [Native Units]",
-        #     xaxis_title="X Axis Title",
-        #     yaxis_title="Y Axis Title",
-        #     legend_title="Legend Title",
+        title=f"Liquidity vs Votes  Filtered By: {filter_asset}",
+    #     xaxis_title="X Axis Title",
+    #     yaxis_title="Y Axis Title",
+    #     legend_title="Legend Title",
         font=dict(
             family="Courier New, monospace",
             size=18,
@@ -210,33 +187,77 @@ def filter(filter_asset):
     )
     fig = fig.add_trace(
         go.Bar(
-            x=local_all_df_processed_liquidity.date,
-            y=local_all_df_processed_liquidity.liquidity_native,
+            x=local_df_processed_liquidity.display_symbol,
+            y=local_df_processed_liquidity.liquidity,
             name="Liquidity",
             # color="pool_name"
         ),
         secondary_y=False
+
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = local_all_df_processed_liquidity.date,
-            y = local_all_df_processed_liquidity.total_votes, 
+            x = local_df_processed_liquidity.display_symbol,
+            y = local_df_processed_liquidity.total_votes, 
             name = "Total Votes",
             line_shape='hvh',
-            line_width=3,
+            # line_width=3,
+            # color=df_vote_deltas.name,
+            # marker_color="red"
+            # layout_yaxis_range=[0,5]
         ),
         secondary_y=True
     )
-    fig.update_layout(autotypenumbers='convert types')
+    fig.update_yaxes(rangemode="tozero")
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # fig = go.Figure()
+    fig.update_layout(
+        title=f"Liquidity vs Votes  Filtered By: {filter_asset}",
+    #     xaxis_title="X Axis Title",
+    #     yaxis_title="Y Axis Title",
+    #     legend_title="Legend Title",
+        font=dict(
+            family="Courier New, monospace",
+            size=18,
+            color="RebeccaPurple"
+        ),
+        height= 1000,
+    )
+    fig = fig.add_trace(
+        go.Bar(
+            x=local_df_processed_liquidity.display_symbol,
+            y=local_df_processed_liquidity.liquidity_native,
+            name="Liquidity",
+            # color="pool_name"
+        ),
+        secondary_y=False
+
+    )
+    fig = fig.add_trace(
+        go.Scatter(
+            x = local_df_processed_liquidity.display_symbol,
+            y = local_df_processed_liquidity.total_votes, 
+            name = "Total Votes",
+            line_shape='hvh',
+            # line_width=3,
+            # color=df_vote_deltas.name,
+            # marker_color="red"
+            # layout_yaxis_range=[0,5]
+        ),
+        secondary_y=True
+    )
+    fig.update_yaxes(rangemode="tozero")
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
     return render_template(
-        'index_liqudity.jinja2',
+        'show_liqudity.jinja2',
         title='Curve Gauge Rounds',
-        template='liquidity-index',
+        template='liquidity-show',
         body="",
-        df_processed_liquidity = df_processed_liquidity,
+        df_processed_liquidity = local_df_processed_liquidity,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
 

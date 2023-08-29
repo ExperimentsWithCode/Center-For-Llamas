@@ -30,13 +30,14 @@ except:
 def get_df_processed_liquidity(df_liquidity):
     output = []
     for index, row in df_liquidity.iterrows():
-        date = row['DATE_DAY']
-        current_bal = row['CURRENT_BAL']
-        current_bal_usd = row['CURRENT_BAL_USD']
+        date = row['date_day']
+        date = dt.strptime(date[:10],'%Y-%m-%d')
+        current_bal =  float(row['current_bal']) if row['current_bal'] else 0
+        current_bal_usd = float(row['current_bal_usd']) if row['current_bal_usd'] else 0
 
-        pool_address = row['POOL_ADDRESS']
-        pool_name = row['POOL_NAME']
-        tradeable_assets = row['TRADEABLE_ASSETS']
+        pool_address = row['pool_address']
+        pool_name = row['pool_name']
+        tradeable_assets = row['tradeable_assets']
         # tradeable_assets = [x.strip() for x in tradeable_assets.split(',')]
 
         try:
@@ -88,18 +89,17 @@ def get_df_processed_liquidity(df_liquidity):
 
 
 def get_df_liquidity():
-    # try:
-    #     filename = 'liquidity_general' #+ current_file_title
-    #     resp_dict = read_csv(filename, 'source')
-    #     df_liquidity = pd.json_normalize(resp_dict)
-    #     df_liquidity = df_liquidity.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+    try:
+        filename = 'liquidity_general' #+ current_file_title
+        resp_dict = read_csv(filename, 'source')
+        df_liquidity = pd.json_normalize(resp_dict)
+        df_liquidity = df_liquidity.sort_values("date_day", axis = 0, ascending = True)
 
-    # except:
-    filename = 'liquidity_general3' #+ fallback_file_title
-    resp_dict = read_json(filename, 'source')
-    df_liquidity = pd.json_normalize(resp_dict)
-    df_liquidity = df_liquidity.sort_values("DATE_DAY", axis = 0, ascending = False)
-
+    except:
+        filename = 'liquidity_general' #+ fallback_file_title
+        resp_dict = read_json(filename, 'source')
+        df_liquidity = pd.json_normalize(resp_dict)
+        df_liquidity = df_liquidity.sort_values("DATE_DAY", axis = 0, ascending = False)
     return df_liquidity
 
 
