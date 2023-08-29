@@ -58,6 +58,7 @@ def get_aggregates(df_vote_choice):
         'count': 'cvx_voter_count'})
     df_vote_aggregates =df_vote_aggregates.sort_values(["proposal_end", 'total_vote_power'], axis = 0, ascending = False)
 
+
     # dfs.append(df_vote_aggregates)
     # titles.append('Aggregates')
     return df_vote_aggregates

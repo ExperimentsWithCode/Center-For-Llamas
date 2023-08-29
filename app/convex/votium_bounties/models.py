@@ -50,10 +50,10 @@ class VBRegistry():
                 b = Bounty(row)
                 self.bounty_list.append(b)
             except Exception as e:
-                # pass
-                print(e)
-                print(row)
-                print(traceback.format_exc())
+                pass
+                # print(e)
+                # print(row)
+                # print(traceback.format_exc())
             if not b.period in self.bounty_map:
                 self.bounty_map[b.period] = {}
             # Group Bounties
@@ -82,11 +82,11 @@ class VBRegistry():
             # print(f"bounty {bounty_paid}")
             return bounty_paid
         except Exception as e:
-            print("_"*50)
-            print(e)
-            print(traceback.format_exc())
-            print(f"period {period}, type: {type(period)}")
-            print(f"period {choice_index}, type: {type(choice_index)}")
+            # print("_"*50)
+            # print(e)
+            # print(traceback.format_exc())
+            # print(f"period {period}, type: {type(period)}")
+            # print(f"period {choice_index}, type: {type(choice_index)}")
             return 0
     
     def get_bounty_currency(self, period, choice_index):
@@ -108,11 +108,11 @@ class VBRegistry():
                 total_value += bounty.bounty_value
             return total_value
         except Exception as e:
-            print("_"*50)
-            print(e)
-            print(traceback.format_exc())
-            print(f"period {period}, type: {type(period)}")
-            print(f"period {choice_index}, type: {type(choice_index)}")
+            # print("_"*50)
+            # print(e)
+            # print(traceback.format_exc())
+            # print(f"period {period}, type: {type(period)}")
+            # print(f"period {choice_index}, type: {type(choice_index)}")
             return 0
         
     def format_output(self):

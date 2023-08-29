@@ -157,7 +157,7 @@ def show(gauge_addr):
 # @login_required
 def filter(filter_asset):
     
-    now = dt.now().date() - timedelta(days=(1))
+    now = datetime.now().date() - timedelta(days=(1))
     print(now)
     print(filter_asset)
     local_all_df_processed_liquidity = df_processed_liquidity[
