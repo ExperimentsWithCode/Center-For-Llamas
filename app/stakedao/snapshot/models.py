@@ -28,6 +28,7 @@ except:
 
 
 
+print("Loading... { stakedao.snapshot.models }")
 
 
 def get_df_snapshot():

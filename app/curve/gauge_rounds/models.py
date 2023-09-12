@@ -2,6 +2,7 @@
 from flask import current_app as app
 
 from datetime import datetime, timedelta
+from app.utilities.utility import timed
 
 
 from app.data.local_storage import (
@@ -21,6 +22,8 @@ except:
     from app.curve.gauge_votes.models import df_gauge_votes_formatted
     from app.curve.locker.models import df_history_data
 
+
+print("Loading... { curve.gauge_rounds.models }")
 
 def calc_vote_utilization(current_date, vote_period_date, final_lock_time):
     # four years forward date
@@ -46,7 +49,7 @@ def calc_vote_utilization(current_date, vote_period_date, final_lock_time):
 
     return vote_utilization
 
-
+@timed
 def generate_aggregation(df_lock_history, df_gauge_vote_history):
     dfs = []
     titles = []
@@ -148,7 +151,7 @@ def generate_aggregation(df_lock_history, df_gauge_vote_history):
             'aggregate_titles': aggregate_titles,
             }
 
-
+@timed
 def concat_all(df_list, sort_list = ["this_period"]):
     df_concat = None
     first = True

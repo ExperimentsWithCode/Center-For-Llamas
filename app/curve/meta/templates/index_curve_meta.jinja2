@@ -1,0 +1,250 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+    <h1>{{ title }}</h1>
+    <div class="row">
+
+        <div class="card text-white bg-info mb-3", style="max-width: 50%;" >
+            <div class="card-header">Query Info</div>
+
+            <div class="card-body">
+                <h4 class="card-title">Round : {{ df_head.iloc[0]['period_end_date'].date() }}</h4>
+                <h4 class="card-title">Compare Round : {{ df_head.iloc[0]['period_end_date_compared'].date() }}</h4>
+                <h5 class="card-title">Number To Display : {{ top_x }}</h5>
+
+                {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+                {# <div id="chart" class="chart"></div> #}
+                {# <div id="chart2" class="chart2"></div> #}
+
+
+            </div> 
+        </div>
+
+        <div class="card bg-warning mb-3", style="max-width: 50%;" >
+            <div class="card-header">Query Info</div>
+            <div class="card-body">
+
+                {# form #}
+                <form method="POST" action="{{ url_for('curve_meta_bp.index') }}">
+                {{ form.csrf_token }}
+
+                <fieldset class="main_round">
+                    {{ form.main_round.label }}
+                    {{ form.main_round(placeholder=0) }}
+                    {% if form.main_round.errors %}
+                    <ul class="errors">
+                        {% for error in form.main_round.errors %}
+                        <li>{{ error }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </fieldset>
+
+                <fieldset class="compare_round">
+                    {{ form.compare_round.label }}
+                    {{ form.compare_round(placeholder=2) }}
+
+                    {% if form.compare_round.errors %}
+                    <ul class="errors">
+                        {% for error in form.compare_round.errors %}
+                        <li>{{ error }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </fieldset>
+
+                <fieldset class="top_results">
+                    {{ form.top_results.label }}
+                    {{ form.top_results(placeholder=20) }}
+                    {% if form.top_results.errors %}
+                    <ul class="errors">
+                        {% for error in form.top_results.errors %}
+                        <li>{{ error }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </fieldset>
+
+                <div class="submit-button">
+                    {{ form.submit }}
+                </div>
+
+                </form>
+                {# end form #}
+                </div>
+            </div> 
+    </div>
+
+
+    <div class="row">
+
+        <div class="card text-white bg-primary mb-3" >
+          <div class="card-header">Top {{top_x}}</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart" class="chart"></div>
+          </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" >
+          <div class="card-header">Bottom {{top_x}}</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart2" class="chart2"></div>
+          </div>
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <h4 class="text-primary">Top {{top_x}} Vote Increases</h4>
+        <div id="head_table"></div>
+    </div>
+
+
+    <div class="row">
+        <h4 class="text-secondary">Top {{top_x}} Vote Decreases</h4>
+        <div id="tail_table"></div>
+    </div>
+
+
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'display_name', name: 'Display Name' },
+            { id: 'power_difference', name: 'power_difference',
+                formatter: (_, row) =>  `${row.cells[1].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'vote_delta', name: 'Vote Delta' },
+            { id: 'vote_percent', name: 'Vote Percent' },
+            { id: 'total_vote_power', name: 'Vote Power',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'last_total_vote_power', name: 'Last Vote Power',
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'gauge_addr', name: 'Gauge Address',
+              formatter: (_, row) => gridjs.html(
+                `<a href=${row.cells[7].data}>${row.cells[6].data}</a>`
+              )
+             },
+            { id: '_', name: '_', formatter: (_, row) => gridjs.html(``)},
+
+
+
+
+        ],
+        data: [
+          {% for index, row in df_head.iterrows() %}
+            {
+              'display_name': '{{ row['display_name'] }}',
+              'power_difference': '{{ row['power_difference']|round(2)  }}',
+              'vote_delta': '{{ row['vote_delta']  }}',
+              'vote_percent': '{{ row['vote_percent'] }}',
+              'total_vote_power': '{{ row['total_vote_power']|round(2)  }}',
+              'last_total_vote_power': '{{ row['last_total_vote_power']|round(2) }}',
+              'gauge_addr': '{{ row['gauge_addr'] }}',
+              '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`
+
+
+            },
+          {% endfor %}
+        ],
+        fixedHeader: true,
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('head_table'));
+</script>
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'display_name', name: 'Display Name' },
+            { id: 'power_difference', name: 'power_difference',
+                formatter: (_, row) =>  `${row.cells[1].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'vote_delta', name: 'Vote Delta' },
+            { id: 'vote_percent', name: 'Vote Percent' },
+            { id: 'total_vote_power', name: 'Vote Power',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'last_total_vote_power', name: 'Last Vote Power',
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'gauge_addr', name: 'Gauge Address',
+              formatter: (_, row) => gridjs.html(
+                `<a href=${row.cells[7].data}>${row.cells[6].data}</a>`
+              )
+             },
+            { id: '_', name: '_', formatter: (_, row) => gridjs.html(``)},
+
+
+
+
+        ],
+        data: [
+          {% for index, row in df_tail.iterrows() %}
+            {
+              'display_name': '{{ row['display_name'] }}',
+              'power_difference': '{{ row['power_difference']|round(2)  }}',
+              'vote_delta': '{{ row['vote_delta']  }}',
+              'vote_percent': '{{ row['vote_percent'] }}',
+              'total_vote_power': '{{ row['total_vote_power']|round(2)  }}',
+              'last_total_vote_power': '{{ row['last_total_vote_power']|round(2) }}',
+              'gauge_addr': '{{ row['gauge_addr'] }}',
+              '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`
+
+
+            },
+          {% endfor %}
+        ],
+        fixedHeader: true,
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-secondary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('tail_table'));
+</script>
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script>
+
+{% endblock %}

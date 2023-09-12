@@ -1,6 +1,8 @@
 from flask import current_app as app
 
 # from ... import db
+from app.utilities.utility import timed
+
 from app.data.local_storage import (
     pd,
     read_json,
@@ -21,6 +23,8 @@ from app.data.reference import (
     fallback_file_title
 )
 
+print("Loading... { curve.locker.models }")
+
 
 class Govenor():
     def __init__(self, address):
@@ -34,6 +38,7 @@ class Govenor():
         self.final_lock_time = 0
         self.final_supply = 0
         self.history = []
+        self.supply_history = []
         if self.address in known_large_curve_holders:
             self.known_as = known_large_curve_holders[self.address]
         else:
@@ -44,7 +49,7 @@ class Govenor():
             # Manual CSV download
             event_name = row['EVENT_NAME']
             if row['DECODED_LOG'] == None:
-                print("No Action!")
+                # print("No Action!")
                 return
             log = ast.literal_eval(row['DECODED_LOG'])
         except:
@@ -105,7 +110,7 @@ class Govenor():
             self.final_balance -= int(action.value)
 
         else:
-            print("No Action")
+            # print("No Action")
             # print(row)
             return
         try:
@@ -125,7 +130,7 @@ class Govenor():
                 'timestamp': dt.strptime(action.block_timestamp, '%Y-%m-%d %H:%M:%S.%f'),
                 'period': get_period(action.week_num, action.week_day, action.block_timestamp),
                 'period_end_date': get_period_end_date(action.block_timestamp),
-                'balance_adj_formatted': "{:,.2f}".format(self.final_balance * (10** -18))
+                'balance_adj_formatted': "{:,.2f}".format(self.final_balance * (10** -18)),
             })
 
 
@@ -233,7 +238,12 @@ class Supply():
             'address': self.address,
             'previous_supply': self.previous_supply,
             'supply': self.supply,
+            'previous_supply_adj': self.previous_supply * (10**-18),
+            'supply_adj': self.supply * (10**-18),
+            'supply_difference_adj': (self.supply -  self.previous_supply) * (10**-18),
             'period': get_period(self.week_num, self.week_day, self.block_timestamp),
+            'period_end_date': get_period_end_date(self.block_timestamp),
+
         }
 
 
@@ -328,7 +338,7 @@ class Locker():
         return output_data
 
 
-
+@timed
 def get_df_locker():
     try:
         filename = 'curve_locker'#+ current_file_title
@@ -346,19 +356,20 @@ def get_df_locker():
 
     return df_locker
 
-
+@timed
 def get_locker_obj():
     locker = Locker()
     locker.process_locks(df_locker)
     return locker
 
+@timed
 def get_history(locker):
     history_data = locker.format_history_output()
     df_history_data = pd.json_normalize(history_data)
     df_history_data = df_history_data.sort_values("timestamp", axis = 0, ascending = True)
     return df_history_data
 
-
+@timed
 def get_current_locks(df_history_data):
     now = dt.now()
     df_current_locks = df_history_data.groupby('provider', as_index=False).last()

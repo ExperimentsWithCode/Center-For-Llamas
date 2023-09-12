@@ -8,3 +8,4 @@ trash/
 *.json
 *.ipynb
 app/static/fonts/*
+wsgi.py

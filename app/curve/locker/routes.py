@@ -18,7 +18,7 @@ import plotly.express as px
 
 
 # from .forms import AMMForm
-from .models import  df_history_data, df_current_locks, df_known_locks
+from .models import  df_history_data, df_current_locks, df_known_locks, df_locker_supply
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
@@ -81,9 +81,9 @@ def index():
     # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    fig = px.bar(df_history_data,
-                    x=df_history_data['period_end_date'],
-                    y=df_history_data['balance_adj'],
+    fig = px.line(df_locker_supply,
+                    x=df_locker_supply['period_end_date'],
+                    y=df_locker_supply['supply_difference_adj'],
                     # color='provider',
                     title='CRV Locked',
                     # facet_row=facet_row,
@@ -91,7 +91,6 @@ def index():
                     )
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
-
     # Build Plotly object
     graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 

@@ -191,7 +191,7 @@ def show(gauge_addr):
         template='gauge-votes-show',
         body="",
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,
-        df_gauge_round_by_user = local_df_gauge_rounds,
+        local_df_gauge_rounds = local_df_gauge_rounds,
         current_votes = df_current_votes.vote_power.sum(),
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,

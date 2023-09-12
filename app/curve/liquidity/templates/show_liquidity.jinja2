@@ -17,10 +17,9 @@
     </div>
 
 
-    {%if local_df_processed_liquidity |length > 0 %}
+    {%if local_all_df_processed_liquidity |length > 0 %}
 
 
-    {% endif %}
 
     <div class="row">
 
@@ -36,7 +35,9 @@
         <div class="card-header">Gauge Address</div>
         <div class="card-body">
           <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['gauge_address']}}</h4>
-
+          <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= local_all_df_processed_liquidity.iloc[0]['gauge_address']) }}">
+            <button type="button" class="btn btn-secondary">View Gauge Rounds</button>
+          </a>
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>
@@ -73,7 +74,21 @@
 
         <div id="vote_table"></div>
     </div>
+    {% else %}
+    <div class="row">
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Unable To Link Pool To Gauge</div>
+        <div class="card-body">
+          <h4 class="card-title">Please try with a different gauge</h4>
 
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+
+    </div>
+
+    {% endif %}
 
 
 
@@ -116,12 +131,8 @@
                 formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'percent', name: 'Percent' },
-            { id: 'symbol', name: 'Symbol' },
 
-            { id: 'actions', 
-            name: 'Actions',
-            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
-          },
+
         ],
         data: [
           {% for index, row in local_all_df_processed_liquidity.iterrows() %}
@@ -133,7 +144,6 @@
                 'liquidity': '{{ row['liquidity']|round(2) }}',
                 'total_votes': '{{ row['total_votes']|round(2) }}',
                 'percent': '{{ row['percent'] |round(3) }}',
-                'actions': null
             },
           {% endfor %}
         ],

@@ -1,6 +1,20 @@
 from datetime import datetime as dt
 from datetime import date, timedelta
 
+from functools import wraps
+from time import time
+
+
+def timed(f):
+  @wraps(f)
+  def wrapper(*args, **kwds):
+    start = time()
+    result = f(*args, **kwds)
+    elapsed = time() - start
+    print ("\t%s took \n\t\t%d time to finish" % (f.__name__, elapsed))
+    return result
+  return wrapper
+
 
 # Slight issue on splitting years will split period despite single period.
 def get_period(week_num, week_day, time, target=5):

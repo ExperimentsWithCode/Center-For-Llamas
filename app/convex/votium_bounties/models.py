@@ -35,7 +35,7 @@ except:
     from app.convex.snapshot.models import convex_snapshot_proposal_choice_map
     from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates as df_vote_aggregates
 
-
+print("Loading... { convex.votium_bounties.models }")
 
 class VBRegistry():
     def __init__(self):

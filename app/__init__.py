@@ -39,6 +39,9 @@ def init_app():
 
         from .curve.liquidity.routes import curve_liquidity_bp
 
+        from .curve.meta.routes import curve_meta_bp
+
+
         from .convex.snapshot.routes import convex_snapshot_bp
         from .convex.votium_bounties.routes import votium_bounties_bp
 
@@ -68,6 +71,8 @@ def init_app():
 
         # Register Blueprints
         app.register_blueprint(home_bp)
+        app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
+
         app.register_blueprint(locker_bp, url_prefix='/curve/locker')
         app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
         app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')

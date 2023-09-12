@@ -15,6 +15,8 @@ from app.data.local_storage import (
 
 from app.snapshot.models import Snapshot
 
+print("Loading... { convex.snapshot.models }")
+
 
 def get_df_snapshot():
     try:

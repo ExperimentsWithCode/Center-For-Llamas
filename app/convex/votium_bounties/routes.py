@@ -15,7 +15,7 @@ from .models import df_votium_bounty_formatted as df_bounty_formatted
 # Blueprint Configuration
 votium_bounties_bp = Blueprint(
     'votium_bounties_bp', __name__,
-    url_prefix='/curve/gauges',
+    url_prefix='/convex/votium',
     template_folder='templates',
     static_folder='static'
 )
