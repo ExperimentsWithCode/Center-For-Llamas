@@ -1,0 +1,45 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">{{choice}}</div>
+        <div class="card-body">
+          <h4 class="card-title"></h4>
+          {% if gauge_addr == "0xNotFound" %}
+            <button type="button" class="btn btn-primary" disable>View Gauge Rounds</button>
+            <p class="card-text">Unable to match with a gauge</p>
+
+          {% else %}
+            <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= gauge_addr) }}">
+              <button type="button" class="btn btn-primary">View Gauge Rounds</button>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Something went wrong</div>
+        <div class="card-body">
+          <h4 class="card-title text-primary">Vote For Gauge Not Found</h4>
+          <p class="card-text">It does not appear there are votes for this gauge on Convex Snapshot.</p> 
+
+        </div>
+      </div>
+    </div>
+
+
+
+{% endblock %}

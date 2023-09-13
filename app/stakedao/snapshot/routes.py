@@ -120,12 +120,22 @@ def index():
 def show(choice):
     df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
 
-    # Filter Data
-    # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
-    # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
-    # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['weight'] > 0]
-    # local_df_gauge_votes = local_df_gauge_votes.sort_values("time", axis = 0, ascending = False)
-    local_df_vote_choice = df_vote_choice[df_vote_choice['choice'] == choice]
+    if choice[:2] == "0x":
+        local_df_vote_choice = df_vote_choice[df_vote_choice['gauge_addr'] == choice]
+        gauge_addr = choice
+    else:
+        local_df_vote_choice = df_vote_choice[df_vote_choice['choice'] == choice]
+        gauge_addr = None
+
+    if len(local_df_vote_choice) == 0:
+        return render_template(
+            'stakedao_not_found.jinja2',
+            title='Stakedao Snapshot Gauge Weight Votes',
+            template='gauge-votes-show',
+            body="",
+            gauge_addr = gauge_addr,
+            choice = choice
+        )
     local_df_vote_choice = local_df_vote_choice.sort_values(["proposal_end", 'choice_power'], axis = 0, ascending = False)
 
     max_value = local_df_vote_choice['proposal_end'].max()
@@ -202,4 +212,96 @@ def show(choice):
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,
         graphJSON4 = graphJSON4,
+    )
+
+
+
+@stakedao_snapshot_bp.route('/voter/<string:voter>', methods=['GET'])
+def voter(voter):
+    df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
+
+    # Filter Data
+    # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
+    # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
+    # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['weight'] > 0]
+    # local_df_gauge_votes = local_df_gauge_votes.sort_values("time", axis = 0, ascending = False)
+
+    local_df_vote_choice = df_vote_choice[df_vote_choice['voter'] == voter]
+        
+    local_df_vote_choice = local_df_vote_choice.sort_values(["proposal_end", 'choice_power'], axis = 0, ascending = False)
+
+    max_value = local_df_vote_choice['proposal_end'].max()
+    df_current_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == max_value]
+    
+    # # Build chart
+    fig = px.pie(df_current_votes, 
+                values=df_current_votes['choice_power'],
+                names=df_current_votes['choice'],
+                title='Current Round Gauge Distribution',
+                # hover_data=['known_as'], labels={'known_as':'known_as'}
+                )
+    fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
+        # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # # Build Plotly object
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+        # # Build chart
+    fig = px.bar(local_df_vote_choice,
+                    x=local_df_vote_choice['proposal_end'],
+                    y=local_df_vote_choice['choice_power'],
+                    color='choice',
+                    title='Choices Per Round',
+                    # facet_row=facet_row,
+                    # facet_col_wrap=facet_col_wrap
+                    )
+        # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # # Build Plotly object
+    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    #     # # Build chart
+    # fig = px.bar(local_df_vote_choice,
+    #                 x=local_df_vote_choice['proposal_end'],
+    #                 y=local_df_vote_choice['choice_power'],
+    #                 color='choice',
+    #                 title='Votes Per Round',
+    #                 # facet_row=facet_row,
+    #                 # facet_col_wrap=facet_col_wrap
+    #                 )
+    #     # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    # fig.update_layout(autotypenumbers='convert types')
+
+    # # # Build Plotly object
+    # graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    # # Build chart
+    fig = px.line(local_df_vote_choice,
+                    x=local_df_vote_choice['period_end_date'],
+                    y=local_df_vote_choice['available_power'],
+                    # color='choice',
+                    title='sdCRV Held',
+                    # facet_row=facet_row,
+                    # facet_col_wrap=facet_col_wrap
+                    )
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # # Build Plotly object
+    graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+    return render_template(
+        'show_voter_snapshot.jinja2',
+        title='StakeDAO Snapshot Voter Profile',
+        template='snapshot-voter-show',
+        body="",
+        df_snapshot_user = local_df_vote_choice,
+        current_votes = df_current_votes.choice_power.sum(),
+        graphJSON = graphJSON,
+        graphJSON2 = graphJSON2,
+        graphJSON3 = graphJSON3
+        # graphJSON4 = graphJSON4,
     )

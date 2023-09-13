@@ -38,6 +38,9 @@
           <a href="{{ url_for('convex_snapshot_bp.show', choice= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
             <button type="button" class="btn btn-secondary">View Convex Snapshot</button>
           </a>
+          <a href="{{ url_for('stakedao_snapshot_bp.show', choice= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
+            <button type="button" class="btn btn-info">View StakeDAO Snapshot</button>
+          </a>
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>

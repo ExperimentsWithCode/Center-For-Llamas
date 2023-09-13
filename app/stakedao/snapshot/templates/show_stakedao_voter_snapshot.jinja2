@@ -15,36 +15,28 @@
       <h1>{{ title }}</h1>
 
       <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">{{df_snapshot_user.iloc[0]['proposal_title']}}</div>
+        <div class="card-header">Voter</div>
         <div class="card-body">
-          <h4 class="card-title">{{df_snapshot_user.iloc[0]['choice']}}</h4>
-          {% if df_snapshot_user.iloc[0]['gauge_addr'] == "0xNotFound" %}
-            <button type="button" class="btn btn-primary" disable>View Gauge Rounds</button>
-            <p class="card-text">Unable to match with a gauge</p>
+          <h4 class="card-title">{{df_snapshot_user.iloc[0]['voter']}}</h4>
 
-          {% else %}
-            <p class="card-text"> Gauge Address: {{df_snapshot_user.iloc[0]['gauge_addr']}} </p>
-            <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= df_snapshot_user.iloc[0]['gauge_addr']) }}">
-              <button type="button" class="btn btn-primary">View Gauge Rounds</button>
-            </a>
-          {% endif %}
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>
-      
+
       <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Current Votes</div>
+        <div class="card-header">Known As</div>
         <div class="card-body">
-          <h4 class="card-title text-primary">{{ "{:,.2f}".format(current_votes) }}</h4>
+          <h4 class="card-title text-primary">{{df_snapshot_user.iloc[0]['known_as']}}</h4>
 
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>
     </div>
+
+
     <div class="row">
 
         <div class="card text-white bg-info mb-3" style="max-width: 50%;">
-          <div class="card-header">This Rounds Votes by Voter</div>
+          <div class="card-header">This Rounds Votes by Gauge</div>
           <div class="card-body">
               {# <h4 class="card-title">}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -53,18 +45,19 @@
         </div>
 
         <div class="card text-white bg-danger mb-3" style="max-width: 50%;" >
-          <div class="card-header">This Rounds Votes by Whitelist</div>
+          <div class="card-header">sdCRV Available Per Vote</div>
           <div class="card-body">
               {# <h4 class="card-title">}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              <div id="chart4" class="chart4"></div>
+              <div id="chart3" class="chart3"></div>
           </div>
         </div>
       </div>
+
       <div class="row">
 
         <div class="card text-white bg-primary mb-3" >
-          <div class="card-header">Votes per round by Voter</div>
+          <div class="card-header">Votes per round by Gauge</div>
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -72,15 +65,7 @@
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="card text-white bg-secondary mb-3" >
-          <div class="card-header">Votes Per Round by Whiteliested Addresses</div>
-          <div class="card-body">
-              {# <h4 class="card-title">??}}</h4> #}
-              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              <div id="chart3" class="chart3"></div>
-          </div>
-        </div>
+
     </div>
     
     <div class="row">
@@ -110,32 +95,27 @@
   Plotly.plot('chart3',graphs3,{});
 </script>
 
-<script type='text/javascript'>
-  var graphs4 = {{graphJSON4 | safe}};
-  Plotly.plot('chart4',graphs4,{});
-</script>
+
 
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'period_end_date', name: 'Round End Date' },
-            { id: 'proposal_title', name: 'Title' },
+            { id: 'proposal_title', name: 'Round' },
             { id: 'known_as', name: 'Known As' },
-            { id: 'voter', name: 'voter',
+            { id: 'choice', name: 'Choice' ,
                 formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[8].data}>${row.cells[3].data}</a>`
-              ) 
+                `<a href=${row.cells[7].data}>${row.cells[2].data}</a>`
+              )
             },
             { id: 'choice_power', name: 'Vote Power',
-                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'choice_percent', name: 'Percent' },
 
-            { id: 'available_power', name: 'Staked sdCRV',
-                formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            { id: 'available_power', name: 'vlCVX',
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'timestamp', name: 'Vote Timestamp' },
-            {# { id: 'choice', name: 'choice' }, #}
 
             { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
 
@@ -143,15 +123,14 @@
         data: [
           {% for index, row in df_snapshot_user.iterrows() %}
             {
-                'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
                 'proposal_title': '{{ row['proposal_title']  }}',
                 'known_as': '{{ row['known_as'] }}',
-                'voter': '{{ row['voter'] }}',
+                'choice': '{{ row['choice'] }}',
                 'choice_power': '{{ row['choice_power']|round(2)}}',
-                'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
+                'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }}',
                 'available_power': '{{ row['available_power']|round(2) }}',
                 'timestamp': '{{ row['timestamp'] }}',
-                '_': `{{ url_for('stakedao_snapshot_bp.voter', voter = row['voter']) }}`
+                '_': `{{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}`
             },
           {% endfor %}
         ],

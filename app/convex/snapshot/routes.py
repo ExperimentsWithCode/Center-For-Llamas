@@ -126,9 +126,19 @@ def show(choice):
 
     if choice[:2] == "0x":
         local_df_vote_choice = df_vote_choice[df_vote_choice['gauge_addr'] == choice]
+        gauge_addr = choice
     else:
         local_df_vote_choice = df_vote_choice[df_vote_choice['choice'] == choice]
-
+        gauge_addr = None
+    if len(local_df_vote_choice) == 0:
+        return render_template(
+            'convex_not_found.jinja2',
+            title='Convex Snapshot Gauge Weight Votes',
+            template='gauge-votes-show',
+            body="",
+            gauge_addr = gauge_addr,
+            choice = choice
+        )
     local_df_vote_choice = local_df_vote_choice.sort_values(["proposal_end", 'choice_power'], axis = 0, ascending = False)
 
     max_value = local_df_vote_choice['proposal_end'].max()

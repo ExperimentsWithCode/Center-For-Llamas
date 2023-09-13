@@ -89,7 +89,11 @@ class GaugeRegistry():
 
     def get_gauge_set_from_snapshot(self, gauge_reference):
         if len(gauge_reference) > 8:
-            partial_addr = gauge_reference[-8:-2].lower()
+            x = gauge_reference.find('(')
+            y = gauge_reference.find(')') +1
+            partial_addr = gauge_reference[x:y][1:7].lower()
+
+            # partial_addr = gauge_reference[-8:-2].lower()
         else:
             partial_addr = gauge_reference
         if partial_addr in self.shorthand_pools:
