@@ -113,6 +113,12 @@ class GaugeRegistry():
                 return self.shorthand_pools[partial_addr]
 
         return None
+    
+    def get_shorthand_pool(self, gauge_addr):
+        if gauge_addr in self.shorthand_pools:
+            return self.shorthand_pools[gauge_addr]
+        else:
+            return None
 
 class Gauge_Set():
     def __init__(self, row):

@@ -52,13 +52,13 @@ def get_aggregates(df_vote_choice):
     #     titles.append(title)
 
     df_vote_aggregates = df_vote_choice.groupby(
-        ['period', 'period_end_date', 'proposal_end', 'proposal_title', 'choice', 'choice_index']
+        ['period', 'period_end_date', 'proposal_end', 'proposal_title', 'choice', 'choice_index', 'gauge_addr']
         )['choice_power'].agg(['sum','count']).reset_index()
 
     df_vote_aggregates = df_vote_aggregates.rename(columns={
         "sum": 'total_vote_power',
         'count': 'cvx_voter_count'})
-    df_vote_aggregates =df_vote_aggregates.sort_values(["proposal_end", 'total_vote_power'], axis = 0, ascending = False)
+    df_vote_aggregates =df_vote_aggregates.sort_values(["proposal_end", 'total_vote_power', 'gauge_addr'], axis = 0, ascending = False)
 
 
     # dfs.append(df_vote_aggregates)

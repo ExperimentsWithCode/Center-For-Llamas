@@ -34,7 +34,7 @@ known_large_cvx_holders_addresses = {
     '0x51c2cef9efa48e08557a361b52db34061c025a1b' : 'JPEGD',
     '0xa52fd396891e7a74b641a2cb1a6999fcf56b077e' : 'Redacted',
     '0x597f540bb63381ffa267027d2d479984825057a8' : 'Mochi Inu',
-    '0xc6625129c9df3314a4dd604845488f4ba62f9db8' : 'Reserve',
+    '0xc6625129c9df3314a4dd604845488f4ba62f9db8' : 'Reserve 1',
     '0x2d643df5de4e9ba063760d475beaa62821c71681' : 'Olympus',
     '0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83' : 'Keeper',
     '0x9e2b6378ee8ad2a4a95fe481d63caba8fb0ebbf9' : 'Alchemix',
@@ -56,6 +56,7 @@ known_large_cvx_holders_addresses = {
     '0x79e76c14b3bb6236dfc06d2d7ff219c8b070169c' : 'Reserve',	
     '0x68378fcb3a27d5613afcfddb590d35a6e751972c' : 'Paladin',	
     '0x8200d84590eceb10c6471268930e2924f34e3d69' : 'Bent',	
+    '0xd733d4cc5b42206a62ed7b1ceec5b4d61898f429' : 'Reserve',
 }
 
 

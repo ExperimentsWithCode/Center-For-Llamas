@@ -24,6 +24,12 @@ from .models import  df_all_by_user, df_all_by_gauge, df_meta_gauge_aggregate
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
 
+try:
+    # curve_gauge_registry = app.config['df_curve_gauge_registry']
+    gauge_registry = app.config['gauge_registry']
+except: 
+    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+    from app.curve.gauges.models import gauge_registry
 
 
 
@@ -197,7 +203,5 @@ def show(gauge_addr):
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,
         graphJSON4 = graphJSON4,
-
-
-
+        pool_shorthand = gauge_registry.get_shorthand_pool(gauge_addr)
     )

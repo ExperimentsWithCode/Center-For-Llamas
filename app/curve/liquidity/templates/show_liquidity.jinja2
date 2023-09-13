@@ -119,16 +119,16 @@
       new gridjs.Grid({
         columns: [
             { id: 'date', name: 'Date' },
-            { id: 'pool_name', name: 'Pool Name' },
+            {# { id: 'pool_name', name: 'Pool Name' }, #}
             { id: 'symbol', name: 'Symbol' },
             { id: 'liquidity_native', name: 'Liquidity Native',
-                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'liquidity', name: 'Liquidity USD',
-                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'total_votes', name: 'Total Votes',
-                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'percent', name: 'Percent' },
 
@@ -137,8 +137,8 @@
         data: [
           {% for index, row in local_all_df_processed_liquidity.iterrows() %}
             {
-                'date': '{{ row['date']  }}',
-                'pool_name': '{{ row['pool_name'] }}',
+                'date': '{{ row['date'].date()  }}',
+                {# 'pool_name': '{{ row['pool_name'] }}', #}
                 'symbol': '{{ row['symbol'] }}',
                 'liquidity_native': '{{ row['liquidity_native']|round(2) }}',
                 'liquidity': '{{ row['liquidity']|round(2) }}',

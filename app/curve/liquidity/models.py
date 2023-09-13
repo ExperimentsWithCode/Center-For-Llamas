@@ -53,10 +53,14 @@ def get_df_processed_liquidity(df_liquidity):
         tradeable_assets = row['tradeable_assets']
         # tradeable_assets = [x.strip() for x in tradeable_assets.split(',')]
         # Get gauge info for pool 
+        # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+        #     print("\n\neusd")
+
         try:
             if pool_address in gauge_registry.pools:
                 gauge_addr = gauge_registry.pools[pool_address].gauge_addr
             else: 
+                # print("Couldn't find in gauge_registry")
                 continue
 
             # Minimize filter by gauge address
@@ -67,26 +71,45 @@ def get_df_processed_liquidity(df_liquidity):
                 all_by_gauge_address[gauge_addr] = df_all_by_gauge_search
 
             df_all_by_gauge_search = all_by_gauge_address[gauge_addr]
+            # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+
+            #     print(len(df_all_by_gauge_search))
             # Get this period end date votes per 
 
             # Minimize Filter by Date
             ## Store last date search
             if not gauge_addr in period_filtered_by_gauge:
-                temp_df = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date < date]
+                temp_df = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date <= date]
                 temp_df.sort_values(['period_end_date'], axis = 0, ascending = False)
+                # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+                #     print(f"Length temp {len(temp_df)}")
+                #     print(f"Date {date}")
+                #     print(f"{df_all_by_gauge_search.period_end_date.unique()}")
+                    # print(f"period_end_date {date}")
+
                 period_filtered_by_gauge[gauge_addr] = temp_df
+            # else:
+            #     if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+            #         print("Unique Period End Dates")
+            #         print(period_filtered_by_gauge[gauge_addr].period_end_date.unique())
+            #         print('\n')
+
             
             ## Get difference between Date and last Period End Date
             period_filtered_this_gauge = period_filtered_by_gauge[gauge_addr]
 
             if len(period_filtered_this_gauge) == 0:
-                continue
-
-            date_spread = date - period_filtered_this_gauge.iloc[0]['period_end_date'] 
+                # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+                #     print(f"Date {date}")
+                #     print(f"No period filtered by this gauge {len(period_filtered_this_gauge) }")
+                date_spread = 0
+            else:
+                date_spread = date - period_filtered_this_gauge.iloc[0]['period_end_date'] 
+                date_spread = date_spread.days
             # print(f"Date Spread: {date_spread.days}")
-        
+
             ## If more than a week, update vote information to more recent. 
-            if date_spread.days >= 7:
+            if date_spread > 7 or len(period_filtered_this_gauge) == 0:
                 # print("more_than_a_week")
                 temp_df = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date < date]
                 temp_df.sort_values(['period_end_date'], axis = 0, ascending = False)
@@ -102,11 +125,12 @@ def get_df_processed_liquidity(df_liquidity):
                 else:
                     liquidity_vs_percent = current_bal_usd / vote_percent
             except Exception as e:
-                # liquidity_vs_percent = 0
-                # print(f"Failed to calc vote percent for process pool {pool_name} \n\t {pool_address}")
-                # print(e)
-                # print(traceback.format_exc())
-                continue
+                # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+                #     liquidity_vs_percent = 0
+                #     print(f"Failed to calc vote percent for process pool {pool_name} \n\t {pool_address}")
+                #     print(e)
+                #     print(traceback.format_exc())
+                continue            
 
             output.append({
                 'date': date,
@@ -117,21 +141,27 @@ def get_df_processed_liquidity(df_liquidity):
                 'liquidity': current_bal_usd,
                 'total_votes': temp_df.iloc[0]['total_vote_power'],
                 'symbol': temp_df.iloc[0]['symbol'],
-                'percent': temp_df.iloc[0]['vote_percent'],
+                'percent': vote_percent,
                 'liquidty_vs_percent': liquidity_vs_percent,
                 'tradeable_assets': tradeable_assets,
                 'display_name': pool_name + f" ({pool_address[0:6]})",
                 'display_symbol': temp_df.iloc[0]['symbol'] + f" ({pool_address[0:6]})"
-
-
                 })
+            
+            # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+            #     print(output[-1])
+
         except Exception as e:
-            # print(f"Could not process pool {pool_name} \n\t {pool_address}")
-            # print(e)
-            # print(traceback.format_exc())
+            # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+            #     print(f"Could not process pool {pool_name} \n\t {pool_address}")
+            #     print(e)
+            #     print(traceback.format_exc())
             continue
+        # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
+        #     print("-"*20)
     out_df = pd.json_normalize(output)
     return out_df.sort_values(['date', 'liquidity'], axis = 0, ascending = False)
+
 
 
 

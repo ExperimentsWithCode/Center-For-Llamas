@@ -83,16 +83,20 @@
       new gridjs.Grid({
         columns: [
           { id: 'known_as', name: 'Known As' },
-          { id: 'address', name: 'Address' },
+          { id: 'address', name: 'Address',
+            formatter: (_, row) => gridjs.html(
+              `<a href=${row.cells[6].data}>${row.cells[1].data}</a>`
+            )
+          },
           { id: 'balance_adj', name: 'Balance Adj',
             {# formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` #}
           },
           { id: 'final_lock_time', name: 'Final Lock Time' },
           { id: 'timestamp', name: 'Last Locked' },
           { id: 'period', name: 'period' },
-          { id: 'actions', 
-            name: 'Actions',
-            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
+          { id: '_', 
+            name: '_',
+            formatter: (_, row) => gridjs.html(``)
           },
         ],
         data: [
@@ -105,7 +109,7 @@
               'final_lock_time': '{{ row['final_lock_time'] }}',
               'timestamp': '{{ row['timestamp'] }}',
               'period': '{{ row['period'] }}',
-              'actions': null
+              '_': `{{ url_for('locker_bp.show', provider = row['provider']) }}`
 
             },
           {% endfor %}

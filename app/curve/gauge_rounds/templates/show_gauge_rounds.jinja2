@@ -28,12 +28,16 @@
             <a href="{{ url_for('curve_liquidity_bp.show', gauge_addr= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
               <button type="button" class="btn btn-primary">View Liqudity</button>
             </a>
+
           {% else %}
               <button type="button" class="btn btn-danger" disabled >View Liqudity (Unavailable)</button>
           <p class="card-text">Could not link Pool to map liquidity</p>
 
           {% endif %}
 
+          <a href="{{ url_for('convex_snapshot_bp.show', choice= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
+            <button type="button" class="btn btn-secondary">View Convex Snapshot</button>
+          </a>
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>

@@ -11,34 +11,82 @@
 {% block content %}
   {% include "navigation.jinja2" %}
 
+
+
     <div class="row">
-      <h1>{{ title }}</h1>
 
-      <div class="card text-white bg-info mb-10" >
-        {% if lockers.iloc[0]['known_as'] =='_' %}
-          <div class="card-header">{{provider}}</div>
-
-        {% else %}
-          <div class="card-header">{{ lockers.iloc[0]['known_as'] }} <br/> {{provider}}</div>
-
-        {% endif %}
-        <div class="card-body">
-            <h4 class="card-title">CRV Locked : {{ "{:,.2f}".format(lockers['balance_adj'].head(1).sum()) }}</h4>
-            <h4 class="card-title">Final Lock Time : {{ lockers.iloc[0]['final_lock_time'] }}</h4>
-            <h5 class="card-title">Locking Events : {{ lockers.shape[0] }}</h5>
-
-            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-            <div id="chart" class="chart"></div>
-            {# <div id="chart2" class="chart2"></div> #}
-
-
+        <div class="card border-info mb-3", style="max-width: 50%;" >
+          <div class="card-header">Voter</div>
+          <div class="card-body">
+              <h4 class="card-title">{{provider}}</h4>
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              {# <div id="chart" class="chart"></div> #}
+            <a href="{{ url_for('gauge_votes_bp.show', user= provider) }}">
+              <button type="button" class="btn btn-primary">View Votes</button>
+            </a>
+          </div>
         </div>
 
-              
+
+        <div class="card border-warning mb-3", style="max-width: 50%;" >
+          <div class="card-header">Known As</div>
+          <div class="card-body">
+            {% if lockers.iloc[0]['known_as'] =='_' %}
+
+              <h4 class="card-title">{{ lockers.iloc[0]['known_as'] }}</h4>
+            {% else %}
+              <h4 class="card-title"> _ </h4>
+
+            {% endif %}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              {# <div id="chart" class="chart"></div> #}
+
+          </div>
+        </div>
+
+
+    </div>
+
+    <div class="row">
+
+        <div class="card border-primary mb-3", style="max-width: 50%;" >
+          <div class="card-header">CRV Locked</div>
+          <div class="card-body">
+              <h4 class="card-title"> {{ "{:,.2f}".format(lockers['balance_adj'].head(1).sum()) }}</h4>
+
+          </div>
+        </div>
+
+
+        <div class="card border-secondary mb-3", style="max-width: 50%;" >
+          <div class="card-header">Info</div>
+          <div class="card-body">
+              {# <h4 class="card-title"> {{ "{:,.2f}".format(lockers['balance_adj'].head(1).sum()) }}</h4> #}
+
+              <p class="card-text">Final Lock Time : {{ lockers.iloc[0]['final_lock_time'] }} </p>
+              <p class="card-text">Locking Events : {{ lockers.shape[0] }} </p>
+              {# <div id="chart" class="chart"></div> #}
+
+          </div>
+        </div>
+
+
     </div>
 
 
+    <div class="row">
 
+        <div class="card text-white bg-info mb-3" >
+          <div class="card-header">CRV Locked</div>
+          <div class="card-body">
+            <div id="chart" class="chart"></div>
+
+          </div>
+        </div>
+
+
+
+    </div>
 
         {# <div class="card-header">Header</div>
         <div class="card-body">
@@ -61,7 +109,7 @@
       new gridjs.Grid({
         columns: [
           { id: 'known_as', name: 'Known As' },
-          { id: 'address', name: 'Address' },
+          {# { id: 'address', name: 'Address' }, #}
           { id: 'balance_adj', name: 'Balance Adj' },
           { id: 'final_lock_time', name: 'Final Lock Time' },
           { id: 'timestamp', name: 'Last Locked' },
@@ -72,7 +120,7 @@
           {% for index, row in lockers.iterrows() %}
             {
               'known_as': '{{ row['known_as'] }}',
-              'address': '{{ row['provider'] }}',
+              {# 'address': '{{ row['provider'] }}', #}
               'balance_adj': '{{ row['balance_adj_formatted'] }}',
               'final_lock_time': '{{ row['final_lock_time'] }}',
               'timestamp': '{{ row['timestamp'] }}',
