@@ -15,6 +15,8 @@ from app.data.local_storage import (
 
 import ast
 from datetime import datetime as dt
+from datetime import datetime, timedelta
+
 
 from app.utilities.utility import get_period, get_period_end_date
 from app.data.reference import (
@@ -338,7 +340,7 @@ class Locker():
         return output_data
 
 
-@timed
+# @timed
 def get_df_locker():
     try:
         filename = 'curve_locker'#+ current_file_title
@@ -356,20 +358,38 @@ def get_df_locker():
 
     return df_locker
 
-@timed
+
+def get_lock_diffs(final_lock_time, df = []):
+    now = datetime.now()
+    # Calc remaining lock
+    now = now.date()
+    ## Weeks until lock expires
+    if len(df)> 0:
+        final_lock_time = df.iloc[0]['final_lock_time']    
+    local_final_lock_time = final_lock_time.date()
+    diff_lock_time = local_final_lock_time - now
+    diff_lock_weeks = diff_lock_time.days / 7
+    ## Max potential weeks locked
+    four_years_forward = now + timedelta(days=(7 * 52 * 4))
+    diff_max_lock = four_years_forward - now
+    diff_max_weeks = diff_max_lock.days / 7
+
+    return diff_lock_weeks, diff_max_weeks
+
+# @timed
 def get_locker_obj():
     locker = Locker()
     locker.process_locks(df_locker)
     return locker
 
-@timed
+# @timed
 def get_history(locker):
     history_data = locker.format_history_output()
     df_history_data = pd.json_normalize(history_data)
     df_history_data = df_history_data.sort_values("timestamp", axis = 0, ascending = True)
     return df_history_data
 
-@timed
+# @timed
 def get_current_locks(df_history_data):
     now = dt.now()
     df_current_locks = df_history_data.groupby('provider', as_index=False).last()

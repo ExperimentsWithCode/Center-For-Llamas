@@ -80,8 +80,17 @@ def show(user):
     now = datetime.now()
     user = user.lower()
     # Filter Data
+    if not (df_gauge_votes_formatted['user'] == user).any():
+        return render_template(
+            'gauge_votes_not_found.jinja2',
+            title='Convex Snapshot Gauge Weight Votes',
+            template='gauge-votes-show',
+            body="",
+            user = user,
+            )
     local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
+
     local_df_gauge_votes = local_df_gauge_votes.sort_values("time", axis = 0, ascending = False)
     local_df_gauge_votes_inactive = local_df_gauge_votes[local_df_gauge_votes['weight'] == 0]
     local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['weight'] > 0]

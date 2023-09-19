@@ -1,0 +1,117 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+    <div class="row">
+        <div class="card border-info mb-3"  >
+
+          <div class="card-header">Notes:</div>
+          <div class="card-body">
+              <p class="card-text">Currently uses "N/A" for gauges which were sourced from scraping the website vs onchain. 
+              Mostly refered to as "Core". These pools do not show on the table below due to lack of creation blocktime.
+              </p>
+
+          </div>
+        </div>
+
+    </div>
+
+    {# <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" >
+        <div class="card-header">Current Votes</div>
+        <div class="card-body">
+            <div id="chart2" class="chart2"></div>
+
+        </div>
+        </div>
+    </div> #}
+    <div class="row">
+
+      <div class="card text-white bg-primary mb-3" >
+        <div class="card-header">Gauge Creation</div>
+        <div class="card-body">
+            {# <h4 class="card-title">??}}</h4> #}
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart" class="chart"></div>
+        </div>
+      </div>
+    </div>
+
+  <div class="row">
+      <h4 class="text-primary">Gauge Indexed</h4>
+
+      <div id="gauge_table"></div>
+  </div>
+
+
+  
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'time_gauge_registered', name: 'Timestamp Created' },
+          { id: 'first_period', name: 'Gauge Round Created' },
+
+          { id: 'type', name: 'type' },
+          { id: 'gauge_name', name: 'Gauge Name' },
+          { id: 'gauge_addr', name: 'Gauge Address',
+              formatter: (_, row) => gridjs.html(
+                `<a href=${row.cells[5].data}>${row.cells[4].data}</a>`
+              )
+          },
+          { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
+
+        ],
+        data: [
+          {% for index, row in df_curve_gauge_registry.iterrows() %}
+            {
+              'time_gauge_registered': '{{ row['time_gauge_registered'] }}',
+              'first_period': '{{ row['first_period'] }}',
+              'type': '{{ row['type'] }}',
+              'gauge_name': '{{ row['gauge_name'] }}',
+              'gauge_addr': '{{ row['gauge_addr'] }}',
+              '_': `{{ url_for('gauges_bp.show', gauge_addr = row['gauge_addr']) }}`,
+
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('gauge_table'));
+</script>
+
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+
+{% endblock %}

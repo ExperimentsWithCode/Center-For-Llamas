@@ -127,7 +127,10 @@
             { id: 'choice_power', name: 'Vote Power',
                 formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
-            { id: 'choice_percent', name: 'Percent' },
+            { id: 'choice_percent', name: 'Percent',
+              formatter: (_, row) =>  `${row.cells[4].data} %`
+
+            },
 
             { id: 'available_power', name: 'vlCVX',
                 formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`

@@ -62,6 +62,8 @@ def get_period_direct(time, target=5):
     # return 0
 
 def get_convex_period_direct(time, target=5):
+    # print(time)
+    # print(type(time))
     if type(time) == str:
         time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
     week_num = int(time.strftime("%V"))

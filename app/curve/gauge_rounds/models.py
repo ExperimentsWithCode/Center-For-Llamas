@@ -49,7 +49,7 @@ def calc_vote_utilization(current_date, vote_period_date, final_lock_time):
 
     return vote_utilization
 
-@timed
+# @timed
 def generate_aggregation(df_lock_history, df_gauge_vote_history):
     dfs = []
     titles = []
@@ -151,7 +151,7 @@ def generate_aggregation(df_lock_history, df_gauge_vote_history):
             'aggregate_titles': aggregate_titles,
             }
 
-@timed
+# @timed
 def concat_all(df_list, sort_list = ["this_period"]):
     df_concat = None
     first = True
@@ -163,6 +163,7 @@ def concat_all(df_list, sort_list = ["this_period"]):
         df_concat = pd.concat([df_concat, df])
     df_concat = df_concat.sort_values(sort_list, axis = 0, ascending = False)
     return df_concat
+
 
 
 # def aggregate_vote_power(df, column_name = 'total_vote_power'):

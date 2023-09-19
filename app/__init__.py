@@ -73,6 +73,7 @@ def init_app():
         app.register_blueprint(home_bp)
         app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
 
+        app.register_blueprint(gauges_bp, url_prefix='/curve/gauges')
         app.register_blueprint(locker_bp, url_prefix='/curve/locker')
         app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
         app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
@@ -82,8 +83,7 @@ def init_app():
         app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
         app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
 
-        app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot'
-                               )
+        app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
 
         # app.register_blueprint(user_bp, url_prefix='/user')
         # app.register_blueprint(space_bp, url_prefix='/space')

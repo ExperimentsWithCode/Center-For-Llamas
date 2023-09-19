@@ -294,7 +294,7 @@ def voter(voter):
 
 
     return render_template(
-        'show_voter_snapshot.jinja2',
+        'show_stakedao_voter_snapshot.jinja2',
         title='StakeDAO Snapshot Voter Profile',
         template='snapshot-voter-show',
         body="",

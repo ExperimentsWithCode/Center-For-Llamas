@@ -12,7 +12,7 @@ from app.data.local_storage import (
 
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_period_end_date
+from app.utilities.utility import get_period_direct, get_period_end_date
 from app.data.reference import (
     known_large_curve_holders,
     current_file_title,
@@ -21,6 +21,7 @@ from app.data.reference import (
 
 from app.data.source.harvested_core_pools import core_pools
 
+print("Loading... { curve.gauges.models }")
 
 
 
@@ -127,6 +128,13 @@ class GaugeRegistry():
 class Gauge_Set():
     def __init__(self, row):
         try:
+            
+            split = row['block_timestamp'].split("T")
+            row['block_timestamp'] = split[0]+" "+split[1][:-1]
+            # row['block_timestamp'] = dt.strptime(row['block_timestamp'], '%Y-%m-%d %H:%M:%S.%f'),
+        except:
+            pass
+        try:
             self.gauge_addr = row['GAUGE_ADDR']
             self.gauge_name = row['GAUGE_NAME']
             self.gauge_symbol = row['GAUGE_SYMBOL']
@@ -165,6 +173,12 @@ class Gauge_Set():
             self.type = row['type']
 
             self.time_gauge_registered = row['block_timestamp'] if 'block_timestamp' in row else None
+        try:
+            self.first_period = get_period_direct(row['block_timestamp'])
+            self.first_period_end_date = get_period_end_date(row['block_timestamp'])
+        except:
+            self.first_period = 'N/A'    
+            self.first_period_end_date = 'N/A'    
 
 
     def format_output(self):
@@ -181,6 +195,8 @@ class Gauge_Set():
             'token_symbol' : self.token_symbol,
             'type' : self.type,
             'time_gauge_registered' : self.time_gauge_registered,
+            'first_period': self.first_period,
+            'first_period_end_date': self.first_period_end_date
         }
 
 

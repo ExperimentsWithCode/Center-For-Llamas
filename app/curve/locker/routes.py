@@ -9,6 +9,7 @@ from datetime import datetime
 import json
 import plotly
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 
@@ -18,7 +19,7 @@ import plotly.express as px
 
 
 # from .forms import AMMForm
-from .models import  df_history_data, df_current_locks, df_known_locks, df_locker_supply
+from .models import  df_history_data, df_current_locks, df_known_locks, df_locker_supply, get_lock_diffs
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
@@ -134,6 +135,32 @@ def show(provider):
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+    # Calc remaining lock
+    final_lock_time = df_current_locks.iloc[0]['final_lock_time']
+    diff_lock_weeks, diff_max_weeks = get_lock_diffs(final_lock_time)
+
+    fig = go.Figure(go.Indicator(
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        value = diff_lock_weeks,
+        mode = "gauge+number+delta",
+        title = {'text': "Lock Efficiency (Weeks)"},
+        delta = {'reference': diff_max_weeks},
+        gauge = {'axis': {'range': [0, 225]},
+                'steps' : [
+                    {'range': [0, 52], 'color': "lightgray"},
+                    {'range': [53, 104], 'color': "gray"},
+                    {'range': [105, 156], 'color': "lightgray"},
+                    {'range': [156, 208], 'color': "gray"},
+                    {'range': [208, 225], 'color': "black"}],
+
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': diff_max_weeks}}))
+    
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
     return render_template(
         'show_locker.jinja2',
         title='Curve Locker',
@@ -141,7 +168,8 @@ def show(provider):
         body="",
         lockers = df_current_locks,
         provider = provider,
-        graphJSON = graphJSON
+        graphJSON = graphJSON,
+        graphJSON2 = graphJSON2
     )
 
 # # """Logged-in page routes."""

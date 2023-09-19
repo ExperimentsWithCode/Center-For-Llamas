@@ -112,10 +112,11 @@
             },
             { id: 'choice_percent', name: 'Percent' },
 
-            { id: 'available_power', name: 'vlCVX',
+            { id: 'available_power', name: 'sdCRV Vote Power',
                 formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'timestamp', name: 'Vote Timestamp' },
+            { id: 'period_end_date', name: 'Period End Date' },
 
             { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
 
@@ -130,6 +131,8 @@
                 'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }}',
                 'available_power': '{{ row['available_power']|round(2) }}',
                 'timestamp': '{{ row['timestamp'] }}',
+                'period_end_date': '{{ row['period_end_date'] }}',
+
                 '_': `{{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}`
             },
           {% endfor %}

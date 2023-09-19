@@ -1,0 +1,41 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">{{user}}</div>
+        <div class="card-body">
+          <h4 class="card-title"></h4>
+
+            <a href="{{ url_for('locker_bp.show', provider= user) }}">
+              <button type="button" class="btn btn-primary">View Locks</button>
+            </a>
+
+        </div>
+      </div>
+      
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Something went wrong</div>
+        <div class="card-body">
+          <h4 class="card-title text-primary">No Votes Found</h4>
+          <p class="card-text">It does not appear there are votes from this voter.</p> 
+
+        </div>
+      </div>
+    </div>
+
+
+
+{% endblock %}

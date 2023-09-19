@@ -288,7 +288,7 @@ class VoterRegistry():
 #         self.power = None
 
 
-@timed
+# @timed
 def get_df_gauge_votes():
     try:
         filename = 'curve_gauge_votes' #+ current_file_title
@@ -304,20 +304,20 @@ def get_df_gauge_votes():
 
     return df_gauge_votes
 
-@timed
+# @timed
 def get_vote_registry_obj():
     vr = VoterRegistry()
     vr.process(df_gauge_votes)
     return vr
 
-@timed
+# @timed
 def get_votes_formatted(vr):
     vote_data = vr.format_output()
     df_gauge_votes_formatted = pd.json_normalize(vote_data)
     df_gauge_votes_formatted = df_gauge_votes_formatted.sort_values("time", axis = 0, ascending = True)
     return df_gauge_votes_formatted
 
-@timed
+# @timed
 def get_current_votes(df_gauge_votes_formatted):
     df_current_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     df_current_gauge_votes = df_current_gauge_votes[df_current_gauge_votes['weight'] > 0]

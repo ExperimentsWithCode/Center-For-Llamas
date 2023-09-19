@@ -29,7 +29,7 @@ def index():
 
     this_round=0
     top_x = 20 
-    compare_round=1
+    compare_round=2
 
     df_head, df_tail = get_meta(this_round, top_x, compare_round)
 
