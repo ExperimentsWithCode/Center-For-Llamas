@@ -8,12 +8,14 @@ from app.data.local_storage import (
     read_json,
     read_csv,
     write_dataframe_csv,
-    write_dfs_to_xlsx
+    write_dfs_to_xlsx,
+    csv_to_df
     )
 
 # filename = 'crv_locker_logs'
 
 from app.snapshot.models import Snapshot
+from app.snapshot.alt_models import merge_target
 
 print("Loading... { convex.snapshot.models }")
 
@@ -29,6 +31,11 @@ def get_df_snapshot():
         snapshot_dict = read_json(filename, 'source')
         df_snapshot = pd.json_normalize(snapshot_dict)
         return df_snapshot.sort_values("VOTE_TIMESTAMP", axis = 0, ascending = True)
+    
+def get_df_snapshot_from_snapshot():
+    filename = ('convex_snapshot_from_snapshot')
+    return csv_to_df(filename)
+
 
 def get_snapshot_obj(df_snapshot):
     snapshot = Snapshot()
@@ -42,15 +49,6 @@ def get_df_vote_choice(snapshot):
 
 
 def get_aggregates(df_vote_choice):
-    # dfs = []
-    # titles = []
-    # for title in df_vote_choice.proposal_title.unique():
-    #     df_temp = df_vote_choice[
-    #         df_vote_choice.proposal_title.isin([title])
-    #     ]
-    #     dfs.append(df_temp)
-    #     titles.append(title)
-
     df_vote_aggregates = df_vote_choice.groupby(
         ['period', 'period_end_date', 'proposal_end', 'proposal_title', 'choice', 'choice_index', 'gauge_addr']
         )['choice_power'].agg(['sum','count']).reset_index()
@@ -60,18 +58,20 @@ def get_aggregates(df_vote_choice):
         'count': 'cvx_voter_count'})
     df_vote_aggregates =df_vote_aggregates.sort_values(["proposal_end", 'total_vote_power', 'gauge_addr'], axis = 0, ascending = False)
 
-
-    # dfs.append(df_vote_aggregates)
-    # titles.append('Aggregates')
     return df_vote_aggregates
 
 
 df_snapshot = get_df_snapshot()
 snapshot = get_snapshot_obj(df_snapshot)
 df_convex_snapshot_vote_choice = get_df_vote_choice(snapshot)
-df_convex_snapshot_vote_aggregates = get_aggregates(df_convex_snapshot_vote_choice)
 
 convex_snapshot_proposal_choice_map = snapshot.format_choice_map_output()
+
+a, b= merge_target(df_convex_snapshot_vote_choice, convex_snapshot_proposal_choice_map, 'convex')
+df_convex_snapshot_vote_choice = a
+convex_snapshot_proposal_choice_map = b 
+
+df_convex_snapshot_vote_aggregates = get_aggregates(df_convex_snapshot_vote_choice)
 
 
 try:

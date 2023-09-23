@@ -20,6 +20,8 @@ import traceback
 from app.data.reference import known_large_cvx_holders_addresses
 
 from app.snapshot.models import Snapshot
+from app.snapshot.alt_models import merge_target
+
 
 try:
     gauge_registry = app.config['gauge_registry']
@@ -81,9 +83,14 @@ def get_aggregates(df_vote_choice):
 df_snapshot = get_df_snapshot()
 snapshot = get_snapshot_obj(df_snapshot)
 df_stakedao_snapshot_vote_choice = get_df_vote_choice(snapshot)
-df_stakedao_snapshot_vote_aggregates = get_aggregates(df_stakedao_snapshot_vote_choice)
 
 stakedao_snapshot_proposal_choice_map = snapshot.format_choice_map_output()
+
+a, b= merge_target(df_stakedao_snapshot_vote_choice, stakedao_snapshot_proposal_choice_map, 'stakedao')
+df_stakedao_snapshot_vote_choice = a
+stakedao_snapshot_proposal_choice_map = b 
+
+df_stakedao_snapshot_vote_aggregates = get_aggregates(df_stakedao_snapshot_vote_choice)
 
 
 try:

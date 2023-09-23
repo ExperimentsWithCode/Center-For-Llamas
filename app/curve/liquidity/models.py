@@ -34,7 +34,7 @@ except:
 
 print("Loading... { curve.liquidity.models }")
 
-@timed
+# @timed
 def get_df_processed_liquidity(df_liquidity):
     output = []
     all_by_gauge_address = {}
@@ -152,21 +152,24 @@ def get_df_processed_liquidity(df_liquidity):
             #     print(output[-1])
 
         except Exception as e:
-            # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
-            #     print(f"Could not process pool {pool_name} \n\t {pool_address}")
-            #     print(e)
-            #     print(traceback.format_exc())
+            print(f"Could not process pool {pool_name} \n\t {pool_address}")
+            print(e)
+            print(traceback.format_exc())
             continue
         # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
         #     print("-"*20)
     out_df = pd.json_normalize(output)
-    return out_df.sort_values(['date', 'liquidity'], axis = 0, ascending = False)
+    try:
+        out_df = out_df.sort_values(['date', 'liquidity'], axis = 0, ascending = False)
+    except:
+        pass
+    return out_df
 
 
 
 
 
-@timed
+# @timed
 def get_df_liquidity():
     try:
         filename = 'liquidity_general' #+ current_file_title

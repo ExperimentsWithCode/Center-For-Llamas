@@ -178,7 +178,30 @@ class Gauge_Set():
             self.first_period_end_date = get_period_end_date(row['block_timestamp'])
         except:
             self.first_period = 'N/A'    
-            self.first_period_end_date = 'N/A'    
+            self.first_period_end_date = 'N/A'
+        try:
+            self.type_id                = row['type_id']
+            self.type_name              = row['type_name']
+            self.name                   = row['name']
+            self.symbol                 = row['symbol']
+            self.weight                 = row['weight']
+            self.type_weight            = row['type_weight']
+            self.type_total_weight      = row['type_total_weight']
+            self.type_weight_time       = row['type_weight_time']
+            self.tx_hash                = row['tx_hash']
+            self.vote_timestamp         = row['vote_timestamp']
+        except:
+            self.type_id                = None
+            self.type_name              = None
+            self.name                   = None
+            self.symbol                 = None
+            self.weight                 = None
+            self.type_weight            = None
+            self.type_total_weight      = None
+            self.type_weight_time       = None
+            self.tx_hash                = None
+            self.vote_timestamp         = None
+
 
 
     def format_output(self):
@@ -196,7 +219,19 @@ class Gauge_Set():
             'type' : self.type,
             'time_gauge_registered' : self.time_gauge_registered,
             'first_period': self.first_period,
-            'first_period_end_date': self.first_period_end_date
+            'first_period_end_date': self.first_period_end_date,
+
+            'type_id'           : self.type_id,
+            'type_name'         : self.type_name,
+            'name'              : self.name,
+            'symbol'            : self.symbol,
+            'weight'            : self.weight,
+            'type_weight'       : self.type_weight,
+            'type_total_weight' : self.type_total_weight,
+            'type_weight_time'  : self.type_weight_time,
+            'tx_hash'           : self.tx_hash,
+            'vote_timestamp'    : self.vote_timestamp,
+
         }
 
 

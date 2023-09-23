@@ -85,7 +85,7 @@
               'type': '{{ row['type'] }}',
               'gauge_name': '{{ row['gauge_name'] }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
-              '_': `{{ url_for('gauges_bp.show', gauge_addr = row['gauge_addr']) }}`,
+              '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`,
 
 
             },

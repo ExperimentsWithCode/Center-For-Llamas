@@ -20,7 +20,11 @@ def timed(f):
 def get_period(week_num, week_day, time, target=5):
     if week_num > -1 and week_day > -1:
         if type(time) == str:
-            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+            try:
+                time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+            except:
+                time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')
+
         week_num = int(time.strftime("%V"))
         week_day = int(time.weekday())
         vote_year = time.year
@@ -42,7 +46,10 @@ def get_period(week_num, week_day, time, target=5):
 # Slight issue on splitting years will split period despite single period.
 def get_period_direct(time, target=5):
     if type(time) == str:
-        time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+        try:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+        except:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')
     week_num = int(time.strftime("%V"))
     week_day = int(time.weekday())      # starts sunday
     vote_year = time.year
@@ -65,7 +72,10 @@ def get_convex_period_direct(time, target=5):
     # print(time)
     # print(type(time))
     if type(time) == str:
-        time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+        try:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+        except:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')
     week_num = int(time.strftime("%V"))
     week_day = int(time.weekday())      # starts sunday
     vote_year = time.year
@@ -87,7 +97,10 @@ def get_period_end_date(time):
     # I know its terrible. 
     # I think fromisocalendar starts on monday?
     if type(time) == str:
-        time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+        try:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+        except:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')
     week_num = int(time.strftime("%V"))
     week_day = int(time.weekday())      # starts sunday
 

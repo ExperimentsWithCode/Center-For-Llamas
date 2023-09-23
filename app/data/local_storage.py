@@ -92,3 +92,14 @@ def write_dfs_to_xlsx(filename, dfs, titles=None):
             print(title)
             df.to_excel(writer, sheet_name = title)
             i+= 1
+
+
+def csv_to_df(filename):
+    resp_dict = read_csv(filename, 'source')
+    df = pd.json_normalize(resp_dict)
+    return df
+
+def df_to_csv(df, filename):
+    cwd = get_cwd()
+    full_filename = cwd+ data_path + '/' + filename+'.csv'
+    df.to_csv(full_filename) 

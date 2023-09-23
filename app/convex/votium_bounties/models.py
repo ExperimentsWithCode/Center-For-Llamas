@@ -23,6 +23,7 @@ from app.data.reference import (
 
 from app.data.source.harvested_core_pools import core_pools
 
+import pdb
 
 try:
     from flask import current_app as app
@@ -46,14 +47,17 @@ class VBRegistry():
     def process_bounties(self, df):
         # Load Bounties
         for i, row in df.iterrows():
+            if row['block_timestamp'] < '2022-12-20 00:00:00.000':
+                continue
             try:
                 b = Bounty(row)
                 self.bounty_list.append(b)
             except Exception as e:
-                pass
-                # print(e)
-                # print(row)
-                # print(traceback.format_exc())
+                # pass
+                print(e)
+                print(row)
+                print(traceback.format_exc())
+                continue
             if not b.period in self.bounty_map:
                 self.bounty_map[b.period] = {}
             # Group Bounties
@@ -124,12 +128,11 @@ class VBRegistry():
 class Bounty():
     def __init__(self, row):
         # self.timestamp = row['block_timestamp']
-        if 'block_timestamp' in row:
-            try:
-                split = row['block_timestamp'].split("T")
-                row['block_timestamp'] = split[0]+" "+split[1][:-1]
-            except:
-                pass
+        try:
+            split = row['block_timestamp'].split("T")
+            row['block_timestamp'] = split[0]+" "+split[1][:-1]
+        except:
+            pass
         self.block_timestamp = row['block_timestamp']
         self.choice_index = int(row['choice_index'])
         self.token_symbol = row['token_symbol']
@@ -161,6 +164,7 @@ class Bounty():
 
 
     def get_gauge_ref(self):
+        # pdb.set_trace()
         if self.period in convex_snapshot_proposal_choice_map:
             if self.choice_index < len(convex_snapshot_proposal_choice_map[self.period]):
                 return convex_snapshot_proposal_choice_map[self.period][self.choice_index]
@@ -183,7 +187,7 @@ class Bounty():
             df_aggs = df_vote_aggregates[(df_vote_aggregates['period']== self.period) & 
                                     (df_vote_aggregates['choice']== self.gauge_ref)]
             self.total_vote_power = df_aggs.iloc[0]['total_vote_power']
-            self.voter_count = df_aggs.iloc[0]['vlcvx_voter_count']
+            self.voter_count = df_aggs.iloc[0]['cvx_voter_count']
             # self.period = df_aggs.iloc[0]['period']
             self.period_end_date = df_aggs.iloc[0]['period_end_date']
         except Exception as e:
