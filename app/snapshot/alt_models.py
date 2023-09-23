@@ -34,7 +34,10 @@ class SnapshotAsSource():
         # Filter for proposals that matter
         if self.space['id'] == 'sdcrv.eth':
             print('stakedao!')
-            local_df_proposals = df_proposals[df_proposals['title'].str.contains('Gauge vote - CRV')]
+            local_df_proposals = df_proposals[
+                df_proposals['title'].str.startswith('Gauge vote') &
+                df_proposals['title'].str.contains('CRV')
+                ]
         else:
             local_df_proposals = df_proposals[df_proposals['title'].str.contains('Gauge Weight')]
         local_df_proposals = local_df_proposals[~local_df_proposals['title'].str.contains('TEST')]

@@ -141,7 +141,7 @@
                 'proposal_title': '{{ row['proposal_title'] }}',
                 'choice': '{{ row['choice'] }}',
                 'total_vote_power': '{{ row['total_vote_power'] |round(2) }}',
-                'voter_count': '{{ row['voter_count'] }}',
+                'voter_count': '{{ row['cvx_voter_count'] }}',
                 'actions': null,
                 'period': {{row['period']}},
                 'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
