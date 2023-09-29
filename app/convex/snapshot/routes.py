@@ -16,13 +16,7 @@ import plotly.express as px
 # from matplotlib.figure import Figure
 # import io
 
-
-# from .forms import AMMForm
-# from .models import  df_convex_snapshot_vote_aggregates as  df_vote_aggregates 
-# from .models import  df_convex_snapshot_vote_choice as df_vote_choice
-# from ..utility.api import get_proposals, get_proposal
-# from ..address.routes import new_address
-# from ..choice.routes import new_choice_list
+from app.curve.gauges.models import df_curve_gauge_registry
 
 
 # Blueprint Configuration
@@ -117,7 +111,6 @@ def index():
 # @login_required
 def show(choice):
     df_vote_choice = app.config['df_convex_snapshot_vote_choice']
-
     # Filter Data
     # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
@@ -130,6 +123,8 @@ def show(choice):
     else:
         local_df_vote_choice = df_vote_choice[df_vote_choice['choice'] == choice]
         gauge_addr = None
+        if len(local_df_vote_choice)> 0:
+            gauge_addr = local_df_vote_choice.iloc[0]['gauge_addr']
     if len(local_df_vote_choice) == 0:
         return render_template(
             'convex_not_found.jinja2',
@@ -139,12 +134,21 @@ def show(choice):
             gauge_addr = gauge_addr,
             choice = choice
         )
+
+    local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr ]
+
     local_df_vote_choice = local_df_vote_choice.sort_values(["proposal_end", 'choice_power'], axis = 0, ascending = False)
 
-    max_value = local_df_vote_choice['proposal_end'].max()
-    df_current_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == max_value]
-    
+    proposal_end_dates = df_vote_choice.proposal_end.unique()
+    proposal_end_dates = sorted(proposal_end_dates)
+    current = proposal_end_dates[-1]
+    prior = proposal_end_dates[-2]
+
+    df_current_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == current]
+    df_prior_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == prior]
+
     # # Build chart
+    
     fig = px.pie(df_current_votes, 
                 values=df_current_votes['choice_power'],
                 names=df_current_votes['voter'],
@@ -210,7 +214,9 @@ def show(choice):
         body="",
         df_snapshot_user = local_df_vote_choice,
         current_votes = df_current_votes.choice_power.sum(),
+        prior_votes = df_prior_votes.choice_power.sum(),
         votium_bounty_registry = app.config['votium_bounty_registry'],
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,

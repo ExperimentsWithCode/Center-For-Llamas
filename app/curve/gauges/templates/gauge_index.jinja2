@@ -64,14 +64,16 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'time_gauge_registered', name: 'Timestamp Created' },
+          { id: 'vote_timestamp', name: 'Vote Timestamp' },
           { id: 'first_period', name: 'Gauge Round Created' },
 
-          { id: 'type', name: 'type' },
+          { id: 'type_name', name: 'Type' },
+          { id: 'source', name: 'Source' },
+
           { id: 'gauge_name', name: 'Gauge Name' },
           { id: 'gauge_addr', name: 'Gauge Address',
               formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[5].data}>${row.cells[4].data}</a>`
+                `<a href=${row.cells[6].data}>${row.cells[5].data}</a>`
               )
           },
           { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
@@ -80,9 +82,11 @@
         data: [
           {% for index, row in df_curve_gauge_registry.iterrows() %}
             {
-              'time_gauge_registered': '{{ row['time_gauge_registered'] }}',
+              'vote_timestamp': '{{ row['vote_timestamp'] }}',
               'first_period': '{{ row['first_period'] }}',
-              'type': '{{ row['type'] }}',
+              'type_name': '{{ row['type_name'] }}',
+              'source': '{{ row['source'] }}',
+
               'gauge_name': '{{ row['gauge_name'] }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
               '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`,

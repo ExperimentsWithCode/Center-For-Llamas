@@ -35,8 +35,8 @@ class GaugeRegistry():
         self.shorthand_pools = {}
         self.shorthand_tokens = {}
 
-        self.process_df(df)
         self.process_list(core_pools)
+        self.process_df(df)
 
 
     def process_df(self, df):
@@ -48,7 +48,17 @@ class GaugeRegistry():
             self.process_row(row)
 
     def process_row(self, row):
-        gs = Gauge_Set(row)
+        if 'gauge_addr' in row:
+            gauge_addr = row['gauge_addr']
+        elif 'GAUGE_ADDR' in row:
+            gauge_addr = row['GAUGE_ADDR']
+        else:
+            gauge_addr = "XX"
+        if gauge_addr in self.gauges:
+            gs_old = self.gauges[gauge_addr]
+        else:
+            gs_old = None
+        gs = Gauge_Set(row, gs_old)
         if gs.gauge_addr:
             self.gauges[gs.gauge_addr.lower()] = gs
             self.shorthand_gauges[gs.gauge_addr[:6].lower()] = gs
@@ -126,14 +136,20 @@ class GaugeRegistry():
             return None
 
 class Gauge_Set():
-    def __init__(self, row):
+    def __init__(self, row, prior_record=None):
         try:
-            
-            split = row['block_timestamp'].split("T")
-            row['block_timestamp'] = split[0]+" "+split[1][:-1]
+            split = row['deployed_timestamp'].split("T")
+            row['deployed_timestamp'] = split[0]+" "+split[1][:-1]
             # row['block_timestamp'] = dt.strptime(row['block_timestamp'], '%Y-%m-%d %H:%M:%S.%f'),
         except:
             pass
+        try:
+            split = row['vote_timestamp'].split("T")
+            row['vote_timestamp'] = split[0]+" "+split[1][:-1]
+            # row['block_timestamp'] = dt.strptime(row['block_timestamp'], '%Y-%m-%d %H:%M:%S.%f'),
+        except:
+            pass
+        # print(row.keys())
         try:
             self.gauge_addr = row['GAUGE_ADDR']
             self.gauge_name = row['GAUGE_NAME']
@@ -150,9 +166,9 @@ class Gauge_Set():
             self.token_name = row['TOKEN_NAME']
             self.token_symbol = row['TOKEN_SYMBOL']
 
-            self.type = row['TYPE']
+            self.source = row['SOURCE']
 
-            self.time_gauge_registered = row['BLOCK_TIMESTAMP'] if 'BLOCK_TIMESTAMP' in row else None
+            # self.time_gauge_registered = row['BLOCK_TIMESTAMP'] if 'BLOCK_TIMESTAMP' in row else None
         except:
             # print(row.keys())
             self.gauge_addr = row['gauge_addr']
@@ -170,15 +186,25 @@ class Gauge_Set():
             self.token_name = row['token_name']
             self.token_symbol = row['token_symbol']
 
-            self.type = row['type']
+            self.source = row['source']
 
-            self.time_gauge_registered = row['block_timestamp'] if 'block_timestamp' in row else None
+            self.time_gauge_registered = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
         try:
-            self.first_period = get_period_direct(row['block_timestamp'])
-            self.first_period_end_date = get_period_end_date(row['block_timestamp'])
-        except:
+            self.first_period = get_period_direct(row['vote_timestamp'])
+            # self.first_period_end_date_deployed = get_period_end_date(row['deployed_timestamp'])
+            self.first_period_end_date = get_period_end_date(row['vote_timestamp'])
+
+        except Exception as e:
+            # print (e)
+            # try:
+            #     print(row['vote_timestamp'])
+            #     print(row['deployed_timestamp'])
+            # except:
+            #     pass
             self.first_period = 'N/A'    
             self.first_period_end_date = 'N/A'
+            # self.first_period_end_date_deployed = "N/A"
+
         try:
             self.type_id                = row['type_id']
             self.type_name              = row['type_name']
@@ -202,7 +228,34 @@ class Gauge_Set():
             self.tx_hash                = None
             self.vote_timestamp         = None
 
+        if not self.gauge_name:
+            if self.name:
+                self.gauge_name = self.name
+        if not self.gauge_symbol:
+            if self.symbol:
+                self.gauge_symbol = self.symbol
+        self.process_old(prior_record)
 
+    def process_old(self, prior_record):
+        if prior_record:
+            # Pool
+            if not self.pool_addr and prior_record.pool_addr:
+                self.pool_addr = prior_record.pool_addr
+
+            if not self.pool_name and prior_record.pool_name:
+                self.pool_name = prior_record.pool_name
+
+            if not self.pool_symbol and prior_record.pool_symbol:
+                self.pool_symbol = prior_record.pool_symbol
+            # Token
+            if not self.token_addr and prior_record.token_addr:
+                self.token_addr = prior_record.token_addr
+
+            if not self.token_name and prior_record.token_name:
+                self.token_name = prior_record.token_name
+
+            if not self.token_symbol and prior_record.token_symbol:
+                self.token_symbol = prior_record.token_symbol
 
     def format_output(self):
         return {
@@ -216,7 +269,7 @@ class Gauge_Set():
             'token_addr' : self.token_addr,
             'token_name' : self.token_name,
             'token_symbol' : self.token_symbol,
-            'type' : self.type,
+            'source' : self.source,
             'time_gauge_registered' : self.time_gauge_registered,
             'first_period': self.first_period,
             'first_period_end_date': self.first_period_end_date,
@@ -243,7 +296,7 @@ def get_df_gauge_pool_map():
 
     except:
         filename = 'gauge_to_lp_map'# '+ fallback_file_title
-        gauge_pool_map = read_csv(filename, 'source')
+        gauge_pool_map = read_json(filename, 'source')
         df_gauge_pool_map = pd.json_normalize(gauge_pool_map)
     # df_gauge_pool_map = df_gauge_pool_map.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df_gauge_pool_map
@@ -256,3 +309,27 @@ try:
     app.config['gauge_registry'] = gauge_registry
 except:
     print("could not register in app.config\n\tGauges")
+
+
+# ,type_id,
+# type_name,
+# name,
+# symbol,
+# gauge_addr,
+# weight,
+# type_weight,
+# type_total_weight,
+# type_weight_time,
+# tx_hash,
+# vote_timestamp,
+# pool_addr,
+# token_addr,
+# source,
+# deployed_timestamp,
+# gauge_name,
+# gauge_symbol,
+# pool_name
+# ,pool_symbol
+# ,token_name
+# ,token_symbol
+# ,__row_index

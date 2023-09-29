@@ -41,13 +41,13 @@ def index():
 
 
 
-    df2 = df_curve_gauge_registry.groupby(['first_period_end_date', 'type'])['gauge_addr'].count()
+    df2 = df_curve_gauge_registry.groupby(['first_period_end_date', 'source'])['gauge_addr'].count()
     df2 = df2.to_frame().reset_index()
 
     fig = px.bar(df2,
                     x=df2['first_period_end_date'],
                     y=df2['gauge_addr'],
-                    color='type',
+                    color='source',
                     title='Gauges Created Per Round',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap

@@ -35,6 +35,13 @@ stakedao_snapshot_bp = Blueprint(
     static_folder='static'
 )
 
+try:
+    # curve_gauge_registry = app.config['df_curve_gauge_registry']
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+except: 
+    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+    from app.curve.gauges.models import df_curve_gauge_registry
+
 # df_vote_aggregates = app.config['df_stakedao_snapshot_vote_aggregates']
 # df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
 
@@ -126,6 +133,8 @@ def show(choice):
     else:
         local_df_vote_choice = df_vote_choice[df_vote_choice['choice'] == choice]
         gauge_addr = None
+        if len(local_df_vote_choice)> 0:
+            gauge_addr = local_df_vote_choice.iloc[0]['gauge_addr']
 
     if len(local_df_vote_choice) == 0:
         return render_template(
@@ -136,11 +145,20 @@ def show(choice):
             gauge_addr = gauge_addr,
             choice = choice
         )
+    
+    local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr ]
+
     local_df_vote_choice = local_df_vote_choice.sort_values(["proposal_end", 'choice_power'], axis = 0, ascending = False)
 
-    max_value = local_df_vote_choice['proposal_end'].max()
-    df_current_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == max_value]
-    
+    proposal_end_dates = df_vote_choice.proposal_end.unique()
+    proposal_end_dates = sorted(proposal_end_dates)
+    current = proposal_end_dates[-1]
+    prior = proposal_end_dates[-2]
+
+    df_current_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == current]
+    df_prior_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == prior]
+
+
     # # Build chart
     fig = px.pie(df_current_votes, 
                 values=df_current_votes['choice_power'],
@@ -206,7 +224,11 @@ def show(choice):
         template='gauge-votes-show',
         body="",
         df_snapshot_user = local_df_vote_choice,
+
         current_votes = df_current_votes.choice_power.sum(),
+        prior_votes = df_prior_votes.choice_power.sum(),
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
+
         # votium_bounty_registry = app.config['votium_bounty_registry'],
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,

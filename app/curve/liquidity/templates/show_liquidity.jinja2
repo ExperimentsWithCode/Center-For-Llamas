@@ -16,6 +16,11 @@
 
     </div>
 
+    {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
+      {% with page_type='liquidity' %}
+        {% include 'gauge_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
     {%if local_all_df_processed_liquidity |length > 0 %}
 
@@ -24,20 +29,19 @@
     <div class="row">
 
       <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">{{local_all_df_processed_liquidity.iloc[0]['pool_name']}}</div>
+        <div class="card-header">Pool Address</div>
         <div class="card-body">
           <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['pool_address']}}</h4>
 
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Gauge Address</div>
+
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Pool Name:</div>
         <div class="card-body">
-          <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['gauge_address']}}</h4>
-          <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= local_all_df_processed_liquidity.iloc[0]['gauge_address']) }}">
-            <button type="button" class="btn btn-primary">View Gauge Rounds</button>
-          </a>
+          <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['pool_name']}}</h4>
+
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>

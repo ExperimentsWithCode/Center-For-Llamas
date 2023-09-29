@@ -1,0 +1,182 @@
+
+
+{%if gauge_info |length > 0 %}
+
+    <div class ="row">
+        <div class="card border-primary mb-3" style="max-width: 50%;" >
+            <div class="card-header">Gauge Contract</div>
+            <div class="card-body">
+                {%if gauge_info['gauge_symbol'] %}
+
+                    <h4 class="card-title text-primary">
+                            {{gauge_info['gauge_symbol']}}
+                    </h4>
+                    <p class="card-text">Address: {{gauge_info['gauge_addr']}}</p>
+                {% else %}
+                    <h5 class="card-title text-primary">
+                            {{gauge_info['gauge_addr']}}
+                    </h5>
+                {% endif %}
+
+                {%if gauge_info['gauge_name'] %}
+                    <p class="card-text">Name: {{gauge_info['gauge_name']}}</p>
+                {% endif %}
+            </div>
+        </div> 
+
+
+
+        <div class="card border-info mb-3" style="max-width: 50%;">
+            <div class="card-header">Type</div>
+            <div class="card-body">
+                <h4 class="card-title text-info">
+                    {{gauge_info['type_name']}}
+                </h4>
+
+                {%if gauge_info['source'] %}
+                    <h5 class="card-title">
+                        Deployed by: {{gauge_info['source']}}
+                    </h5>
+                {% endif %}
+            </div>
+        </div>   
+                
+    </div>
+
+    <div class ="row">
+        <div class="card text-white bg-primary mb-3" >
+
+            <div class="accordion" id="accordionExample">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        More Info
+                    </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class ="row">
+
+
+                                <div class="card border-primary mb-3" style="max-width: 50%;" >
+                                    <div class="card-header">Associated Contracts</div>
+                                    <div class="card-body">
+                                        {%if gauge_info['pool_addr'] %}
+                                            <p class="card-text">Pool Address: {{gauge_info['pool_addr']}}</p>
+                                            <p class="card-text">Pool Name: {{gauge_info['pool_name']}}</p>
+                                            <p class="card-text">Pool Symbol: {{gauge_info['pool_symbol']}}</p>
+                                        {% endif %}
+
+                                        {%if gauge_info['token_addr'] %}
+                                            <p class="card-text">Token Name: {{gauge_info['token_name']}}</p>
+                                            <p class="card-text">Token Address: {{gauge_info['token_addr']}}</p>
+                                            <p class="card-text">Token Symbol: {{gauge_info['token_symbol']}}</p>
+                                        {% endif %}
+
+                                    </div>
+                                </div>   
+
+                                <div class="card border-secondary mb-3" style="max-width: 50%;">
+                                    <div class="card-header">Details</div>
+                                    <div class="card-body">
+                                        <p class="card-text">Type ID: {{gauge_info['type_id']}}</p>
+
+                                        <p class="card-text">Weight: {{gauge_info['weight']}}</p>
+                                        {%if gauge_info['time_gauge_registered'] %}
+                                            <p class="card-text">Deploy Timestamp: {{gauge_info['time_gauge_registered']}}</p>
+                                        {% endif %}
+                                        {%if gauge_info['vote_timestamp'] %}
+                                            <p class="card-text">Vote Timestamp: {{gauge_info['vote_timestamp']}}</p>
+                                        {% endif %}
+
+                                    </div>
+                                </div> 
+                            </div>
+    
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+    <div class ="row">
+        <div class="card border-info mb-3"  >
+            <div class="card-body">
+
+                {%if not page_type == 'curve' %}
+                <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
+                    <button type="button" class="btn btn-primary">Gauge Rounds</button>
+                </a>
+                {% else %}
+                <a href="#">
+                    <button type="button" class="btn btn-primary disabled">Gauge Rounds</button>
+                </a>
+                {% endif %}
+
+                {%if not page_type == 'convex' %}
+                <a href="{{ url_for('convex_snapshot_bp.show', choice= gauge_info['gauge_addr']) }}">
+                    <button type="button" class="btn btn-secondary">Convex Snapshot</button>
+                </a>
+                {% else %}
+                <a href="#">
+                    <button type="button" class="btn btn-secondary disabled">Convex Snapshot</button>
+                </a>
+                {% endif %}
+
+                {%if not page_type == 'stakedao' %}
+                <a href="{{ url_for('stakedao_snapshot_bp.show', choice= gauge_info['gauge_addr']) }}">
+                    <button type="button" class="btn btn-info">StakeDAO Snapshot</button>
+                </a>
+                {% else %}
+                <a href="#">
+                    <button type="button" class="btn btn-info disabled">StakeDAO Snapshot</button>
+                </a>
+                {% endif %}
+                {%if not page_type == 'liquidity' %}
+                    {%if gauge_info['pool_addr'] %}
+                    <a href="{{ url_for('curve_liquidity_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
+                        <button type="button" class="btn btn-warning">Liqudity</button>
+                    </a>
+                    {% else %}
+                    <a href="#">
+                    <button type="button" class="btn btn-danger" disabled >Liqudity (Unavailable)</button>
+                    </a>
+
+                    {% endif %}
+                {% else %}
+                    {%if gauge_info['pool_addr'] %}
+                    <a href="#">
+                        <button type="button" class="btn btn-warning disabled">Liqudity</button>
+                    </a>
+                    {% else %}
+                    <a href="#">
+                    <button type="button" class="btn btn-danger" disabled >Liqudity (Unavailable)</button>
+                    </a>
+
+                    {% endif %}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+{% else %}
+    <div class ="row">
+        <div class="card border-info mb-3"  >
+            <div class="card-header">Something went wrong</div>
+            <div class="card-body">
+                <h4 class="card-title text-info">
+                    Unable to link Gauge Address
+                </h4>
+
+                <p class="card-text">Its likely that the data is present but the link could not be made.
+                You can search on the gauge rounds page and likely find the votes.</p>
+                <p>This is largely because I have not link all gauge generating contracts to map pool address to gauge address</p>
+            </div>
+        </div>   
+    </div>
+    </div>
+{% endif %}

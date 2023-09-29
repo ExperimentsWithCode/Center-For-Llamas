@@ -645,7 +645,7 @@ def get_core_pools(temp_core_pools):
             'TOKEN_NAME': pool_symbol  + ' Curve Token',
             'TOKEN_SYMBOL': pool_symbol + 'CRV',
 
-            'TYPE': 'core'
+            'SOURCE': 'core'
         })
     return data_out
 

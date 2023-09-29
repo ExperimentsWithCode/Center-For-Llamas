@@ -18,6 +18,15 @@ from plotly.subplots import make_subplots
 
 from .models import df_liquidity, df_processed_liquidity
 
+
+try:
+    # curve_gauge_registry = app.config['df_curve_gauge_registry']
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+except: 
+    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+    from app.curve.gauges.models import df_curve_gauge_registry
+
+
 # Blueprint Configuration
 curve_liquidity_bp = Blueprint(
     'curve_liquidity_bp', __name__,
@@ -31,7 +40,7 @@ curve_liquidity_bp = Blueprint(
 # @login_required
 def index():
     # now = dt.now()
-
+    local_df_processed_liquidity = df_processed_liquidity.groupby(['pool_address', 'gauge_address'], as_index=False).last()
     # Filter Data
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
@@ -41,7 +50,7 @@ def index():
         title='Curve Liqudity',
         template='liquidity-index',
         body="",
-        df_processed_liquidity = df_processed_liquidity,
+        df_processed_liquidity = local_df_processed_liquidity,
 
     )
 
@@ -53,6 +62,7 @@ def show(gauge_addr):
     now = dt.now()
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 
+    local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
     local_all_df_processed_liquidity = df_processed_liquidity[
         df_processed_liquidity['gauge_address'].str.contains(gauge_addr)
         ]
@@ -148,6 +158,7 @@ def show(gauge_addr):
         template='liquidity-index',
         body="",
         local_all_df_processed_liquidity = local_all_df_processed_liquidity,
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
 

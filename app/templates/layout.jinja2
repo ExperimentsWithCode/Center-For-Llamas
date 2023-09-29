@@ -25,7 +25,7 @@
   <link href="{{ url_for('static', filename='bootstrap_minty.css') }}" rel="stylesheet" type="text/css">
 
   {# <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" type="text/css"> #}
- <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script> 
+ {# <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>  #}
 
   
   <!-- <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" type="text/css"> -->
@@ -46,7 +46,10 @@
   <link rel="stylesheet" href="https://use.typekit.net/sus7rlu.css">
   <link href="{{ url_for('static', filename='dist/css/style.css') }}" rel="stylesheet" type="text/css">
   {% block pagestyles %}{% endblock %} -->
-#}
+#}<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<script src="{{ url_for('static', filename='/js/bootstrap.bundle.min.js') }}"></script>
+
 </head>
 
 <body class="container" style="max-width:95%;">
@@ -54,7 +57,6 @@
 </body>
 <footer>
 {# {% include "blueprintinfo.jinja2" %} #}
-<!-- <script src="{{ url_for('static', filename='/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/sketchy.css') }}"></script> -->
+  {# <script src="{{ url_for('static', filename='js/sketchy.css') }}"></script>  #}
 </footer>
 </html>

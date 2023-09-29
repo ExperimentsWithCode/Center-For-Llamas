@@ -14,33 +14,61 @@
     <div class="row">
       <h1>{{ title }}</h1>
 
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">{{df_snapshot_user.iloc[0]['proposal_title']}}</div>
-        <div class="card-body">
-          <h4 class="card-title">{{df_snapshot_user.iloc[0]['choice']}}</h4>
-          {% if df_snapshot_user.iloc[0]['gauge_addr'] == "0xNotFound" %}
-            <button type="button" class="btn btn-primary" disable>View Gauge Rounds</button>
-            <p class="card-text">Unable to match with a gauge</p>
+    {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
+      {% with page_type='stakedao' %}
+        {% include 'gauge_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+    <div class="row">
 
-          {% else %}
-            <p class="card-text"> Gauge Address: {{df_snapshot_user.iloc[0]['gauge_addr']}} </p>
-            <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= df_snapshot_user.iloc[0]['gauge_addr']) }}">
-              <button type="button" class="btn btn-primary">View Gauge Rounds</button>
-            </a>
-          {% endif %}
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        <div class="card border-primary mb-3" style="max-width: 50%;" >
+          <div class="card-header">Choice</div>
+          <div class="card-body">
+            <h4 class="card-title">{{df_snapshot_user.iloc[0]['choice']}}</h4>
+
+          </div>
         </div>
-      </div>
-      
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card border-secondary mb-3" style="max-width: 50%;" >
+          <div class="card-header">Title</div>
+          <div class="card-body">
+            <h4 class="card-title text-primary">{{df_snapshot_user.iloc[0]['proposal_title']}}</h4>
+
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+          </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+       <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Previous Votes</div>
+        <div class="card-body">
+          <h4 class="card-title text-secondary">{{ "{:,.2f}".format(prior_votes) }}</h4>
+        </div>
+      </div>   
+
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
         <div class="card-header">Current Votes</div>
         <div class="card-body">
-          <h4 class="card-title text-primary">{{ "{:,.2f}".format(current_votes) }}</h4>
-
+          <h4 class="card-title text-primary">{{ "{:,.2f}".format(current_votes) }}
+            {% if current_votes > prior_votes  %}
+              <span class="badge bg-primary rounded-pill">
+               + {{"{:,.2f}".format(((current_votes / prior_votes)-1)*100)}} %
+              </span>
+            {% elif current_votes == prior_votes  %}
+              <span class="badge bg-info rounded-pill">
+               {{"{:,.2f}".format(((current_votes / prior_votes)-1)*100)}} %
+              </span>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">
+               {{"{:,.2f}".format(((current_votes / prior_votes)-1)*100)}} %
+              </span>
+            {% endif %}
+            </h4>
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>
-    </div>
+
     <div class="row">
 
         <div class="card text-white bg-info mb-3" style="max-width: 50%;">

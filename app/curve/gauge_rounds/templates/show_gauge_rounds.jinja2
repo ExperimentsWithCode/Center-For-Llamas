@@ -17,100 +17,41 @@
     </div>
 
 
+    {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
+      {% with page_type='curve' %}
+        {% include 'gauge_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+
+
+
     <div class="row">
+
+       <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Previous Votes</div>
+        <div class="card-body">
+          <h4 class="card-title text-secondary">{{ "{:,.2f}".format(sum_prior_votes) }}</h4>
+        </div>
+      </div>   
 
       <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Gauge Symbol</div>
-        <div class="card-body">
-          <h4 class="card-title">{{local_df_gauge_rounds.iloc[0]['symbol']}}</h4>
-          {%if local_df_curve_gauge_registry |length > 0 %}
-
-            <a href="{{ url_for('curve_liquidity_bp.show', gauge_addr= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
-              <button type="button" class="btn btn-primary">View Liqudity</button>
-            </a>
-
-          {% else %}
-              <button type="button" class="btn btn-danger" disabled >View Liqudity (Unavailable)</button>
-          <p class="card-text">Could not link Pool to map liquidity</p>
-
-          {% endif %}
-
-          <a href="{{ url_for('convex_snapshot_bp.show', choice= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
-            <button type="button" class="btn btn-secondary">View Convex Snapshot</button>
-          </a>
-          <a href="{{ url_for('stakedao_snapshot_bp.show', choice= local_df_gauge_rounds.iloc[0]['gauge_addr']) }}">
-            <button type="button" class="btn btn-info">View StakeDAO Snapshot</button>
-          </a>
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
-
-  {%if local_df_curve_gauge_registry |length > 0 %}
-
-       <div class="card border-info mb-3" style="max-width: 50%;" >
-        <div class="card-header">Contracts</div>
-        <div class="card-body">
-          <p class="card-text">Gauge Address: {{local_df_curve_gauge_registry.iloc[0]['gauge_addr']}}</p>
-          <p class="card-text">Pool Address: {{local_df_curve_gauge_registry.iloc[0]['pool_addr']}}</p>
-          {%if local_df_curve_gauge_registry.iloc[0]['token_addr'] %}
-
-          <p class="card-text">Token Address: {{local_df_curve_gauge_registry.iloc[0]['token_addr']}}</p>
-          {% endif %}
-
-        </div>
-      </div>   
-    </div>
-
-
-
-    <div class="row">
-
-       <div class="card border-info mb-3" style="max-width: 50%;" >
-        <div class="card-header">Type</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">
-
-            {{local_df_curve_gauge_registry.iloc[0]['type']}}
-          </h4>
-        </div>
-      </div>   
-
-
-  {% else %}
-
-      <div class="card border-info mb-3" style="max-width: 50%;" >
-        <div class="card-header">Contracts</div>
-        <div class="card-body">
-          <p class="card-text">Gauge Address: {{local_df_gauge_rounds.iloc[0]['gauge_addr']}}</p>
-          {# <p class="card-text">Pool Address: {{local_df_curve_gauge_registry.iloc[0]['pool_addr']}}</p> #}
-          {# {%if local_df_curve_gauge_registry.iloc[0]['token_addr'] %}
-
-          <p class="card-text">Token Address: {{local_df_curve_gauge_registry.iloc[0]['token_addr']}}</p>
-          {% endif %} #}
-
-        </div>
-      </div>   
-    </div>
-
-
-
-    <div class="row">
-
-       <div class="card border-info mb-3" style="max-width: 50%;" >
-        <div class="card-header">Type</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">
-            <p class="card-text">Not Identified</p>
-          </h4>
-        </div>
-      </div>   
-  {% endif %}
-
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
         <div class="card-header">Current Votes</div>
         <div class="card-body">
-          <h4 class="card-title text-primary">{{ "{:,.2f}".format(current_votes) }}</h4>
-
+          <h4 class="card-title text-primary">{{ "{:,.2f}".format(sum_current_votes) }}
+            {% if sum_current_votes > sum_prior_votes  %}
+              <span class="badge bg-primary rounded-pill">
+               + {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% elif sum_current_votes == sum_prior_votes  %}
+              <span class="badge bg-info rounded-pill">
+               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">
+               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% endif %}
+            </h4>
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
       </div>

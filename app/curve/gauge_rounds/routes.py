@@ -19,7 +19,7 @@ import plotly.express as px
 
 
 # from .forms import AMMForm
-from .models import  df_all_by_user, df_all_by_gauge, df_meta_gauge_aggregate
+from .models import  df_all_by_user, df_all_by_gauge
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
@@ -49,11 +49,18 @@ def index():
     # Filter Data
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
+    period_end_dates = df_all_by_gauge.period_end_date.unique()
+    period_end_dates = sorted(period_end_dates)
+    current_period = period_end_dates[-1]
+    prior_period = period_end_dates[-2]
+    df_current_votes = df_all_by_gauge[df_all_by_gauge['period_end_date'] == current_period]
+    df_prior_votes = df_all_by_gauge[df_all_by_gauge['period_end_date'] == prior_period]
+
 
     # Build chart
-    fig = px.bar(df_meta_gauge_aggregate,
-                    x=df_meta_gauge_aggregate['period_end_date'],
-                    y=df_meta_gauge_aggregate['total_vote_power'],
+    fig = px.bar(df_all_by_gauge,
+                    x=df_all_by_gauge['period_end_date'],
+                    y=df_all_by_gauge['total_vote_power'],
                     color='symbol',
                     title='Gauge Round Vote Weights',
                     # facet_row=facet_row,
@@ -65,12 +72,7 @@ def index():
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    period_end_dates = df_meta_gauge_aggregate.period_end_date.unique()
-    period_end_dates = sorted(period_end_dates)
-    current_period = period_end_dates[-1]
-    prior_period = period_end_dates[-2]
-    df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['period_end_date'] == current_period]
-    df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['period_end_date'] == prior_period]
+
 
     # # Build chart
     fig = px.pie(df_current_votes, 
@@ -105,7 +107,7 @@ def index():
         title='Curve Gauge Rounds',
         template='gauge-round-index',
         body="",
-        meta_gauge_aggregate_votes = df_meta_gauge_aggregate,
+        meta_gauge_aggregate_votes = df_all_by_gauge,
         sum_current_votes = df_current_votes.total_vote_power.sum(),
         sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         graphJSON = graphJSON,
@@ -129,8 +131,14 @@ def show(gauge_addr):
     local_df_gauge_rounds = df_all_by_user[df_all_by_user['gauge_addr'] == gauge_addr]
     local_df_gauge_rounds = local_df_gauge_rounds.sort_values(["this_period", 'vote_power'], axis = 0, ascending = False)
 
-    max_value = local_df_gauge_rounds['period_end_date'].max()
-    df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == max_value]
+    period_end_dates = df_all_by_gauge.period_end_date.unique()
+    period_end_dates = sorted(period_end_dates)
+    current_period = period_end_dates[-1]
+    prior_period = period_end_dates[-2]
+    df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == current_period]
+    df_prior_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == prior_period]
+
+    # df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == max_value]
     
     # # Build chart
     fig = px.pie(df_current_votes, 
@@ -198,7 +206,8 @@ def show(gauge_addr):
         body="",
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         local_df_gauge_rounds = local_df_gauge_rounds,
-        current_votes = df_current_votes.vote_power.sum(),
+        sum_current_votes = df_current_votes.vote_power.sum(),
+        sum_prior_votes = df_prior_votes.vote_power.sum(),
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,

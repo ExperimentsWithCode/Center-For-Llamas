@@ -11,54 +11,19 @@
 {% block content %}
   {% include "navigation.jinja2" %}
 
+
     <div class="row">
       <h1>{{ title }}</h1>
     </div>
-    <div class ="row">
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Gauge Name</div>
-        <div class="card-body">
-          <h4 class="card-title">{{df_curve_gauge_registry.iloc[0]['gauge_name']}}</h4>
 
-        </div>
-      </div> 
-
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Gauge Symbol</div>
-        <div class="card-body">
-          <h4 class="card-title">{{df_curve_gauge_registry.iloc[0]['symbol']}}</h4>
-
-        </div>
-      </div>   
-                
-    </div>
-    <div class="row">
-
-       <div class="card border-info mb-3" style="max-width: 50%;" >
-        <div class="card-header">Contracts</div>
-        <div class="card-body">
-          <p class="card-text">Gauge Address: {{df_curve_gauge_registry.iloc[0]['gauge_addr']}}</p>
-          <p class="card-text">Pool Address: {{df_curve_gauge_registry.iloc[0]['pool_addr']}}</p>
-          {%if df_curve_gauge_registry.iloc[0]['token_addr'] %}
-
-          <p class="card-text">Token Address: {{df_curve_gauge_registry.iloc[0]['token_addr']}}</p>
-          {% endif %}
-
-        </div>
-      </div>   
+    {% with gauge_info=df_curve_gauge_registry.iloc[0] %}
+      {% with page_type='gauges' %}
+        {% include 'gauge_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
 
-       <div class="card border-info mb-3" style="max-width: 50%;" >
-        <div class="card-header">Type</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">
 
-            {{df_curve_gauge_registry.iloc[0]['type']}}
-          </h4>
-        </div>
-      </div>   
-
-    </div>
 
     {# <div class="row">
 
