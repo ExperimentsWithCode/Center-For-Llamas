@@ -36,7 +36,6 @@ def calc_vote_utilization(current_date, vote_period_date, final_lock_time):
     # Vote end
     period_date = vote_period_date
 
-    # Get % of four years lock extends
     ## Calcualted at time of lock and does not update from external activities
     diff_lock_time = local_final_lock_time - period_date
     diff_max_lock = four_years_forward - period_date

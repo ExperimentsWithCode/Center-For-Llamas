@@ -182,7 +182,7 @@ def merge_target(df_snapshot, proposal_choice_map, target):
         local_proposal_choice_map = def_get_proposal_choice_map(target)
     # clear out overlap
     for title in local_df_snapshot.proposal_title.unique():
-        print(f"Removing: {title}")
+        # print(f"Removing: {title}")
         df_snapshot = df_snapshot[~df_snapshot['proposal_title'].str.match(title)]
     # merge the things
     df_snapshot = pd.concat([df_snapshot, local_df_snapshot])
