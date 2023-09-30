@@ -35,7 +35,16 @@
 
                 {%if gauge_info['source'] %}
                     <h5 class="card-title">
-                        Deployed by: {{gauge_info['source']}}
+                        Factory: {{gauge_info['source']}}
+                    </h5>
+                {% endif %}
+                {%if gauge_info['chain_id'] %}
+                    <h5 class="card-title text-danger">
+                        Chain ID: {{gauge_info['chain_id']}} 
+                        {%if gauge_info['chain_name'] %}
+                            <br>Chain: {{gauge_info['chain_name']}}
+                        {% endif %}
+
                     </h5>
                 {% endif %}
             </div>

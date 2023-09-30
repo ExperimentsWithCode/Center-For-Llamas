@@ -20,6 +20,7 @@ from app.data.reference import (
 )
 
 from app.data.source.harvested_core_pools import core_pools
+from app.data.source.chain_ids import chain_id_map
 
 print("Loading... { curve.gauges.models }")
 
@@ -121,13 +122,13 @@ class GaugeRegistry():
             return gauge_set.gauge_addr
         return None
 
-    def get_gauge_name(self, gauge_reference):
-        if len(gauge_reference) > 8:
-            partial_addr = gauge_reference[-8:-2].lower()
-            if partial_addr in self.shorthand_pools:
-                return self.shorthand_pools[partial_addr]
+    # def get_gauge_name(self, gauge_reference):
+    #     if len(gauge_reference) > 8:
+    #         partial_addr = gauge_reference[-8:-2].lower()
+    #         if partial_addr in self.shorthand_pools:
+    #             return self.shorthand_pools[partial_addr]
 
-        return None
+    #     return None
     
     def get_shorthand_pool(self, gauge_addr):
         if gauge_addr in self.shorthand_pools:
@@ -216,6 +217,9 @@ class Gauge_Set():
             self.type_weight_time       = row['type_weight_time']
             self.tx_hash                = row['tx_hash']
             self.vote_timestamp         = row['vote_timestamp']
+            self.chain_id               = row['chain_id']
+            self.chain_name             = None
+
         except:
             self.type_id                = None
             self.type_name              = None
@@ -227,6 +231,16 @@ class Gauge_Set():
             self.type_weight_time       = None
             self.tx_hash                = None
             self.vote_timestamp         = None
+            self.chain_id               = None
+            self.chain_name             = None
+
+
+        if self.chain_id:
+            try:
+                self.chain_id = int(self.chain_id)
+                self.chain_name = chain_id_map[self.chain_id]
+            except:
+                pass
 
         if not self.gauge_name:
             if self.name:
@@ -284,6 +298,8 @@ class Gauge_Set():
             'type_weight_time'  : self.type_weight_time,
             'tx_hash'           : self.tx_hash,
             'vote_timestamp'    : self.vote_timestamp,
+            'chain_id'          : self.chain_id,
+            'chain_name'        : self.chain_name
 
         }
 

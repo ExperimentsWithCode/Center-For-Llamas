@@ -56,16 +56,15 @@ class Voter():
                 time = dt.fromtimestamp(decoded_log['time'])
                 user = decoded_log['user']
                 weight = decoded_log['weight']
-                if 'NAME' in row:
+                temp_name = gauge_registry.get_gauge_name(gauge_addr)
+                if temp_name:
+                    name = temp_name
+                elif  gauge_addr in gauge_names:
+                    name = gauge_names[gauge_addr]
+                elif 'NAME' in row:
                     name = row['NAME']
                     if name == 'null':
-                        if gauge_addr in gauge_names:
-                            name = gauge_names[gauge_addr]
-                        else:
-                            temp_name = gauge_registry.get_gauge_name(gauge_addr)
-                            name = temp_name if temp_name else ""
-                elif gauge_addr in gauge_names:
-                    name = gauge_names[gauge_addr]
+                        name = ""
                 else:
                     name = ""
                 if 'SYMBOL' in row:
@@ -102,17 +101,17 @@ class Voter():
                 time = dt.fromtimestamp(int(row['decoded_log.time']))
                 user = row['decoded_log.user']
                 weight = int(row['decoded_log.weight'])
-                if 'name' in row:
+                temp_name = gauge_registry.get_gauge_name(gauge_addr)
+                if temp_name:
+                    name = temp_name
+                elif  gauge_addr in gauge_names:
+                    name = gauge_names[gauge_addr]
+                elif 'name' in row:
                     name = row['name']
                     if name == 'null':
-                        if gauge_addr in gauge_names:
-                            name = gauge_names[gauge_addr]
-                        else:
-                            temp_name = gauge_registry.get_gauge_name(gauge_addr)
-                            name = temp_name if temp_name else ""
-                elif gauge_addr in gauge_names:
-                    name = gauge_names[gauge_addr]
+                        name = ""
                 else:
+                    name = ""
                     name = ""
                 if 'symbol' in row:
                     symbol = row['symbol']

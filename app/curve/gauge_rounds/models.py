@@ -50,7 +50,7 @@ def calc_vote_utilization(current_date, vote_period_date, final_lock_time):
     return vote_utilization
 
 # @timed
-def generate_aggregation(df_lock_history, df_gauge_vote_history):
+def generate_aggregation(df_lock_history, df_gauge_votes_formatted):
     dfs = []
     titles = []
 
@@ -72,7 +72,7 @@ def generate_aggregation(df_lock_history, df_gauge_vote_history):
         this_period = get_period(0,0, current_date)
         
         # get all votes prior to period
-        temp_lock = df_history_data[df_history_data['period']<= this_period ]
+        temp_lock = df_lock_history[df_lock_history['period']<= this_period ]
         temp_vote = df_gauge_votes_formatted[df_gauge_votes_formatted['period'] <= this_period]
 
         # Filter for most recent vote/lock per user per gauge
