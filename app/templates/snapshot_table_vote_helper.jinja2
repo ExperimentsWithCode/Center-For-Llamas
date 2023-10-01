@@ -1,0 +1,86 @@
+   
+{% block content %}
+
+{% if df_snapshot|length > 0 %}
+    <div class="row">
+
+        <div id='{{ id }}' ></div>
+    </div>
+
+
+
+  <script type='text/javascript'>
+        new gridjs.Grid({
+          columns: [
+            { id: 'period_end_date', name: 'Round End Date' },
+            { id: 'proposal_title', name: 'Title' },
+            { id: 'choice', name: 'Choice' ,
+                formatter: (_, row) => gridjs.html(
+                `${row.cells[2].data.toString()}`
+              )
+            },
+            { id: 'choice_power', name: 'Vote Power',
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+            },
+            { id: 'choice_percent', name: 'Percent',
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'available_power', name: 'sdCRV Vote Power',
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+            },
+            { id: 'timestamp', name: 'Vote Timestamp' },
+
+
+          ],
+          data: [
+            {% for index, row in df_snapshot.iterrows() %}
+              {
+                    'period_end_date': '{{ row['period_end_date'] }}',
+                    'proposal_title': '{{ row['proposal_title']  }}',
+                    {% if snapshot_space == "stakedao"  %}
+                    'choice':  `<a href={{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
+                    {% else %}
+                    'choice':  `<a href={{ url_for('convex_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
+                    {% endif %}
+                    'choice_power': '{{ row['choice_power']|round(2)}}',
+                    'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }}',
+                    'available_power': '{{ row['available_power']|round(2) }}',
+                    'timestamp': '{{ row['timestamp'] }}',
+
+  
+
+              },
+            {% endfor %}
+          ],
+          search: true,
+          sort: true,
+          pagination: {
+            limit: 20,
+            summary: true
+          },
+          className: {
+            {# td: 'my-td-class', #}
+            th: 'table-primary',
+            table: 'table table-hover' 
+          },
+        style: {
+
+          td: {
+            {# 'max-width': '120px', #}
+            'overflow': 'hidden',
+            'text-overflow': 'ellipsis',
+            'white-space': 'nowrap',
+          },
+          autoWidth: true,
+
+
+        } 
+        }).render(document.getElementById( '{{ id }}' ));
+  </script>
+
+{% endif%}
+{% endblock %}

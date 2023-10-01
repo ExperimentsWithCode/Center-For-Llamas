@@ -26,41 +26,13 @@
             </div>
         </div>
     </div>
-    <div class="row">
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Total Votes Prior Round</div>
-        <div class="card-body">
-          <h4 class="card-title">{{ "{:,.2f}".format(sum_prior_votes) }}</h4>
 
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Total Votes Current Round</div>
-        <div class="card-body">
-          <li class="list-group-item d-flex justify-content-between align-items-center">
+    {% with sum_current_votes=sum_current_votes %}
+      {% with sum_prior_votes=sum_prior_votes %}
+        {% include 'utility_vote_compare.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
-          <h4 class="card-title text-primary">{{ "{:,.2f}".format(sum_current_votes) }}</h4>
-          <h4>
-            {% if sum_current_votes > sum_prior_votes  %}
-              <span class="badge bg-primary rounded-pill">
-               + {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
-              </span>
-            {% elif sum_current_votes == sum_prior_votes  %}
-              <span class="badge bg-info rounded-pill">
-               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
-              </span>
-            {% else %}
-              <span class="badge bg-secondary rounded-pill">
-               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
-              </span>
-            {% endif %}
-          </h4>
-          </li>
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
-     </div>
     <div class="row">
  
         <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
@@ -83,18 +55,13 @@
             </div>
         </div>
 
+    <h4 class="text-primary">veCRV Gauges Vote Aggregates</h4>
 
-    </div>
-    <div class="row">
-        <h4 class="text-primary">Currently Active Votes</h4>
-
-        <div id="meta_gauge_aggregate_vote_table"></div>
-    </div>
-    {# <div class="row">
-        <h4 class="text-secondary">Currently Inactive Votes</h4>
-
-        <div id="inactive_vote_table"></div>
-    </div> #}
+    {% with df_gauge_rounds=meta_gauge_aggregate_votes %}
+        {% with table_type='agg' %}
+          {% include 'gauge_rounds_table_manager.jinja2' %} 
+        {% endwith %}
+    {% endwith %}
 
 
 
@@ -114,55 +81,6 @@
 <script type='text/javascript'>
   var graphs3 = {{graphJSON3 | safe}};
   Plotly.plot('chart3',graphs3,{});
-</script>
-
-
-<script type='text/javascript'>
-      new gridjs.Grid({
-        columns: [
-            { id: 'this_period', name: 'Round' },
-            { id: 'period_end_date', name: 'Round End Date' },
-            { id: 'gauge_addr', name: 'Gauge Address',
-              formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[7].data}>${row.cells[2].data}</a>`
-              ) 
-            },
-            { id: 'symbol', name: 'Symbol' },
-            { id: 'total_vote_power', name: 'Total Vote Power' ,
-                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-            },
-            { id: 'vote_percent', name: 'Percent' },
-            { id: 'vecrv_voter_count', name: '# veCRV Voter' },
-            { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
-
-        ],
-        data: [
-          {% for index, row in meta_gauge_aggregate_votes.iterrows() %}
-            {
-                'this_period': '{{ row['this_period']  }}',
-                'period_end_date': '{{ row['period_end_date'] }}',
-
-                'gauge_addr': '{{ row['gauge_addr'] }}',
-                'symbol': '{{ row['symbol'] }}',
-                'total_vote_power': '{{ row['total_vote_power']|round(2) }}',
-                'vote_percent': '{{ row['vote_percent'] |round(4) }}' ,
-                'vecrv_voter_count': '{{ row['vecrv_voter_count'] }}',
-                '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`
-            },
-          {% endfor %}
-        ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
-      }).render(document.getElementById('meta_gauge_aggregate_vote_table'));
 </script>
 
 

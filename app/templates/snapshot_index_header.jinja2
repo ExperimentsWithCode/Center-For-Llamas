@@ -1,0 +1,58 @@
+
+{% block content %}
+
+   <div class="row">
+    {%if choice %}
+    <div class="row">
+
+        <div class="card border-info mb-3" style="max-width: 50%;" >
+          <div class="card-header">Choice</div>
+          <div class="card-body">
+            <h4 class="card-title text-info">{{df_snapshot.iloc[0]['choice']}}</h4>
+
+          </div>
+        </div>
+
+        
+        <div class="card border-secondary mb-3" style="max-width: 50%;" >
+          <div class="card-header">Title</div>
+          <div class="card-body">
+            <h4 class="card-title ">{{df_snapshot.iloc[0]['proposal_title']}}</h4>
+
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+          </div>
+        </div>
+
+
+    </div>
+
+  {% else %}
+      <div class="card border-info mb-3" >
+        <div class="card-header">Title</div>
+        <div class="card-body">
+          <h4 class="card-title text-info">{{ df_snapshot.iloc[0]['proposal_title'] }}</h4>
+        </div>
+      </div>  
+
+  {% endif %}
+    <div class="row">
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Snapshot Start</div>
+        <div class="card-body">
+          <h4 class="card-title ">{{ df_snapshot.iloc[0]['proposal_start'] }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Snapshot End</div>
+        <div class="card-body">
+          <h4 class="card-title text-primary">{{df_snapshot.iloc[0]['proposal_end']  }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+     </div>
+
+
+{% endblock %}

@@ -1,0 +1,84 @@
+   
+{% block content %}
+
+
+    <div class="row">
+
+        <div id='{{ id }}' ></div>
+    </div>
+
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'period_end_date', name: 'Round End Date' },
+            { id: 'proposal_title', name: 'Title' },
+            { id: 'choice', name: 'Gauge Choice',
+                formatter: (_, row) => gridjs.html(
+                `${row.cells[2].data.toString()}`
+                ),                
+            },
+            { id: 'total_vote_power', name: 'Total Votes' ,
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'voter_count', name: '# Voters',
+                {% include 'utility_sort_float.jinja2' %} 
+             },
+            { id: 'period', name: 'Round' },
+            { id: 'proposal_end', name: 'Proposal End Date' },
+            {# { id: 'bounties_total', name: 'Bounties Total' },
+            { id: 'bounty_currencies', name: 'Bounty Currencies' }, #}
+
+        ],
+        data: [
+          {% for index, row in df_snapshot.iterrows() %}
+            {
+                'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
+                'proposal_title': '{{ row['proposal_title'] }}',
+
+                {% if snapshot_space == "stakedao"  %}
+                'choice':  `<a href={{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
+                {% else %}
+                'choice':  `<a href={{ url_for('convex_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
+                {% endif %}
+                'total_vote_power': '{{ row['total_vote_power'] |round(2) }}',
+                'voter_count': '{{ row['cvx_voter_count'] }}',
+                'actions': null,
+                'period': {{row['period']}},
+                'proposal_end': '{{ row['proposal_end'] }}',
+                {# 'bounty': '${{ row['bounties_total'] |round(2)}}',
+                'bounty_currency': '{{ row['bounty_currencies'] }}', #}
+
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 20,
+          summary: true
+        },
+        autoWidth: true,
+        className: {
+          td: '{{ id }}',
+          th: 'table-primary',
+          table: 'table table-hover' 
+        },
+        style: {
+
+          td: {
+            'max-width': '120px',
+            'overflow': 'hidden',
+            'text-overflow': 'ellipsis',
+            'white-space': 'nowrap',
+          }
+
+        } 
+      }).render(document.getElementById( '{{ id }}' ));
+</script>
+
+
+{% endblock %}

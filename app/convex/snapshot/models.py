@@ -50,7 +50,7 @@ def get_df_vote_choice(snapshot):
 
 def get_aggregates(df_vote_choice):
     df_vote_aggregates = df_vote_choice.groupby(
-        ['period', 'period_end_date', 'proposal_end', 'proposal_title', 'choice', 'choice_index', 'gauge_addr']
+        ['period', 'period_end_date','proposal_start', 'proposal_end', 'proposal_title', 'choice', 'choice_index', 'gauge_addr']
         )['choice_power'].agg(['sum','count']).reset_index()
 
     df_vote_aggregates = df_vote_aggregates.rename(columns={

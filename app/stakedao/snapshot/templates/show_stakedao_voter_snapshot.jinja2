@@ -32,6 +32,11 @@
       </div>
     </div>
 
+    {% with df_snapshot=df_snapshot_user %}
+      {% with choice=False %}
+        {% include 'snapshot_index_header.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
     <div class="row">
 
@@ -67,14 +72,15 @@
       </div>
 
     </div>
-    
-    <div class="row">
-        <h4 class="text-primary">Votes Per Round</h4>
 
-        <div id="vote_table"></div>
-    </div>
-
-
+    <h4 class="text-primary">Votes by this Voter</h4>
+    {% with df_snapshot=df_snapshot_user %}
+      {% with snapshot_space='stakedao' %}
+          {% with table_type='voter' %}
+            {% include 'snapshot_table_manager.jinja2' %} 
+          {% endwith %}
+      {% endwith %}
+    {% endwith %}
 
 
 
@@ -96,59 +102,5 @@
 </script>
 
 
-
-<script type='text/javascript'>
-      new gridjs.Grid({
-        columns: [
-            { id: 'proposal_title', name: 'Round' },
-            { id: 'known_as', name: 'Known As' },
-            { id: 'choice', name: 'Choice' ,
-                formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[8].data}>${row.cells[2].data}</a>`
-              )
-            },
-            { id: 'choice_power', name: 'Vote Power',
-                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-            },
-            { id: 'choice_percent', name: 'Percent' },
-
-            { id: 'available_power', name: 'sdCRV Vote Power',
-                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-            },
-            { id: 'timestamp', name: 'Vote Timestamp' },
-            { id: 'period_end_date', name: 'Period End Date' },
-
-            { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
-
-        ],
-        data: [
-          {% for index, row in df_snapshot_user.iterrows() %}
-            {
-                'proposal_title': '{{ row['proposal_title']  }}',
-                'known_as': '{{ row['known_as'] }}',
-                'choice': '{{ row['choice'] }}',
-                'choice_power': '{{ row['choice_power']|round(2)}}',
-                'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }}',
-                'available_power': '{{ row['available_power']|round(2) }}',
-                'timestamp': '{{ row['timestamp'] }}',
-                'period_end_date': '{{ row['period_end_date'] }}',
-
-                '_': `{{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}`
-            },
-          {% endfor %}
-        ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
-      }).render(document.getElementById('vote_table'));
-</script>
 
 {% endblock %}

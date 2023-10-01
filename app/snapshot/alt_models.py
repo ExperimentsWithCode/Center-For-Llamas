@@ -33,12 +33,14 @@ class SnapshotAsSource():
         df_proposals = pd.json_normalize(proposals)
         # Filter for proposals that matter
         if self.space['id'] == 'sdcrv.eth':
-            print('stakedao!')
+            # print('stakedao!')
             local_df_proposals = df_proposals[
                 df_proposals['title'].str.startswith('Gauge vote') &
                 df_proposals['title'].str.contains('CRV')
                 ]
         else:
+            # print('convex!')
+
             local_df_proposals = df_proposals[df_proposals['title'].str.contains('Gauge Weight')]
         local_df_proposals = local_df_proposals[~local_df_proposals['title'].str.contains('TEST')]
         

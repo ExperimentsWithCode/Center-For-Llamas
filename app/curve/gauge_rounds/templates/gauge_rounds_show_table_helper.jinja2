@@ -1,0 +1,83 @@
+
+
+
+
+<div class="row">
+
+    <div id='{{ id }}' ></div>
+</div>
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'this_period', name: 'Round' },
+            { id: 'period_end_date', name: 'Round End Date' },
+            { id: 'known_as', name: 'Known As' },
+            { id: 'user', name: 'Voter',
+                formatter: (_, row) => gridjs.html(
+                  `${row.cells[3].data.toString()}`
+                )
+            },
+            { id: 'symbol', name: 'Symbol' },
+            { id: 'weight', name: 'weight' },
+            { id: 'vote_power', name: 'Vote Power',
+                formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+            },
+            { id: 'balance_adj', name: 'Locked CRV',
+                formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+            },
+            { id: 'vote_utilization', name: 'Vote Efficiency',
+              formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}%`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+            },
+            { id: 'time', name: 'Vote Timestamp' },
+
+        ],
+        data: [
+          {% for index, row in df_gauge_rounds.iterrows() %}
+            {
+                'this_period': '{{ row['this_period']  }}',
+                'period_end_date': '{{ row['period_end_date'] }}',
+                'known_as': '{{ row['known_as_x'] }}',
+                'user':  `<a href={{ url_for('gauge_votes_bp.show', user = row['user']) }}>{{row['user']}}</a>`,
+                'symbol': '{{ row['symbol'] }}',
+                'weight': '{{ row['weight'] }}',
+                'vote_power': '{{ row['vote_power']|round(2) }}',
+                'balance_adj': '{{ row['balance_adj']|round(2) }}',
+                'vote_utilization': '{{ (row['vote_utilization']*100)|round(2) }}',
+                'time': '{{ row['time'] }}',
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        autoWidth: true,
+
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        },
+          style: {
+
+            td: {
+              'max-width': '120px',
+              'overflow': 'hidden',
+              'text-overflow': 'ellipsis',
+              'white-space': 'nowrap',
+            }
+
+          }   
+
+      }).render(document.getElementById( '{{ id }}' ));
+</script>

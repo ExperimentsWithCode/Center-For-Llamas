@@ -1,0 +1,90 @@
+   
+{% block content %}
+
+{% if df_snapshot|length > 0 %}
+    <div class="row">
+
+        <div id='{{ id }}' ></div>
+    </div>
+
+
+
+  <script type='text/javascript'>
+        new gridjs.Grid({
+          columns: [
+              { id: 'period_end_date', name: 'Round End Date' },
+              { id: 'proposal_title', name: 'Title' },
+              { id: 'known_as', name: 'Known As' },
+              { id: 'voter', name: 'voter',
+                  formatter: (_, row) => gridjs.html(
+                  `${row.cells[3].data.toString()}`
+                )
+              },
+              { id: 'choice_power', name: 'Vote Power',
+                  formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+              },
+              { id: 'choice_percent', name: 'Percent',
+              formatter: (_, row) =>  `${row.cells[5].data.toString()}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+              },
+
+              { id: 'available_power', name: 'Available Power',
+                  formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                  {% include 'utility_sort_float.jinja2' %} 
+
+              },
+              { id: 'timestamp', name: 'Vote Timestamp' },
+              {# { id: 'choice', name: 'choice' }, #}
+
+
+          ],
+          data: [
+            {% for index, row in df_snapshot.iterrows() %}
+              {
+                  'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
+                  'proposal_title': '{{ row['proposal_title']  }}',
+                  'known_as': '{{ row['known_as'] }}',
+                  {% if snapshot_space == "stakedao"  %}
+                  'voter':  `<a href={{ url_for('stakedao_snapshot_bp.voter', voter = row['voter']) }}>{{row['voter']}}</a>`,
+                  {% else %}
+                  'voter':  `<a href={{ url_for('convex_snapshot_bp.voter', voter = row['voter']) }}>{{row['voter']}}</a>`,
+                  {% endif %}
+                  'choice_power': '{{ row['choice_power']|round(2)}}',
+                  'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
+                  'available_power': '{{ row['available_power']|round(2) }}',
+                  'timestamp': '{{ row['timestamp'] }}',
+
+
+              },
+            {% endfor %}
+          ],
+          search: true,
+          sort: true,
+          pagination: {
+            limit: 20,
+            summary: true
+          },
+          autoWidth: true,
+          className: {
+            td: '{{ id }}',
+            th: 'table-primary',
+            table: 'table table-hover' 
+          },
+          style: {
+
+            td: {
+              'max-width': '120px',
+              'overflow': 'hidden',
+              'text-overflow': 'ellipsis',
+              'white-space': 'nowrap',
+            }
+
+          }    
+        }).render(document.getElementById( '{{ id }}' ));
+  </script>
+
+{% endif%}
+{% endblock %}

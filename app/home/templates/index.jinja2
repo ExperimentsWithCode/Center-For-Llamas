@@ -68,6 +68,61 @@
     </div> #}
 
 
+  <div class ="row"> 
+        {# <div class="card text-white bg-info mb-3" style="max-width: 50%" > #}
+
+            <div class="accordion" id="accordionTables" style="max-width: 50%">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button text-white bg-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Nerd Stuff
+                    </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionTables">
+                        <div class="accordion-body">
+                          <div class="card border-info mb-3" >
+                              <div class="card-body">
+
+                                {{ nerd_stuff }}
+
+                              </div>
+
+                          </div>
+                        </div>                  
+   
+                    </div>
+                </div>
+
+            </div>
+        {# </div> #}
+        {# <div class="card text-white bg-success mb-3" style="max-width: 50%" > #}
+
+            <div class="accordion" id="accordionTablesAlt" style="max-width: 50%">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOneAlt">
+                    <button class="accordion-button text-white bg-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOneAlt" aria-expanded="true" aria-controls="collapseOneAlt">
+                        To Do
+                    </button>
+                    </h2>
+                    <div id="collapseOneAlt" class="accordion-collapse collapse" aria-labelledby="headingOneAlt" data-bs-parent="#accordionTablesAlt">
+                        <div class="accordion-body">
+                          <div class="card border-success mb-3" >
+                              <div class="card-body">
+
+                                {{ to_do }}
+
+                              </div>
+
+                          </div>
+                        </div>                  
+   
+                    </div>
+                </div>
+            </div>
+        {# </div> #}
+    </div>
 
 
 {% endblock %}

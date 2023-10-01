@@ -11,7 +11,6 @@
 {% block content %}
   {% include "navigation.jinja2" %}
 
-    <div class="row">
       <h1>{{ title }}</h1>
 
     {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
@@ -19,55 +18,19 @@
         {% include 'gauge_widget.jinja2' %} 
       {% endwith %}
     {% endwith %}
-    <div class="row">
 
-        <div class="card border-primary mb-3" style="max-width: 50%;" >
-          <div class="card-header">Choice</div>
-          <div class="card-body">
-            <h4 class="card-title">{{df_snapshot_user.iloc[0]['choice']}}</h4>
+    {% with df_snapshot=df_snapshot_user %}
+      {% with choice=True %}
+        {% include 'snapshot_index_header.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
-          </div>
-        </div>
-        <div class="card border-secondary mb-3" style="max-width: 50%;" >
-          <div class="card-header">Title</div>
-          <div class="card-body">
-            <h4 class="card-title text-primary">{{df_snapshot_user.iloc[0]['proposal_title']}}</h4>
+    {% with sum_current_votes=current_votes %}
+      {% with sum_prior_votes=prior_votes %}
+        {% include 'utility_vote_compare.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
-            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-          </div>
-        </div>
-    </div>
-
-    <div class="row">
-
-       <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Previous Votes</div>
-        <div class="card-body">
-          <h4 class="card-title text-secondary">{{ "{:,.2f}".format(prior_votes) }}</h4>
-        </div>
-      </div>   
-
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Current Votes</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">{{ "{:,.2f}".format(current_votes) }}
-            {% if current_votes > prior_votes  %}
-              <span class="badge bg-primary rounded-pill">
-               + {{"{:,.2f}".format(((current_votes / prior_votes)-1)*100)}} %
-              </span>
-            {% elif current_votes == prior_votes  %}
-              <span class="badge bg-info rounded-pill">
-               {{"{:,.2f}".format(((current_votes / prior_votes)-1)*100)}} %
-              </span>
-            {% else %}
-              <span class="badge bg-secondary rounded-pill">
-               {{"{:,.2f}".format(((current_votes / prior_votes)-1)*100)}} %
-              </span>
-            {% endif %}
-            </h4>
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
 
     <div class="row">
 
@@ -111,14 +74,15 @@
         </div>
     </div>
     
-    <div class="row">
-        <h4 class="text-primary">Votes Per Round</h4>
+    <h4 class="text-primary">Votes for this Gauge</h4>
 
-        <div id="vote_table"></div>
-    </div>
-
-
-
+    {% with df_snapshot=df_snapshot_user %}
+      {% with snapshot_space='stakedao' %}
+          {% with table_type='show' %}
+            {% include 'snapshot_table_manager.jinja2' %} 
+          {% endwith %}
+      {% endwith %}
+    {% endwith %}
 
 
 
@@ -143,58 +107,5 @@
   Plotly.plot('chart4',graphs4,{});
 </script>
 
-<script type='text/javascript'>
-      new gridjs.Grid({
-        columns: [
-            { id: 'period_end_date', name: 'Round End Date' },
-            { id: 'proposal_title', name: 'Title' },
-            { id: 'known_as', name: 'Known As' },
-            { id: 'voter', name: 'voter',
-                formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[8].data}>${row.cells[3].data}</a>`
-              ) 
-            },
-            { id: 'choice_power', name: 'Vote Power',
-                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-            },
-            { id: 'choice_percent', name: 'Percent' },
-
-            { id: 'available_power', name: 'Staked sdCRV',
-                formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-            },
-            { id: 'timestamp', name: 'Vote Timestamp' },
-            {# { id: 'choice', name: 'choice' }, #}
-
-            { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
-
-        ],
-        data: [
-          {% for index, row in df_snapshot_user.iterrows() %}
-            {
-                'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
-                'proposal_title': '{{ row['proposal_title']  }}',
-                'known_as': '{{ row['known_as'] }}',
-                'voter': '{{ row['voter'] }}',
-                'choice_power': '{{ row['choice_power']|round(2)}}',
-                'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
-                'available_power': '{{ row['available_power']|round(2) }}',
-                'timestamp': '{{ row['timestamp'] }}',
-                '_': `{{ url_for('stakedao_snapshot_bp.voter', voter = row['voter']) }}`
-            },
-          {% endfor %}
-        ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
-      }).render(document.getElementById('vote_table'));
-</script>
 
 {% endblock %}

@@ -1,0 +1,37 @@
+
+{% block content %}
+
+    <div class="row">
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total Votes Prior Round</div>
+        <div class="card-body">
+          <h4 class="card-title">{{ "{:,.2f}".format(sum_prior_votes) }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total Votes Current Round</div>
+        <div class="card-body">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+
+          <h4 class="card-title text-primary">{{ "{:,.2f}".format(sum_current_votes) }}</h4>
+          <h4>
+            {% if sum_current_votes > sum_prior_votes  %}
+              <span class="badge bg-primary rounded-pill">
+               + {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">
+               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% endif %}
+          </h4>
+          </li>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+     </div>
+
+{% endblock %}

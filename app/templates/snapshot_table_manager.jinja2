@@ -1,0 +1,116 @@
+ {% block content %}
+
+    {# <div class ="row"> #}
+        {# <div class="card text-white bg-primary mb-3" >
+
+            <div class="accordion" id="accordionTables">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        This Proposal
+                    </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionTables">
+                        <div class="accordion-body">
+                            {% with df_snapshot=df_snapshot[df_snapshot['period'] == df_snapshot.iloc[0]['period']] %}
+                              {% with snapshot_space=snapshot_space %}
+                                  {% with id="vote_table_1" %}
+                                    {% if table_type == 'show' %}
+                                      {% include 'snapshot_table_helper.jinja2' %} 
+                                    {% elif table_type == 'agg' %}
+                                      {% include 'snapshot_table_agg_helper.jinja2' %} 
+                                    {% elif table_type == 'voter' %}
+                                      {% include 'snapshot_table_vote_helper.jinja2' %} 
+                                    {% endif %}
+                                  {% endwith %}
+                                {% endwith %}
+                              {% endwith %}
+
+                  
+   
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                        All Proposals
+                    </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionTables">
+                        <div class="accordion-body">
+                              {% with df_snapshot = df_snapshot %}
+                                {% with snapshot_space=snapshot_space %}
+                                  {% with id="vote_table_2" %}
+                                    {% if table_type == 'show' %}
+                                      {% include 'snapshot_table_helper.jinja2' %} 
+                                    {% elif table_type == 'agg' %}
+                                      {% include 'snapshot_table_agg_helper.jinja2' %} 
+                                    {% elif table_type == 'voter' %}
+                                      {% include 'snapshot_table_vote_helper.jinja2' %} 
+                                    {% endif %}
+                                  {% endwith %}
+                                {% endwith %}
+                              {% endwith %}
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div> #}
+
+<div class ="row">
+
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link active" data-bs-toggle="tab" href="#thisProposal" aria-selected="true" role="tab">This Proposal</a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" data-bs-toggle="tab" href="#allProposals" aria-selected="false" role="tab" tabindex="-1">All Proposals</a>
+    </li>
+
+
+  </ul>
+  <div id="myTabContent" class="tab-content">
+    <div class="tab-pane fade active show" id="thisProposal" role="tabpanel">
+
+      {% with df_snapshot=df_snapshot[df_snapshot['period'] == df_snapshot.iloc[0]['period']] %}
+        {% with snapshot_space=snapshot_space %}
+            {% with id="vote_table_1" %}
+              {% if table_type == 'show' %}
+                {% include 'snapshot_table_helper.jinja2' %} 
+              {% elif table_type == 'agg' %}
+                {% include 'snapshot_table_agg_helper.jinja2' %} 
+              {% elif table_type == 'voter' %}
+                {% include 'snapshot_table_vote_helper.jinja2' %} 
+              {% endif %}
+            {% endwith %}
+          {% endwith %}
+        {% endwith %}
+      
+  </div>
+  <div class="tab-pane fade" id="allProposals" role="tabpanel">
+
+    {% with df_snapshot = df_snapshot %}
+      {% with snapshot_space=snapshot_space %}
+        {% with id="vote_table_2" %}
+          {% if table_type == 'show' %}
+            {% include 'snapshot_table_helper.jinja2' %} 
+          {% elif table_type == 'agg' %}
+            {% include 'snapshot_table_agg_helper.jinja2' %} 
+          {% elif table_type == 'voter' %}
+            {% include 'snapshot_table_vote_helper.jinja2' %} 
+          {% endif %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+    </div>
+
+  </div>
+
+</div>
+
+    {% endblock %}
+
