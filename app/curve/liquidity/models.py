@@ -22,6 +22,7 @@ from datetime import timedelta
 
 
 
+
 try:
     df_all_by_gauge = app.config['df_all_by_gauge']
     gauge_registry = app.config['gauge_registry']
@@ -80,7 +81,6 @@ def get_df_processed_liquidity(df_liquidity):
             ## Store last date search
             if not gauge_addr in period_filtered_by_gauge:
                 temp_df = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date <= date]
-                temp_df.sort_values(['period_end_date'], axis = 0, ascending = False)
                 # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
                 #     print(f"Length temp {len(temp_df)}")
                 #     print(f"Date {date}")
@@ -120,10 +120,12 @@ def get_df_processed_liquidity(df_liquidity):
             ## Filter shitty vote percent
             try:
                 vote_percent = temp_df.iloc[0]['vote_percent'] 
-                if vote_percent < 0.001:
+                if vote_percent < 0.0001:
                     liquidity_vs_percent = 0
+                    liquidity_vs_votes = 0
                 else:
                     liquidity_vs_percent = current_bal_usd / vote_percent
+                    liquidity_vs_votes = current_bal_usd / temp_df.iloc[0]['total_vote_power']
             except Exception as e:
                 # if pool_address == '0xaeda92e6a3b1028edc139a4ae56ec881f3064d4f':
                 #     liquidity_vs_percent = 0
@@ -143,6 +145,8 @@ def get_df_processed_liquidity(df_liquidity):
                 'symbol': temp_df.iloc[0]['symbol'],
                 'percent': vote_percent,
                 'liquidty_vs_percent': liquidity_vs_percent,
+                'liquidty_vs_votes': liquidity_vs_votes,
+
                 'tradeable_assets': tradeable_assets,
                 'display_name': pool_name + f" ({pool_address[0:6]})",
                 'display_symbol': temp_df.iloc[0]['symbol'] + f" ({pool_address[0:6]})"
@@ -165,7 +169,21 @@ def get_df_processed_liquidity(df_liquidity):
         pass
     return out_df
 
+# def get_liquidity_comparison(df_processed_liquidity, filter_asset):
+#     if filter_asset:
+#         local_df_all = df_processed_liquidity[df_processed_liquidity['tradeable_assets'].str.contains(filter_asset)]
 
+#         local_df = local_df_all[local_df_all['date'] == local_df_all.date.max()]
+
+#         local_df = local_df.sort_values(['liquidity'], axis = 0, ascending = False)
+#     # local_df_all = local_df_all.sort_values(["date", 'liquidity'], axis = 0, ascending = False)
+#     else:
+#         local_df = df_processed_liquidity[df_processed_liquidity['date'] == df_processed_liquidity.date.max()]
+
+#         local_df = local_df.sort_values(['liquidity'], axis = 0, ascending = False)
+
+
+#     return local_df
 
 
 

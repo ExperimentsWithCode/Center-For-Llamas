@@ -1,0 +1,309 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+
+    <div class="row">
+
+        <div class="card text-white bg-info mb-3" >
+            <div class="card-header">Query Info</div>
+
+            <div class="card-body">
+                <h4 class="card-title">Filter Asset : {{ filter_asset }}</h4>
+                <h4 class="card-title">Head : {{ head|int }}</h4>
+                <h4 class="card-title">Tail : {{ tail }}</h4>
+                <h4 class="card-title">Source : {{ source }}</h4>
+
+
+               
+                <p class="card-text">This dashboard compares votes and liquidity based on assets traded by a pool.</p>
+                <p class="card-text">It is very possible that some liquidity is missing. </p>
+                <p class="card-text">Native can be deciving for cross asset.</p>
+                <p class="card-text">USD can be deciving if one token does not have a price feed </p>
+                
+                {# <div id="chart" class="chart"></div> #}
+                {# <div id="chart2" class="chart2"></div> #}
+
+
+            </div> 
+        </div>
+    </div>
+
+
+    <div class="row">
+    <div class="col">
+        <div class="card bg-warning mb-3" >
+            <div class="card-header">Enter Filter Criteria</div>
+                <div class="card-body">
+
+                    {# form #}
+                    <form method="POST" action="{{ url_for('curve_liquidity_bp.filter_by_asset') }}">
+                    {{ form.csrf_token }}
+                        <fieldset class="filter_asset">
+                          <div class="form-group row">
+
+                           <div class="col col-form-label"> 
+                           {{ form.filter_asset.label }} 
+                           </div>
+                            <div class="col">
+                            {{ form.filter_asset() }}
+                            </div>
+                            {% if form.filter_asset.errors %}
+                            <ul class="errors">
+                                {% for error in form.filter_asset.errors %}
+                                <li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                          </div>
+
+                        </fieldset>
+
+                        <fieldset class="source">
+                          <div class="form-group row">
+                           <div class="col col-form-label"> 
+                           {{ form.source.label }} 
+                           </div>
+                            <div class="col">
+                            {{ form.source() }}
+                            </div>
+                            {% if form.source.errors %}
+                            <ul class="errors">
+                                {% for error in form.source.errors %}
+                                <li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                          </div>
+                        </fieldset>
+
+                        <fieldset class="head">
+                          <div class="form-group row">
+                           <div class="col col-form-label"> 
+                           {{ form.head.label }} 
+                           </div>
+                            <div class="col">
+                            {{ form.head(placeholder='') }}
+                            </div>
+                            {% if form.head.errors %}
+                            <ul class="errors">
+                                {% for error in form.head.errors %}
+                                <li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                          </div>
+
+                        </fieldset>
+                        <fieldset class="tail">
+                          <div class="form-group row">
+                           <div class="col col-form-label"> 
+                           {{ form.tail.label }} 
+                           </div>
+                            <div class="col">
+                            {{ form.tail(placeholder='') }}
+                            </div>
+                            {% if form.tail.errors %}
+                            <ul class="errors">
+                                {% for error in form.tail.errors %}
+                                <li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                          </div>
+                        </fieldset>
+                        <fieldset class="gauge_adr">
+                          {% for entry in form.gauge_address_list %}
+                            <div class="form-group row">
+
+                            {% if  loop.index == loop.length - 4 %}
+                              <div>Add Gauge Address To Filter:</div>
+                            {% endif %}  
+                            {% if  loop.index > loop.length - 5 %}
+                              {# <div class="mt-4">  #}
+                               
+                                {{ entry.gauge_addr() }}
+                                {# {{ entry.delete() }} {{ entry.delete.label }} #}
+                              {# </div> #}
+                            {% else %}  
+                              <div class="col-sm"> 
+                                {{ loop.index }})<nbsp> </nbsp>
+                                {{ gauge_registry.get_gauge_display_name(entry.gauge_addr.data) }}
+                              </div>
+
+                              <div class="col-sm"> 
+                                {{ entry.gauge_addr() }}
+                              </div>
+
+                              <div class="col-sm"> 
+                                {{ entry.delete() }} {{ entry.delete.label }}
+                              </div>
+                            {% endif %}  
+                            </div>
+
+                          {% endfor %}
+                        </fieldset>
+                        <div class="form-group row">
+                          <div class="submit-button">
+                              {{ form.submit }}
+                          </div>
+                        </div>
+                      
+                    </form>
+
+            </div>
+        </div> 
+        </div>
+        <div class="col">
+        <div class="card bg-outline-warning mb-3" >
+            <div class="card-header">Reference Table</div>
+                <div class="card-body">
+                <h5 class="card-text">Case sensitive.</h5>
+                <div id="reference_table" class="reference_table"></div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+
+        <div class="card text-white bg-primary mb-3" style="max-width: 50%;"  >
+          <div class="card-header">Pool vs Total Votes (USD) </div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart" class="chart"></div>
+          </div>
+        </div>
+
+
+        <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
+          <div class="card-header">Pool vs Total Votes (Native) </div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart2" class="chart2"></div>
+          </div>
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <h4 class="text-primary">Top {{top_x}} Filtered Liquidity Comparison</h4>
+        <div id="liquidity_table"></div>
+    </div>
+
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'date', name: 'Date' },
+            {# { id: 'pool_name', name: 'Pool Name' }, #}
+            { id: 'symbol', name: 'Symbol' },
+            { id: 'liquidity_native', name: 'Liquidity Native',
+                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'liquidity', name: 'Liquidity USD',
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'total_votes', name: 'Total Votes',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
+            { id: 'percent', name: 'Percent' },
+
+
+        ],
+        data: [
+          {% for index, row in df_processed_liquidity.iterrows() %}
+            {
+                'date': '{{ row['date'].date()  }}',
+                {# 'pool_name': '{{ row['pool_name'] }}', #}
+                'symbol': '{{ row['symbol'] }}',
+                'liquidity_native': '{{ row['liquidity_native']|round(2) }}',
+                'liquidity': '{{ row['liquidity']|round(2) }}',
+                'total_votes': '{{ row['total_votes']|round(2) }}',
+                'percent': '{{ row['percent'] |round(3) }}',
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('liquidity_table'));
+</script>
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'display_name', name: 'Display Name' },
+            { id: 'tradeable_assets', name: 'Tradeable Assets'},
+            { id: 'gauge_address', name: 'Gauge Address'},
+            { id: 'liquidity', name: 'Liquidity',
+              formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+              {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'source', name: 'Source'},
+
+
+        ],
+        data: [
+          {% for index, row in df_tradeable_assets.iterrows() %}
+            {
+              'display_name': '{{ row['display_name'] }}',
+              'tradeable_assets': '{{ row['tradeable_assets'] }}',
+              'gauge_address': '{{ row['gauge_address'] }}',
+              'liquidity': '{{ row['liquidity'] }}',
+              'source': '{{ gauge_registry.get_gauge(row['gauge_address']).source }}',
+
+
+            },
+          {% endfor %}
+        ],
+        fixedHeader: true,
+        search: true,
+        sort: true,
+        pagination: {
+          limit: 10,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-dark text-white',
+          table: 'table table-hover' 
+        }
+      }).render(document.getElementById('reference_table'));
+</script>
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script>
+
+
+{% endblock %}

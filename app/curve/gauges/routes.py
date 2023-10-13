@@ -37,7 +37,7 @@ gauges_bp = Blueprint(
 @gauges_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    local_df_curve_gauge_registry = df_curve_gauge_registry.sort_values("time_gauge_registered", axis = 0, ascending = False)
+    local_df_curve_gauge_registry = df_curve_gauge_registry.sort_values("deployed_timestamp", axis = 0, ascending = False)
 
 
 

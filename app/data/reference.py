@@ -10,7 +10,7 @@ known_large_cvx_holders = {
 	'JPEGD': '0x51c2cef9efa48e08557a361b52db34061c025a1b',
 	'Redacted': '0xa52fd396891e7a74b641a2cb1a6999fcf56b077e',
 	'Mochi Inu': '0x597f540bb63381ffa267027d2d479984825057a8',
-	'Reserve': '0xc6625129c9df3314a4dd604845488f4ba62f9db8',
+	'Reserve 1': '0xc6625129c9df3314a4dd604845488f4ba62f9db8',
 	'Olympus': '0x2d643df5de4e9ba063760d475beaa62821c71681',
 	'Keeper': '0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83',
 	'Alchemix': '0x9e2b6378ee8ad2a4a95fe481d63caba8fb0ebbf9',
@@ -22,6 +22,9 @@ known_large_cvx_holders = {
     'Clever': '0x96c68d861ada016ed98c30c810879f9df7c64154',
     'Badger': '0x898111d1f4eb55025d0036568212425ee2274082',
     'Bent': '0xe001452bec9e7ac34ca4ecac56e7e95ed9c9aa3b',
+    'Reserve': '0x578a4af5cbc3009487a89be88bc560157200795b',
+    'StakeDAO': '0xf930ebbd05ef8b25b1797b9b2109ddc9b0d43063',
+    'Origin': '0xc1aa82499da8d37383f1e6d95de417ecf7514e7c',
 }
 
 

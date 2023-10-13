@@ -63,18 +63,26 @@
             { id: 'date', name: 'date' },
             { id: 'pool_name', name: 'Pool Name' },
             { id: 'liquidity', name: 'Liquidity',
-                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
             },
             { id: 'liquidity_native', name: 'Liquidity Native',
-                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
             },
             { id: 'tradeable_assets', name: 'Tradeable Assets'},
             { id: 'gauge_address', name: 'Gauge Address' },
             { id: 'symbol', name: 'Symbol' },
             { id: 'percent', name: 'Percent',
+                {% include 'utility_sort_float.jinja2' %} 
+
             },
             { id: 'liquidty_vs_percent', name: 'Liquidity/Percent',
-                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
             },
             { id: 'pool_address', name: 'Pool Address',
                 formatter: (_, row) => gridjs.html(

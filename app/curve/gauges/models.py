@@ -70,7 +70,13 @@ class GaugeRegistry():
             self.tokens[gs.token_addr.lower()] = gs
             self.shorthand_tokens[gs.token_addr[:6].lower()] = gs
 
-
+    def get_value(self, gauge_addr, key):
+        if gauge_addr in self.gauges:
+            this_gauge = self.gauges[gauge_addr].format_output()
+            if key in this_gauge:
+                return this_gauge[key]
+        return None
+    
     def format_output(self):
         output_data = []
         for gauge in self.gauges:
@@ -122,13 +128,15 @@ class GaugeRegistry():
             return gauge_set.gauge_addr
         return None
 
-    # def get_gauge_name(self, gauge_reference):
-    #     if len(gauge_reference) > 8:
-    #         partial_addr = gauge_reference[-8:-2].lower()
-    #         if partial_addr in self.shorthand_pools:
-    #             return self.shorthand_pools[partial_addr]
+    def get_gauge_display_name(self, gauge_addr):
+        if gauge_addr in self.gauges:
+            ga = self.gauges[gauge_addr]
 
-    #     return None
+            partial_addr = ga.gauge_addr[0:6].lower()
+            return f"{ga.gauge_symbol} ({partial_addr})"
+
+
+        return None
     
     def get_shorthand_pool(self, gauge_addr):
         if gauge_addr in self.shorthand_pools:
@@ -169,7 +177,7 @@ class Gauge_Set():
 
             self.source = row['SOURCE']
 
-            # self.time_gauge_registered = row['BLOCK_TIMESTAMP'] if 'BLOCK_TIMESTAMP' in row else None
+            # self.deployed_timestamp = row['BLOCK_TIMESTAMP'] if 'BLOCK_TIMESTAMP' in row else None
         except:
             # print(row.keys())
             self.gauge_addr = row['gauge_addr']
@@ -189,11 +197,13 @@ class Gauge_Set():
 
             self.source = row['source']
 
-            self.time_gauge_registered = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
+            self.deployed_timestamp = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
         try:
             self.first_period = get_period_direct(row['vote_timestamp'])
             # self.first_period_end_date_deployed = get_period_end_date(row['deployed_timestamp'])
-            self.first_period_end_date = get_period_end_date(row['vote_timestamp'])
+            if row['vote_timestamp']:
+                self.first_period_end_date = get_period_end_date(row['vote_timestamp'])
+
 
         except Exception as e:
             # print (e)
@@ -284,7 +294,7 @@ class Gauge_Set():
             'token_name' : self.token_name,
             'token_symbol' : self.token_symbol,
             'source' : self.source,
-            'time_gauge_registered' : self.time_gauge_registered,
+            'deployed_timestamp' : self.deployed_timestamp,
             'first_period': self.first_period,
             'first_period_end_date': self.first_period_end_date,
 

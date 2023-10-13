@@ -134,16 +134,16 @@ ___
 ___
 # Reference Links
 * Currently using Boostrap Themes. 
-    - Current theme: https://bootswatch.com/minty/
+    * Current theme: https://bootswatch.com/minty/
 
 * Tables are reliant on a Javascript library Grid.js
-    - Eventually should make server side sorting
-    - https://gridjs.io/docs/examples/server-side-sort
+    * Eventually should make server side sorting
+    * https://gridjs.io/docs/examples/server-side-sort
 
 * Charts are reliant on Flask-Plotly
-    - https://github.com/alanjones2/Flask-Plotly
-        - example
-        - https://github.com/alanjones2/Flask-Plotly/blob/main/plotly/app2.py
+    * https://github.com/alanjones2/Flask-Plotly
+        * example
+        * https://github.com/alanjones2/Flask-Plotly/blob/main/plotly/app2.py
 
 * URL structure is managed by Flask Blueprints
-    - https://flask.palletsprojects.com/en/1.1.x/blueprints/
+    * https://flask.palletsprojects.com/en/1.1.x/blueprints/

@@ -92,8 +92,8 @@
                                         <p class="card-text">Type ID: {{gauge_info['type_id']}}</p>
 
                                         <p class="card-text">Weight: {{gauge_info['weight']}}</p>
-                                        {%if gauge_info['time_gauge_registered'] %}
-                                            <p class="card-text">Deploy Timestamp: {{gauge_info['time_gauge_registered']}}</p>
+                                        {%if gauge_info['deployed_timestamp'] %}
+                                            <p class="card-text">Deploy Timestamp: {{gauge_info['deployed_timestamp']}}</p>
                                         {% endif %}
                                         {%if gauge_info['vote_timestamp'] %}
                                             <p class="card-text">Vote Timestamp: {{gauge_info['vote_timestamp']}}</p>
