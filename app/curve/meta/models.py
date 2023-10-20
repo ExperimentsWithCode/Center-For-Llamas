@@ -26,12 +26,12 @@ from app.data.reference import (
 from flask import current_app as app
 
 try:
-    # df_history_data = app.config['df_history_data']
+    # df_curve_locker_history = app.config['df_curve_locker_history']
     # df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
     df_all_by_gauge = app.config['df_all_by_gauge']
 except:
     # from app.curve.gauge_votes.models import df_gauge_votes_formatted
-    # from app.curve.locker.models import df_history_data
+    # from app.curve.locker.models import df_curve_locker_history
     from app.curve.gauge_rounds.models import df_all_by_gauge
 
 

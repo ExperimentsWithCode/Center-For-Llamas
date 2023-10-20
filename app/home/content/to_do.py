@@ -37,6 +37,12 @@ to_do =markdown.markdown(
 * [] launch experimental pages which allow these sorts of filtered comparisons to be viewed. 
     * Acceptable to be pretty specific
 * [] harden standardized components for easier plug and play. 
+
+## Gauge Votes
+* Edit table to display as tabs (currently all votes are not displayed): 
+    * Active Votes
+    * Inactive Votes
+    * All Votes
 ''',
 extensions=["fenced_code"]
 )

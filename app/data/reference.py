@@ -104,3 +104,24 @@ gauge_symbols = {
     '0xc5ae4b5f86332e70f3205a8151ee9ed9f71e0797': 'OptimismMainent(2)'
 
 }
+
+filename_curve_gauges = 'gauge_to_lp_map'
+
+filename_curve_locker = 'curve_locker'
+filename_curve_locker_supply = 'curve_locker_supply'
+filename_curve_locker_withdraw = 'curve_locker_withdraw'
+filename_curve_locker_deposit = 'curve_locker_deposit'
+filename_curve_locker_history = 'curve_locker_history'
+filename_curve_locker_current_locks = 'curve_locker_current_locks'
+filename_curve_locker_known_locks = 'curve_locker_known_locks'
+
+filename_curve_gauge_votes = 'curve_gauge_votes'
+filename_curve_gauge_votes_all = 'curve_gauge_votes_all'
+filename_curve_gauge_votes_formatted = 'curve_gauge_votes_formatted'
+filename_curve_gauge_votes_current = 'curve_gauge_votes_current'
+
+filename_curve_gauge_rounds_by_user = 'curve_gauge_rounds_by_user'
+filename_curve_gauge_rounds_by_aggregate = 'curve_gauge_rounds_by_aggregate'
+
+filename_curve_liquidity = 'curve_liquidity'
+filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate'

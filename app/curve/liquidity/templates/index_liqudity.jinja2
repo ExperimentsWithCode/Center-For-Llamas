@@ -19,7 +19,7 @@
       <div class="card border-info mb-3" style="max-width: 50%;" >
       <div class="card-header">Pool Liquidity</div>
       <div class="card-body"> 
-          <h4 class="card-title">{{ df_processed_liquidity.index | length }} Liquidity Pools Tracked</h4>
+          <h4 class="card-title">{{ df_curve_liquidity_aggregates.index | length }} Liquidity Pools Tracked</h4>
           <p class="card-text">This measures liquidity vs votes</p>
 
       </div>
@@ -72,21 +72,20 @@
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
-            { id: 'tradeable_assets', name: 'Tradeable Assets'},
-            { id: 'gauge_address', name: 'Gauge Address' },
-            { id: 'symbol', name: 'Symbol' },
+            { id: 'token_symbol', name: 'Tradeable Assets'},
+            { id: 'gauge_addr', name: 'Gauge Address' },
             { id: 'percent', name: 'Percent',
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
-            { id: 'liquidty_vs_percent', name: 'Liquidity/Percent',
-                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            { id: 'liquidity_over_votes', name: 'Liquidity/Votes',
+                formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
             { id: 'pool_address', name: 'Pool Address',
                 formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[10].data}>${row.cells[9].data}</a>`
+                `<a href=${row.cells[9].data}>${row.cells[8].data}</a>`
               )
             },
 
@@ -94,22 +93,21 @@
 
         ],
         data: [
-          {% for index, row in df_processed_liquidity.iterrows() %}
+          {% for index, row in df_curve_liquidity_aggregates.iterrows() %}
             {
                 'date': '{{ row['date'] }}',
                 'pool_name': '{{ row['pool_name'] }}',
 
                 'liquidity': '{{ row['liquidity'] | round(2) }}',
                 'liquidity_native': '{{ row['liquidity_native']| round(2) }}',
-                'tradeable_assets': '{{ row['tradeable_assets'] }}',
+                'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
 
-                'gauge_address': '{{ row['gauge_address'] }}',
-                'symbol': '{{ row['symbol'] }}',
+                'gauge_addr': '{{ row['gauge_addr'] }}',
                 'percent': '{{ row['percent'] | round(4) }}',
-                'liquidty_vs_percent': '{{ row['liquidty_vs_percent'] | round(0) }}',
+                'liquidity_over_votes': '{{ row['liquidity_over_votes']  }}',
                 'pool_address': '{{ row['pool_address'] }}',
 
-                '_': `{{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_address']) }}`
+                '_': `{{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_addr']) }}`
 
             },
           {% endfor %}

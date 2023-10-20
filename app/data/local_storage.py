@@ -4,19 +4,24 @@ import json
 import traceback
 import pandas as pd
 
-cwd_temp = os.getcwd()
-temp_split = cwd_temp.split('/')
-cwd = ""
-for x in temp_split:
-    if x == 'experiments':
-        break
-    elif x == '':
-        pass
-    else:
-        cwd += "/"+x
 
-if temp_split[-1] == 'Musings':
-    cwd += '/center-for-llamas'
+def get_cwd():
+    cwd_temp = os.getcwd()
+    temp_split = cwd_temp.split('/')
+    cwd = ""
+    for x in temp_split:
+        if x == 'experiments':
+            break
+        elif x == '':
+            pass
+        else:
+            cwd += "/"+x    
+    if temp_split[-1] == 'Musings':
+        cwd += '/center-for-llamas'   
+    return cwd
+
+
+cwd = get_cwd()
 
 def read_csv(filename, path='source'):
     # print(cwd)
@@ -66,11 +71,11 @@ def write_json(filename, data):
         return False
 
 
-def write_dataframe_csv(filename, df):
-    print(cwd+"/app/data/output/"+ filename+'.csv')
+def write_dataframe_csv(filename, df, source='output'):
+    print(f"{cwd}/app/data/{source}/{filename}.csv")
     try:
-        full_filename = cwd+"/app/data/output/"+ filename+'.csv'
-        df.to_csv(full_filename)
+        full_filename = f"{cwd}/app/data/{source}/{filename}.csv"
+        df.to_csv(full_filename,  index=False)
         return True
     except Exception as e:
         print(e)
@@ -94,12 +99,12 @@ def write_dfs_to_xlsx(filename, dfs, titles=None):
             i+= 1
 
 
-def csv_to_df(filename):
-    resp_dict = read_csv(filename, 'source')
+def csv_to_df(filename, path='source'):
+    resp_dict = read_csv(filename, path)
     df = pd.json_normalize(resp_dict)
     return df
 
-def df_to_csv(df, filename):
+def df_to_csv(df, filename, path='source'):
     cwd = get_cwd()
-    full_filename = cwd+ data_path + '/' + filename+'.csv'
+    full_filename = cwd+ path + '/' + filename+'.csv'
     df.to_csv(full_filename) 

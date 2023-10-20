@@ -22,7 +22,7 @@
       {% endwith %}
     {% endwith %}
 
-    {%if local_all_df_processed_liquidity |length > 0 %}
+    {%if local_all_df_curve_liquidity |length > 0 %}
 
 
 
@@ -31,7 +31,7 @@
       <div class="card border-primary mb-3" style="max-width: 50%;" >
         <div class="card-header">Pool Address</div>
         <div class="card-body">
-          <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['pool_address']}}</h4>
+          <h4 class="card-title">{{local_all_df_curve_liquidity.iloc[0]['pool_address']}}</h4>
 
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
@@ -40,7 +40,7 @@
       <div class="card border-info mb-3" style="max-width: 50%;" >
         <div class="card-header">Pool Name:</div>
         <div class="card-body">
-          <h4 class="card-title">{{local_all_df_processed_liquidity.iloc[0]['pool_name']}}</h4>
+          <h4 class="card-title">{{local_all_df_curve_liquidity.iloc[0]['pool_name']}}</h4>
 
           {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
         </div>
@@ -124,7 +124,7 @@
         columns: [
             { id: 'date', name: 'Date' },
             {# { id: 'pool_name', name: 'Pool Name' }, #}
-            { id: 'symbol', name: 'Symbol' },
+            { id: 'token_symbol', name: 'Token Symbol' },
             { id: 'liquidity_native', name: 'Liquidity Native',
                 formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
@@ -135,19 +135,22 @@
                 formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
             { id: 'percent', name: 'Percent' },
+            { id: 'has_price', name: 'Has Price' },
 
 
         ],
         data: [
-          {% for index, row in local_all_df_processed_liquidity.iterrows() %}
+          {% for index, row in local_all_df_curve_liquidity.iterrows() %}
             {
-                'date': '{{ row['date'].date()  }}',
+                'date': '{{ row['date']  }}',
                 {# 'pool_name': '{{ row['pool_name'] }}', #}
-                'symbol': '{{ row['symbol'] }}',
+                'token_symbol': '{{ row['token_symbol'] }}',
                 'liquidity_native': '{{ row['liquidity_native']|round(2) }}',
                 'liquidity': '{{ row['liquidity']|round(2) }}',
                 'total_votes': '{{ row['total_votes']|round(2) }}',
                 'percent': '{{ row['percent'] |round(3) }}',
+                'has_price': '{{ row['has_price']  }}',
+
             },
           {% endfor %}
         ],

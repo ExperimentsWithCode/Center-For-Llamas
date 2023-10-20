@@ -26,6 +26,7 @@
                 <h4 class="card-title">Head : {{ head|int }}</h4>
                 <h4 class="card-title">Tail : {{ tail }}</h4>
                 <h4 class="card-title">Source : {{ source }}</h4>
+                <h4 class="card-title">Days Back : {{ days_back }}</h4>
 
 
                
@@ -121,6 +122,22 @@
                             {% endif %}
                           </div>
                         </fieldset>
+                        <fieldset class="days_back">
+                          <div class="form-group row">
+                           <div class="col col-form-label"> 
+                           {{ form.days_back.label }} 
+                           </div>
+                            <div class="col">
+                            {{ form.days_back(placeholder='') }}
+                            </div>
+                            {% if form.days_back.errors %}
+                            <ul class="errors">
+                                {% for error in form.days_back.errors %}
+                                <li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                          </div>
+                        </fieldset>
                         <fieldset class="gauge_adr">
                           {% for entry in form.gauge_address_list %}
                             <div class="form-group row">
@@ -210,30 +227,53 @@
         columns: [
             { id: 'date', name: 'Date' },
             {# { id: 'pool_name', name: 'Pool Name' }, #}
-            { id: 'symbol', name: 'Symbol' },
+            { id: 'display_symbol', name: 'Symbol' },
             { id: 'liquidity_native', name: 'Liquidity Native',
-                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+                
             },
             { id: 'liquidity', name: 'Liquidity USD',
-                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `$${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'total_votes', name: 'Total Votes',
-                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
             },
-            { id: 'percent', name: 'Percent' },
+            { id: 'percent', name: 'Percent' ,
+            {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'token_symbol', name: 'Token Symbol',
+            },
+            { id: 'has_price', name: 'Has Price',
+            },
+            { id: 'source', name: 'Source'},
+            { id: 'gauge_addr', name: 'Gauge Address',              
+                formatter: (_, row) => gridjs.html(
+                  `${row.cells[9].data.toString()}`
+                )
+            },
 
 
         ],
         data: [
-          {% for index, row in df_processed_liquidity.iterrows() %}
+          {% for index, row in df_curve_liquidity.iterrows() %}
             {
-                'date': '{{ row['date'].date()  }}',
+                'date': '{{ row['date'] }}',
                 {# 'pool_name': '{{ row['pool_name'] }}', #}
-                'symbol': '{{ row['symbol'] }}',
+                'display_symbol': '{{ row['display_symbol'] }}',
                 'liquidity_native': '{{ row['liquidity_native']|round(2) }}',
                 'liquidity': '{{ row['liquidity']|round(2) }}',
                 'total_votes': '{{ row['total_votes']|round(2) }}',
                 'percent': '{{ row['percent'] |round(3) }}',
+                'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
+                'has_price': '{{ row['has_price'] }}',
+                'source': '{{ gauge_registry.get_gauge(row['gauge_addr']).source }}',
+                'gauge_addr':  `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+
+
             },
           {% endfor %}
         ],
@@ -255,8 +295,8 @@
       new gridjs.Grid({
         columns: [
             { id: 'display_name', name: 'Display Name' },
-            { id: 'tradeable_assets', name: 'Tradeable Assets'},
-            { id: 'gauge_address', name: 'Gauge Address'},
+            { id: 'token_symbol', name: 'Token Symbols',},
+            { id: 'gauge_addr', name: 'Gauge Address'},
             { id: 'liquidity', name: 'Liquidity',
               formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
               {% include 'utility_sort_float.jinja2' %} 
@@ -269,10 +309,10 @@
           {% for index, row in df_tradeable_assets.iterrows() %}
             {
               'display_name': '{{ row['display_name'] }}',
-              'tradeable_assets': '{{ row['tradeable_assets'] }}',
-              'gauge_address': '{{ row['gauge_address'] }}',
+              'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
+              'gauge_addr': '{{ row['gauge_addr'] }}',
               'liquidity': '{{ row['liquidity'] }}',
-              'source': '{{ gauge_registry.get_gauge(row['gauge_address']).source }}',
+              'source': '{{ gauge_registry.get_gauge(row['gauge_addr']).source }}',
 
 
             },

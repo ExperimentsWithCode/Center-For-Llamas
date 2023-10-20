@@ -19,7 +19,7 @@ import plotly.graph_objects as go
 
 
 # from .forms import AMMForm
-from .models import  df_history_data, df_current_locks, df_known_locks, df_locker_supply, get_lock_diffs
+from .models import  df_curve_locker_history, df_curve_locker_current_locks, df_curve_locker_known_locks, df_curve_locker_supply, get_lock_diffs
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
@@ -38,9 +38,9 @@ locker_bp = Blueprint(
 def index():
 
     # Build chart
-    fig = px.bar(df_current_locks,
-                    x=df_current_locks['final_lock_time'],
-                    y=df_current_locks['balance_adj'],
+    fig = px.bar(df_curve_locker_current_locks,
+                    x=df_curve_locker_current_locks['final_lock_time'],
+                    y=df_curve_locker_current_locks['balance_adj'],
                     # color='provider',
                     title='Final Lock Time by week',
                     # facet_row=facet_row,
@@ -52,7 +52,7 @@ def index():
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     
-    filtered_history = df_history_data[df_history_data['known_as'] != '_']
+    filtered_history = df_curve_locker_history[df_curve_locker_history['known_as'] != '_']
     fig = px.line(filtered_history,
                     x=filtered_history['timestamp'],
                     y=filtered_history['balance_adj'],
@@ -64,9 +64,9 @@ def index():
                     )
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    fig = px.pie(df_known_locks,
-                    names=df_known_locks['known_as'],
-                    values=df_known_locks['balance_adj'],
+    fig = px.pie(df_curve_locker_known_locks,
+                    names=df_curve_locker_known_locks['known_as'],
+                    values=df_curve_locker_known_locks['balance_adj'],
                     # color='provider',
                     title='Relative Lock weight',
                     # facet_row=facet_row,
@@ -82,9 +82,9 @@ def index():
     # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    fig = px.line(df_locker_supply,
-                    x=df_locker_supply['period_end_date'],
-                    y=df_locker_supply['supply_difference_adj'],
+    fig = px.line(df_curve_locker_supply,
+                    x=df_curve_locker_supply['period_end_date'],
+                    y=df_curve_locker_supply['supply_difference_adj'],
                     # color='provider',
                     title='CRV Locked',
                     # facet_row=facet_row,
@@ -100,7 +100,7 @@ def index():
         title='Curve Locker',
         template='locker-index',
         body="",
-        lockers = df_current_locks,
+        lockers = df_curve_locker_current_locks,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,
@@ -116,13 +116,13 @@ def show(provider):
     now = datetime.now()
     provider = provider.lower()
     # Filter Data
-    df_current_locks = df_history_data[df_history_data['provider'] == provider]
-    # df_current_locks = df_history_data.groupby('provider', as_index=False).last()
-    df_current_locks = df_current_locks.sort_values("timestamp", axis = 0, ascending = False)
+    df_curve_locker_current_locks = df_curve_locker_history[df_curve_locker_history['provider'] == provider]
+    # df_curve_locker_current_locks = df_curve_locker_history.groupby('provider', as_index=False).last()
+    df_curve_locker_current_locks = df_curve_locker_current_locks.sort_values("timestamp", axis = 0, ascending = False)
     # Build chart
-    fig = px.line(df_current_locks,
-                    x=df_current_locks['timestamp'],
-                    y=df_current_locks['balance_adj'],
+    fig = px.line(df_curve_locker_current_locks,
+                    x=df_curve_locker_current_locks['timestamp'],
+                    y=df_curve_locker_current_locks['balance_adj'],
                     # color='provider',
                     line_shape='hv',
                     title='Cumulative Lock',
@@ -136,7 +136,7 @@ def show(provider):
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     # Calc remaining lock
-    final_lock_time = df_current_locks.iloc[0]['final_lock_time']
+    final_lock_time = df_curve_locker_current_locks.iloc[0]['final_lock_time']
     diff_lock_weeks, diff_max_weeks = get_lock_diffs(final_lock_time)
 
     fig = go.Figure(go.Indicator(
@@ -166,7 +166,7 @@ def show(provider):
         title='Curve Locker',
         template='locker-show',
         body="",
-        lockers = df_current_locks,
+        lockers = df_curve_locker_current_locks,
         provider = provider,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2

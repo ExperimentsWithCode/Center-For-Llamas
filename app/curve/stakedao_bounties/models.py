@@ -304,3 +304,5 @@ registry.process_creation(df_stakedao_bounty_created)
 registry.process_increase(df_stakedao_bounty_duration_increase)
 registry.process_claims(df_stakedao_bounty_claimed)
 registry.process_closed(df_stakedao_bounty_closed)
+
+

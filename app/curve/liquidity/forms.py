@@ -32,6 +32,10 @@ class FilterLiquidityForm(FlaskForm):
         'Source',
         # validators=[DataRequired()]
     )
+    days_back = IntegerField(
+        'Days Offset Back',
+        # validators=[DataRequired()]
+    )
     gauge_address_list = FieldList(FormField(EntryForm))
 
     submit = SubmitField('Submit')

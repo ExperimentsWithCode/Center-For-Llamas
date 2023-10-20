@@ -17,8 +17,8 @@
             <div class="card-header">Query Info</div>
 
             <div class="card-body">
-                <h4 class="card-title">Round : {{ df_head.iloc[0]['period_end_date'].date() }}</h4>
-                <h4 class="card-title">Compare Round : {{ df_head.iloc[0]['period_end_date_compared'].date() }}</h4>
+                <h4 class="card-title">Round : {{ df_head.iloc[0]['period_end_date'] }}</h4>
+                <h4 class="card-title">Compare Round : {{ df_head.iloc[0]['period_end_date_compared'] }}</h4>
                 <h5 class="card-title">Number To Display : {{ top_x }}</h5>
 
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
