@@ -10,6 +10,19 @@ Each folder has `models.py` which reads data from a CSV and forms dataframes of 
 
 **there is no database at present and csv fed dataframes seems to be plenty effective for the time being**
 
+### Data
+* At present, data is queried from API's and stored as CSVs. 
+* Data is loaded by processor which takes raw data and parses it into desired tables and formats, stored as CSVs.
+* The server reads the CSV's and formats columns defined in each `models.py`
+
+This three step process helps by:
+
+* Reducing load times when starting up server (especially relevant when less frequent site visits)
+* Allows for faster development as no need to wait for processing each change.
+    * Allows more nuance in where in lifecycle of data to address issues.
+* Reduces unintended changes vs prior jupyter setup by enshrining queries into a `fetch.py` files.
+* Generate more meta tables which don't significantly affect load times to produce more enriched data.
+ 
 ## View
 Each folder has a `/templates` folder which contains jinja2 template files which are hybrid html/python files. 
 These define how to display information.

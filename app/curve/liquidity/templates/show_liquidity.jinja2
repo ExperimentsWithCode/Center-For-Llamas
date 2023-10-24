@@ -49,7 +49,7 @@
 
     <div class="row">
 
-        <div class="card text-white bg-info mb-3" >
+        <div class="card text-white bg-primary mb-3" >
           <div class="card-header">Vote Deltas</div>
           <div class="card-body">
               {# <h4 class="card-title">}</h4> #}
@@ -59,6 +59,20 @@
         </div>
 
     </div>
+
+  
+    <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" >
+          <div class="card-header">Liquidity by Asset (USD)</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart3" class="chart3"></div>
+          </div>
+        </div>
+    </div>
+
 
     <div class="row">
 
@@ -72,7 +86,18 @@
         </div>
     </div>
 
-    
+    <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" >
+          <div class="card-header">Liquidity by Asset (Native Units)</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart4" class="chart4"></div>
+          </div>
+        </div>
+    </div>
+
     <div class="row">
         <h4 class="text-primary">Votes Per Round</h4>
 
@@ -107,6 +132,16 @@
 <script type='text/javascript'>
   var graphs2 = {{graphJSON2 | safe}};
   Plotly.plot('chart2',graphs2,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs3 = {{graphJSON3 | safe}};
+  Plotly.plot('chart3',graphs3,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs4 = {{graphJSON4 | safe}};
+  Plotly.plot('chart4',graphs4,{});
 </script>
 
 {# <script type='text/javascript'>

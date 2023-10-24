@@ -33,6 +33,7 @@ class LiquidityProcessor():
         self.all_by_gauge_address = {}
         self.period_filtered_by_gauge = {}
         self.last_output_per_gauge_per_asset = {}
+        self.total_records = {}
         self.process_liquidity()
 
     def process_liquidity(self):
@@ -51,6 +52,17 @@ class LiquidityProcessor():
             gauge_addr = self.output[-1]['gauge_addr']
             token_symbol = self.output[-1]['token_symbol']
             this_output = self.output[-1]
+
+            # Most spam only has one balance change. 
+            ##  To fight filling in spam transactions, 
+            ##  Track how many records there are per gauge/token
+            if not gauge_addr in self.total_records:
+                self.total_records[gauge_addr] = {}
+                self.total_records[gauge_addr][token_symbol] = 0
+            elif not token_symbol in self.total_records[gauge_addr]:
+                self.total_records[gauge_addr][token_symbol] = 0
+            self.total_records[gauge_addr][token_symbol] += 1
+            
             # If first record then start here and skip filling in missing data
             if (
                 gauge_addr in self.last_output_per_gauge_per_asset and
@@ -59,7 +71,7 @@ class LiquidityProcessor():
                 last_output = self.last_output_per_gauge_per_asset[gauge_addr][token_symbol]
             else:
                 last_output = None
-            # Loop to fill in missing dates
+            # Loop to fill in missing dates between records
             while self.is_there_a_gap(this_output, last_output):
                 last_output = last_output.copy()
                 date = last_output['date']
@@ -71,18 +83,61 @@ class LiquidityProcessor():
             if not gauge_addr in self.last_output_per_gauge_per_asset:
                 self.last_output_per_gauge_per_asset[gauge_addr] = {}
             self.last_output_per_gauge_per_asset[gauge_addr][token_symbol] = this_output
+        # Loop to fill in missing between last and today
+        # print("MADE IT TO FILLING IN FINAL GAPS")
+        now = dt.now().date()
+        now = now - timedelta(days=5)
+        # print(f"~Today: {now}")
+        self.fill_in_gaps_to_current_date()
 
-    def is_there_a_gap(self, this_output, last_output):
+    def is_there_a_gap(self, this_output, last_output, this_output_is_date=False):
+        # If Return True, next record procssed is 1 day later than last_ouput
+        # As such there is always a minimum of 1 day buffer in when True is returned
         if last_output:
-            date_spread = this_output['date'] - last_output['date']
-            if date_spread.days > 1:
-                # print(f"\tfill in: {last_output['date']} to {this_output['date']} | Days to go: {date_spread.days - 1}")
-                # print(f"\t\t{last_output['display_symbol']} | {last_output['token_symbol']}")
-                return True
+            if this_output_is_date:
+                # Current record does not exist (so process one more time to create current days record)
+                date_spread = this_output - last_output['date']
+                # print(f"Date Now {this_output}\tDate Compare {last_output['date']}")
+                # print(f"Date spread {date_spread}")
+                if date_spread.days >= 1:
+                    # print("\n\tProcess next day\n")
+                    return True
+            else:
+                # Current record exists
+                date_spread = this_output['date'] - last_output['date']
+                if date_spread.days > 1:
+                    # print(f"\tfill in: {last_output['date']} to {this_output['date']} | Days to go: {date_spread.days - 1}")
+                    # print(f"\t\t{last_output['display_symbol']} | {last_output['token_symbol']}")
+                    return True
         return False
     
 
-        
+    def fill_in_gaps_to_current_date(self):
+        # Loop to fill in missing between last and today
+        # print("MADE IT TO FILLING IN FINAL GAPS")
+        now = dt.now().date()
+        now = now - timedelta(days=5)
+        # print(f"~Today: {now}")
+        for gauge_key in self.last_output_per_gauge_per_asset.keys():
+            record = self.last_output_per_gauge_per_asset[gauge_key]
+            for asset_key in record.keys():
+                # Filter out records where there was only one balance update to fight spam tokens
+                if self.total_records[gauge_key][asset_key] < 2:
+                    # print(f"\tSkipping Token: {asset_key}")
+                    continue
+                # print(f"Gauge: \n\t{gauge_key} \n Asset \n\t{asset_key}")
+                last_output = record[asset_key]
+                # print(last_output)
+                while self.is_there_a_gap(now, last_output, True):
+                    last_output = last_output.copy()
+                    date = last_output['date']
+                    date_next = date +  timedelta(days=1)
+                    last_output['date'] = date_next
+                    last_output['delta_native'] = 0
+                    last_output['delta_usd'] = 0        
+                    self.process_row(last_output, False)
+
+
     def process_row(self, row, is_row_raw= True):
         if is_row_raw:
             date = row['date'] if 'date' in row else row['DATE']
@@ -97,10 +152,9 @@ class LiquidityProcessor():
             # bal_delta_usd = row['bal_delta_usd'] if 'bal_delta_usd' in row else row['BAL_DELTA_USD']
             current_bal = row['current_bal'] if 'current_bal' in row else row['CURRENT_BAL']
             current_bal_usd = row['current_bal_usd'] if 'current_bal_usd' in row else row['CURRENT_BAL_USD']
-            # format
             current_bal = float(current_bal)
             current_bal_usd = float(current_bal_usd)
-            has_price = bool(has_price)
+            has_price = False if has_price == 'False' or has_price == 'false' else True
         else:
             date = row['date']
             token_address = row['token_address']
@@ -121,6 +175,10 @@ class LiquidityProcessor():
                 gauge_addr = self.gauge_registry.pools[pool_address].gauge_addr
                 pool_name = self.gauge_registry.pools[pool_address].pool_name
                 pool_symbol = self.gauge_registry.pools[pool_address].pool_symbol
+                if not pool_symbol:
+                    if self.gauge_registry.pools[pool_address].token_symbol:
+                        pool_symbol = self.gauge_registry.pools[pool_address].pool_symbol
+
 
             else: 
                 # print("Couldn't find in gauge_registry")
@@ -137,8 +195,9 @@ class LiquidityProcessor():
             df_all_by_gauge_search = self.all_by_gauge_address[gauge_addr]
 
             # Minimize Filter by Date
-            ## Store last date search          
-            # period_filtered_by_gauge[gauge_addr] = gauge votes filtered by that gauge address before this date     
+            ##  Store last date search          
+            ##  period_filtered_by_gauge[gauge_addr] = gauge votes 
+            ##    filtered by that gauge address before this date     
             if not gauge_addr in self.period_filtered_by_gauge:
                 temp_df_1 = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date <= date]
                 self.period_filtered_by_gauge[gauge_addr] = temp_df_1      
@@ -216,8 +275,22 @@ class LiquidityProcessor():
             return False 
         return True
     
+    # WIP
+    ## Sometimes removes pools if only single deposit and no further action
+    ## But tradeoff feels reasonable to purge spam
+    def purge_shitcoins(self, df):
+        for gauge_key in self.total_records:
+            for asset_key in self.total_records[gauge_key]:
+                if self.total_records[gauge_key][asset_key] < 2:
+                    # print(f"Removing {asset_key} from {gauge_key}")
+                    df = df[~(
+                            (df['token_symbol'] == asset_key) & 
+                            (df['gauge_addr'] == gauge_key)
+                        )]
+        return df
+            
     def get_df(self):
-        out_df = pd.json_normalize(self.output)
+        out_df = self.purge_shitcoins(pd.json_normalize(self.output))
         try:
             out_df = out_df.sort_values(['date', 'liquidity'], axis = 0, ascending = False)
         except:

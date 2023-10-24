@@ -158,6 +158,13 @@ def show(gauge_addr):
 
 
         graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+        fig = px.bar(local_all_df_curve_liquidity, x="date", y="liquidity", color="token_symbol", title="Liquidity By Asset")
+        graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+        fig = px.bar(local_all_df_curve_liquidity, x="date", y="liquidity_native", color="token_symbol", title="Native Liquidity By Asset")
+        graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
     else:
         graphJSON = None
         graphJSON2 = None
@@ -171,6 +178,9 @@ def show(gauge_addr):
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
+        graphJSON3 = graphJSON3,
+        graphJSON4 = graphJSON4
+
 
     )
 

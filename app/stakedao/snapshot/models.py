@@ -82,11 +82,11 @@ def get_aggregates(df_vote_choice):
 
 df_snapshot = get_df_snapshot()
 snapshot = get_snapshot_obj(df_snapshot)
-df_stakedao_snapshot_vote_choice = get_df_vote_choice(snapshot)
+df_stakedao_snapshot_vote_choice_temp = get_df_vote_choice(snapshot)
 
 stakedao_snapshot_proposal_choice_map = snapshot.format_choice_map_output()
 
-a, b= merge_target(df_stakedao_snapshot_vote_choice, stakedao_snapshot_proposal_choice_map, 'stakedao')
+a, b= merge_target(df_stakedao_snapshot_vote_choice_temp, stakedao_snapshot_proposal_choice_map, 'stakedao')
 df_stakedao_snapshot_vote_choice = a
 stakedao_snapshot_proposal_choice_map = b 
 

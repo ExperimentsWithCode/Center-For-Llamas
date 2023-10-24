@@ -2,29 +2,34 @@
 
 
 <div class ="row">
+    {% with unique_end_dates = df_gauge_rounds.period_end_date.unique() %}
 
-    <ul class="nav nav-tabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <a class="nav-link active" data-bs-toggle="tab" href="#thisRound" aria-selected="true" role="tab">This Round</a>
-    </li>
-    {% if table_type == "show" %}
+        <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" data-bs-toggle="tab" href="#thisRound" aria-selected="true" role="tab">This Round</a>
+        </li>
+        {% if table_type == "show" %}
+            {% if unique_end_dates|length > 1 %}
 
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" data-bs-toggle="tab" href="#priorRound" aria-selected="false" role="tab" tabindex="-1">Prior Round</a>
-    </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" data-bs-toggle="tab" href="#priorRound" aria-selected="false" role="tab" tabindex="-1">Prior Round</a>
+                </li>
+            {% endif %}
 
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" data-bs-toggle="tab" href="#twoPriorRound" aria-selected="false" role="tab" tabindex="-1">Two Prior Rounds</a>
-    </li>
-    {% endif %}
+            {% if unique_end_dates|length > 2 %}
 
-    <li class="nav-item" role="presentation">
-        <a class="nav-link" data-bs-toggle="tab" href="#allRounds" aria-selected="false" role="tab" tabindex="-1">All Rounds</a>
-    </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" data-bs-toggle="tab" href="#twoPriorRound" aria-selected="false" role="tab" tabindex="-1">Two Prior Rounds</a>
+                </li>
+            {% endif %}
+        {% endif %}
 
-    </ul>
-    <div id="myTabContent" class="tab-content">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" data-bs-toggle="tab" href="#allRounds" aria-selected="false" role="tab" tabindex="-1">All Rounds</a>
+        </li>
 
+        </ul>
+        <div id="myTabContent" class="tab-content">
         <div class="tab-pane fade active show" id="thisRound" role="tabpanel">
 
             {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.iloc[0]['period_end_date']] %}
@@ -42,25 +47,11 @@
         </div>
         {% if table_type == "show" %}
 
-        <div class="tab-pane fade" id="priorRound" role="tabpanel">
+            <div class="tab-pane fade" id="priorRound" role="tabpanel">
+            {% if unique_end_dates|length > 1 %}
 
-            {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.period_end_date.unique()[1] ] %}
-                {% with id="vote_table_2" %}
-                    {% if table_type == 'show' %}
-                        {% include 'gauge_rounds_show_table_helper.jinja2' %} 
-                    {% elif table_type == 'agg' %}
-                        {% include 'gauge_rounds_index_table_helper.jinja2' %} 
-                    {% elif table_type == 'voter' %}
-                        {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
-                    {% endif %}
-                {% endwith %}
-            {% endwith %}
-        </div>
-
-            <div class="tab-pane fade" id="twoPriorRound" role="tabpanel">
-
-                {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.period_end_date.unique()[2] ] %}
-                    {% with id="vote_table_3" %}
+                {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.period_end_date.unique()[1] ] %}
+                    {% with id="vote_table_2" %}
                         {% if table_type == 'show' %}
                             {% include 'gauge_rounds_show_table_helper.jinja2' %} 
                         {% elif table_type == 'agg' %}
@@ -71,6 +62,24 @@
                     {% endwith %}
                 {% endwith %}
             </div>
+            {% endif %}
+
+            {% if unique_end_dates|length > 2 %}
+                <div class="tab-pane fade" id="twoPriorRound" role="tabpanel">
+
+                    {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.period_end_date.unique()[2] ] %}
+                        {% with id="vote_table_3" %}
+                            {% if table_type == 'show' %}
+                                {% include 'gauge_rounds_show_table_helper.jinja2' %} 
+                            {% elif table_type == 'agg' %}
+                                {% include 'gauge_rounds_index_table_helper.jinja2' %} 
+                            {% elif table_type == 'voter' %}
+                                {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                </div>
+            {% endif %}
         {% endif %}
 
             
@@ -89,6 +98,7 @@
                 {% endwith %}
             </div>
         </div>  
+    {% endwith %}
 
 
 </div>

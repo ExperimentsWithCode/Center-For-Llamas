@@ -79,7 +79,7 @@
 
             },
             { id: 'liquidity_over_votes', name: 'Liquidity/Votes',
-                formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {# formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, #}
                 {% include 'utility_sort_float.jinja2' %} 
 
             },

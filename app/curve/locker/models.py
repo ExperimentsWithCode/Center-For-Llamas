@@ -8,7 +8,9 @@ from app.data.reference import (
     filename_curve_locker_known_locks 
 )
 
-import datetime
+from datetime import datetime as dt
+from datetime import timedelta
+
 from app.data.local_storage import (
     pd,
     read_json,
@@ -22,7 +24,7 @@ from app.data.local_storage import (
 print("Loading... { curve.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
-    now = datetime.now()
+    now = dt.now()
     # Calc remaining lock
     now = now.date()
     ## Weeks until lock expires

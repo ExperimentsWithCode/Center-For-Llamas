@@ -83,7 +83,7 @@ def show(user):
     if not (df_gauge_votes_formatted['user'] == user).any():
         return render_template(
             'gauge_votes_not_found.jinja2',
-            title='Convex Snapshot Gauge Weight Votes',
+            title='Curve Gauge Votes',
             template='gauge-votes-show',
             body="",
             user = user,

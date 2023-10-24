@@ -131,12 +131,29 @@ def show(gauge_addr):
     local_df_gauge_rounds = df_all_by_user[df_all_by_user['gauge_addr'] == gauge_addr]
     local_df_gauge_rounds = local_df_gauge_rounds.sort_values(["this_period", 'vote_power'], axis = 0, ascending = False)
 
+    if len(local_df_gauge_rounds) == 0:
+        return render_template(
+            'gauge_rounds_not_found.jinja2',
+            title='Votes Per Gauge Round',
+            template='gauge-votes-show',
+            body="",
+            gauge_addr = gauge_addr,
+            )
+    
     period_end_dates = df_all_by_gauge.period_end_date.unique()
     period_end_dates = sorted(period_end_dates)
-    current_period = period_end_dates[-1]
-    prior_period = period_end_dates[-2]
+    if len(period_end_dates) >= 2:
+        current_period = period_end_dates[-1]
+        prior_period = period_end_dates[-2]
+    elif len(period_end_dates == 1):
+        current_period = period_end_dates[-1]
+        prior_period = None
+
     df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == current_period]
-    df_prior_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == prior_period]
+    if prior_period:
+        df_prior_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == prior_period]
+    else:
+        df_prior_votes == []
 
     # df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == max_value]
     
@@ -159,7 +176,7 @@ def show(gauge_addr):
                     x=local_df_gauge_rounds['period_end_date'],
                     y=local_df_gauge_rounds['vote_power'],
                     color='user',
-                    title='Votes Per Round',
+                    title='Votes Per Gauge Round',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
@@ -207,7 +224,7 @@ def show(gauge_addr):
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         local_df_gauge_rounds = local_df_gauge_rounds,
         sum_current_votes = df_current_votes.vote_power.sum(),
-        sum_prior_votes = df_prior_votes.vote_power.sum(),
+        sum_prior_votes = df_prior_votes.vote_power.sum() if len(df_prior_votes) > 0 else 0,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,
