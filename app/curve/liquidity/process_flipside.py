@@ -85,8 +85,6 @@ class LiquidityProcessor():
             self.last_output_per_gauge_per_asset[gauge_addr][token_symbol] = this_output
         # Loop to fill in missing between last and today
         # print("MADE IT TO FILLING IN FINAL GAPS")
-        now = dt.now().date()
-        now = now - timedelta(days=5)
         # print(f"~Today: {now}")
         self.fill_in_gaps_to_current_date()
 
@@ -116,7 +114,6 @@ class LiquidityProcessor():
         # Loop to fill in missing between last and today
         # print("MADE IT TO FILLING IN FINAL GAPS")
         now = dt.now().date()
-        now = now - timedelta(days=5)
         # print(f"~Today: {now}")
         for gauge_key in self.last_output_per_gauge_per_asset.keys():
             record = self.last_output_per_gauge_per_asset[gauge_key]
