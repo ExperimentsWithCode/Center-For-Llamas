@@ -95,7 +95,7 @@ def get_df_and_target(filename, target = 'block_timestamp'):
     # Get Max Value of target
     temp_df = df.sort_values(target).tail(1)
     search_result = temp_df.iloc[0][target] 
-
+    df = df[df[target] < search_result]
     try:
         if 'T' in search_result:
             split = search_result.split("T")

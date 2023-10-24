@@ -12,7 +12,7 @@
           {# { id: 'user', name: 'User' }, #}
           { id: 'symbol', name: 'Symbol' },
           { id: 'weight', name: 'Weight',
-            {% include 'utility_sort_int.jinja2' %} 
+            {% include 'utility_sort_float.jinja2' %} 
           },
           { id: 'gauge_addr', name: 'Gauge Address',
             formatter: (_, row) => gridjs.html(

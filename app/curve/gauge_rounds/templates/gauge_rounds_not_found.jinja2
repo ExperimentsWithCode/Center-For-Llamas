@@ -13,25 +13,34 @@
 
     <div class="row">
       <h1>{{ title }}</h1>
+    </div>
 
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">{{gauge_addr}}</div>
+    {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
+      {% with page_type='curve' %}
+        {% include 'gauge_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+    <div class="row">
+
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        {# <div class="card-header"></div> #}
         <div class="card-body">
-          <h4 class="card-title"></h4>
+          <h4 class="card-title text-secondary">No Votes Found</h4>
+          <p class="card-text">It does not appear that this gauge has ever been voted for.</p> 
 
         </div>
       </div>
-      
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Something went wrong</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">No Votes Found</h4>
-          <p class="card-text">It does not appear that this gauge has been voted into governance yet.</p> 
 
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Governance Approval</div>
+        <div class="card-body">
+        {% if local_df_curve_gauge_registry.iloc[0]['vote_timestamp'] %}
+          <h4 class="card-title text-primary">Voted in: {{local_df_curve_gauge_registry.iloc[0]['vote_timestamp']}}</h4>
+        {% else %}
+          <h4 class="card-title text-secondary">Not yet approved by governance</h4>
+        {% endif %}
         </div>
       </div>
     </div>
-
-
 
 {% endblock %}

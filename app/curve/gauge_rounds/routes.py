@@ -137,7 +137,7 @@ def show(gauge_addr):
             title='Votes Per Gauge Round',
             template='gauge-votes-show',
             body="",
-            gauge_addr = gauge_addr,
+            local_df_curve_gauge_registry = local_df_curve_gauge_registry,
             )
     
     period_end_dates = df_all_by_gauge.period_end_date.unique()

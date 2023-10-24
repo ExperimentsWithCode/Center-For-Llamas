@@ -5,7 +5,7 @@ def generate_query(min_block_timestamp=None):
     curve_voter_address = '0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB'
 
     if min_block_timestamp:
-        filter_line = f"AND BLOCK_TIMESTAMP > '{min_block_timestamp}'"
+        filter_line = f"AND BLOCK_TIMESTAMP >= '{min_block_timestamp}'"
     else:
         filter_line = ""
 
