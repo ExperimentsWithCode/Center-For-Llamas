@@ -104,11 +104,10 @@ def get_period_end_date(time):
     week_num = int(time.strftime("%V"))
     week_day = int(time.weekday())      # starts sunday
 
-    day = int(time.day)
     month = int(time.month)
     if week_num > 50 and month == 1:
         week_num = 1
-    if week_day > 5:
+    if week_day >= 5:
         week_num += 1
     # print(time)
     try:

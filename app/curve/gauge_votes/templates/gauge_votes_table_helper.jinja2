@@ -1,0 +1,63 @@
+<div class="row">
+
+    <div id='{{ id }}' ></div>
+</div>
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'period', name: 'Period' },
+          { id: 'known_as', name: 'Known As' },
+          {# { id: 'user', name: 'User' }, #}
+          { id: 'symbol', name: 'Symbol' },
+          { id: 'weight', name: 'Weight',
+            {% include 'utility_sort_int.jinja2' %} 
+          },
+          { id: 'gauge_addr', name: 'Gauge Address',
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[4].data.toString()}`
+            )
+          },
+          { id: 'time', name: 'Timestamp' },
+
+        ],
+        data: [
+          {% for index, row in df.iterrows() %}
+            {
+              'period': '{{ row['period'] }}',
+              'known_as': '{{ row['known_as'] }}',
+              {# 'user': '{{ row['user'] }}', #}
+              'symbol': '{{ row['symbol'] }}',
+              'weight': '{{ row['weight'] }}',
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+              'time': '{{ row['time'] }}',
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        autoWidth: true,
+
+        pagination: {
+          limit: 20,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-{{table_type}}',
+          table: 'table table-hover' 
+        },
+          style: {
+
+            td: {
+              'max-width': '120px',
+              'overflow': 'hidden',
+              'text-overflow': 'ellipsis',
+              'white-space': 'nowrap',
+            }
+
+          }   
+      }).render(document.getElementById( '{{ id }}' ));
+</script>

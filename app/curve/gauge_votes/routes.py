@@ -44,25 +44,50 @@ def index():
                 'period_end_date', 'period', 
             ])['voter'].agg(['count']).reset_index()
 
- 
+    local_df_gauge_votes_formatted = df_gauge_votes_formatted[[
+            'period_end_date','period', 'voter',
+            ]].groupby([
+                'period_end_date', 'period', 
+            ])['voter'].agg(['count']).reset_index()
+    
     # Build chart
-    fig = px.line(local_df_gauge_votes,
+    fig = px.bar(local_df_gauge_votes,
                     x=local_df_gauge_votes['period_end_date'],
                     y=local_df_gauge_votes['count'],
                     # color='known_as',
-                    title='# of Votes per round',
-                    line_shape='hv',
+                    title='Currently Active Vote Count Per Round',
+                    # line_shape='hv',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     hover_data=['period'], labels={'period':'period'}
 
                     )
+    
+
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
 
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    fig = px.bar(local_df_gauge_votes_formatted,
+                    x=local_df_gauge_votes_formatted['period_end_date'],
+                    y=local_df_gauge_votes_formatted['count'],
+                    # color='known_as',
+                    title='Placed Vote Count Per Round',
+                    # line_shape='hv',
+                    # facet_row=facet_row,
+                    # facet_col_wrap=facet_col_wrap
+                    hover_data=['period'], labels={'period':'period'}
+
+                    )
+    
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template(
         'index_gauge_votes.jinja2',
@@ -71,6 +96,7 @@ def index():
         body="",
         votes = df_current_gauge_votes,
         graphJSON = graphJSON,
+        graphJSON2 = graphJSON2,
     )
 
 
@@ -88,14 +114,32 @@ def show(user):
             body="",
             user = user,
             )
+    # Get Local votes by active and inactive
     local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
 
-    local_df_gauge_votes = local_df_gauge_votes.sort_values("time", axis = 0, ascending = False)
+    local_df_gauge_votes = local_df_gauge_votes.sort_values(["time", 'weight'], axis = 0, ascending = False)
     local_df_gauge_votes_inactive = local_df_gauge_votes[local_df_gauge_votes['weight'] == 0]
     local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['weight'] > 0]
 
+    local_df_gauge_votes_formatted = df_gauge_votes_formatted[df_gauge_votes_formatted['user'] == user]
+    local_df_gauge_votes_formatted = local_df_gauge_votes_formatted.sort_values(["time", 'weight'], axis = 0, ascending = False)
+
+    # Get vote counts for charts
+    local_df_gauge_votes_counts = local_df_gauge_votes[[
+            'period_end_date','period', 'voter',
+            ]].groupby([
+                'period_end_date', 'period', 
+            ])['voter'].agg(['count']).reset_index()
+
+    local_df_gauge_votes_formatted_counts = local_df_gauge_votes_formatted[[
+            'period_end_date','period', 'voter',
+            ]].groupby([
+                'period_end_date', 'period', 
+            ])['voter'].agg(['count']).reset_index()
+    
     # # Build chart
+    # Current distribution
     fig = px.pie(local_df_gauge_votes, 
                 values=local_df_gauge_votes['weight'],
                 names=local_df_gauge_votes['gauge_addr'],
@@ -109,6 +153,49 @@ def show(user):
     # # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+
+    # Build chart
+    # Round Active Votes Places
+    fig = px.bar(local_df_gauge_votes_counts,
+                    x=local_df_gauge_votes_counts['period_end_date'],
+                    y=local_df_gauge_votes_counts['count'],
+                    # color='known_as',
+                    title='Currently Active Vote Count Per Round',
+                    # line_shape='hv',
+                    # facet_row=facet_row,
+                    # facet_col_wrap=facet_col_wrap
+                    hover_data=['period'], labels={'period':'period'}
+
+                    )
+
+
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    # Build Chart
+    # Round all votes placed
+    fig = px.bar(local_df_gauge_votes_formatted_counts,
+                    x=local_df_gauge_votes_formatted_counts['period_end_date'],
+                    y=local_df_gauge_votes_formatted_counts['count'],
+                    # color='known_as',
+                    title='Placed Vote Count Per Round',
+                    # line_shape='hv',
+                    # facet_row=facet_row,
+                    # facet_col_wrap=facet_col_wrap
+                    hover_data=['period'], labels={'period':'period'}
+
+                    )
+    
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
     return render_template(
         'show_gauge_votes.jinja2',
         title='Curve Gauge Votes',
@@ -116,8 +203,12 @@ def show(user):
         body="",
         votes = local_df_gauge_votes,
         inactive_votes = local_df_gauge_votes_inactive,
+        all_votes = local_df_gauge_votes_formatted,
         user = user,
-        graphJSON = graphJSON
+        graphJSON = graphJSON,
+        graphJSON2 = graphJSON2,
+        graphJSON3 = graphJSON3,
+
     )
 
 

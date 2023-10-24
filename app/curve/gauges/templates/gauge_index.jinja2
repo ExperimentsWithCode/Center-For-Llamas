@@ -64,7 +64,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'deployed_timestamp', name: ' Timestamp' },
+          { id: 'deployed_timestamp', name: 'Deployed Timestamp' },
           { id: 'vote_timestamp', name: 'Vote Timestamp' },
           { id: 'first_period', name: 'Gauge Round Created' },
 
@@ -78,7 +78,6 @@
               )
           },
           { id: 'pool_addr', name: 'Pool Address' },
-
           { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
         ],
         data: [
@@ -92,9 +91,7 @@
               'gauge_name': '{{ row['gauge_name'] }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
               'pool_addr': '{{ row['pool_addr'] }}',
-
               '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`,
-
 
             },
           {% endfor %}

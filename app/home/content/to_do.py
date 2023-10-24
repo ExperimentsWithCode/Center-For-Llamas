@@ -53,7 +53,7 @@ to_do =markdown.markdown(
 * Locally select many filters to compare data. 
 * [] launch experimental pages which allow these sorts of filtered comparisons to be viewed. 
     * Acceptable to be pretty specific
-    * [X] Compare Top Vote Changes
+    * [x] Compare Top Vote Changes
         * [] Update Navigation
     * [x] Targetted Vote / Liquidity Comparissons
         * [] Add to Navigation
@@ -61,9 +61,11 @@ to_do =markdown.markdown(
 
 ## Gauge Votes
 * Edit table to display as tabs (currently all votes are not displayed): 
-    * [] Active Votes to tab format
-    * [] Inactive Votes to tab format
-    * [] All Votes include
+    * [X] Active Votes to tab format
+    * [X] Inactive Votes to tab format
+    * [X] All Votes include
+* [x] Add charts for All Votes not just active
+
 
 ## Add Description of metholodgy to each page
     * [] Pages w/ direct queries
@@ -73,7 +75,7 @@ to_do =markdown.markdown(
     * Takes like 10 minutes where significant time is taken to filter out shitcoins.
     * [] Revise process for less heavy burden on filtering.
     * [] Need to solve hacked assets which have no balance changes but price prior to hack since no trades/moves after drained.
-    
+
 ''',
 extensions=["fenced_code"]
 )

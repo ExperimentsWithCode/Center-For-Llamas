@@ -17,7 +17,7 @@
     <div class="row">
 
         <div class="card border-info mb-3", style="max-width: 50%;" >
-          <div class="card-header">Address</div>
+          <div class="card-header">Voter Address</div>
           <div class="card-body">
               <h4 class="card-title">{{user}}</h4>
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -44,40 +44,45 @@
     </div>
 
     <div class ="row">
-        <div class="card text-white bg-primary mb-3" >
-          <div class="card-header">Currently Active Votes : {{ votes.shape[0] }}</div>
+      <div class="card text-white bg-info mb-3" style="max-width: 50%;">
+        <div class="card-header">Active Vote Distribution - Count: {{ votes.shape[0] }}</div>
+        <div class="card-body">
+            {# <h4 class="card-title">{{votes.iloc[0]['known_as']}}</h4> #}
+
+            {# <h4 class="card-title">Current Votes : {{ votes.shape[0] }}</h4> #}
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart" class="chart"></div>
+
+        </div>
+      </div>
+
+      <div class="card text-white bg-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Active Votes</div>
+        <div class="card-body">
+            {# <h4 class="card-title">{{votes.iloc[0]['known_as']}}</h4> #}
+
+            {# <h4 class="card-title">Current Votes : {{ votes.shape[0] }}</h4> #}
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart2" class="chart2"></div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class ="row">
+        <div class="card text-white bg-secondary mb-3" >
+          <div class="card-header">All Votes Placed By Voter</div>
           <div class="card-body">
               {# <h4 class="card-title">{{votes.iloc[0]['known_as']}}</h4> #}
 
               {# <h4 class="card-title">Current Votes : {{ votes.shape[0] }}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              <div id="chart" class="chart"></div>
+              <div id="chart3" class="chart3"></div>
 
           </div>
         </div>
     </div>
-    <div class="row">
-
-        <div id="chart" class="chart"></div>
-
-    </div>
-    <div class="row">
-
-        <h4 class="text-primary">Currently Active Votes</h4>
-
-        <div id="vote_table"></div>
-
-    </div>
-    <div class="row">
-
-        <h4 class="text-secondary">Currently Inactive Votes</h4>
-
-        <div id="inactive_vote_table"></div>
-
-    </div>
-
-
-
 
 
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
@@ -86,104 +91,21 @@
   Plotly.plot('chart',graphs,{});
 </script>
 
-
-
 <script type='text/javascript'>
-      new gridjs.Grid({
-        columns: [
-          { id: 'period', name: 'Period' },
-          { id: 'known_as', name: 'Known As' },
-          { id: 'user', name: 'User' },
-          { id: 'symbol', name: 'Symbol' },
-          { id: 'weight', name: 'Weight' },
-          { id: 'gauge_addr', name: 'Gauge Address',
-            formatter: (_, row) => gridjs.html(
-              `<a href=${row.cells[7].data}>${row.cells[5].data}</a>`
-            )
-          
-          },
-          { id: 'time', name: 'Timestamp' },
-          { id: '_', name: '_', 
-            formatter: (_, row) => gridjs.html(``)
-
-          },
-        ],
-        data: [
-          {% for index, row in votes.iterrows() %}
-            {
-              'period': '{{ row['period'] }}',
-              'known_as': '{{ row['known_as'] }}',
-              'user': '{{ row['user'] }}',
-              'symbol': '{{ row['symbol'] }}',
-              'weight': '{{ row['weight'] }}',
-              'gauge_addr': '{{ row['gauge_addr'] }}',
-              'time': '{{ row['time'] }}',
-              '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`
-
-            },
-          {% endfor %}
-        ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
-      }).render(document.getElementById('vote_table'));
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
 </script>
 
 
 <script type='text/javascript'>
-      new gridjs.Grid({
-        columns: [
-          { id: 'period', name: 'Period' },
-          { id: 'known_as', name: 'Known As' },
-          { id: 'user', name: 'User' },
-          { id: 'symbol', name: 'Symbol' },
-          { id: 'weight', name: 'Weight' },
-          { id: 'gauge_addr', name: 'Gauge Address',
-            formatter: (_, row) => gridjs.html(
-              `<a href=${row.cells[7].data}>${row.cells[5].data}</a>`
-            )
-          
-          },
-          { id: 'time', name: 'Timestamp' },
-          { id: '_', name: '_',
-            formatter: (_, row) => gridjs.html(``)
-          },
-        ],
-        data: [
-          {% for index, row in inactive_votes.iterrows() %}
-            {
-              'period': '{{ row['period'] }}',
-              'known_as': '{{ row['known_as'] }}',
-              'user': '{{ row['user'] }}',
-              'symbol': '{{ row['symbol'] }}',
-              'weight': '{{ row['weight'] }}',
-              'gauge_addr': '{{ row['gauge_addr'] }}',
-              'time': '{{ row['time'] }}',
-              '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`
-
-            },
-          {% endfor %}
-        ],
-        fixedHeader: true,
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-secondary',
-          table: 'table table-hover' 
-        }
-      }).render(document.getElementById('inactive_vote_table'));
+  var graphs3 = {{graphJSON3 | safe}};
+  Plotly.plot('chart3',graphs3,{});
 </script>
+
+
+
+
+  {% include 'gauge_votes_table_manager.jinja2' %} 
+
+
 {% endblock %}
