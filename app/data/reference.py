@@ -37,7 +37,7 @@ known_large_cvx_holders_addresses = {
     '0x51c2cef9efa48e08557a361b52db34061c025a1b' : 'JPEGD',
     '0xa52fd396891e7a74b641a2cb1a6999fcf56b077e' : 'Redacted',
     '0x597f540bb63381ffa267027d2d479984825057a8' : 'Mochi Inu',
-    '0xc6625129c9df3314a4dd604845488f4ba62f9db8' : 'Reserve 1',
+    '0xc6625129c9df3314a4dd604845488f4ba62f9db8' : 'Reserve',
     '0x2d643df5de4e9ba063760d475beaa62821c71681' : 'Olympus',
     '0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83' : 'Keeper',
     '0x9e2b6378ee8ad2a4a95fe481d63caba8fb0ebbf9' : 'Alchemix',
@@ -56,10 +56,11 @@ known_large_cvx_holders_addresses = {
     '0x5180db0237291a6449dda9ed33ad90a38787621c' : 'frax',	
     '0x9b8b04b6f82cd5e1dae58ca3614d445f93defc5c' : 'silo',	
     '0x131bd1a2827cceb2945b2e3b91ee1bf736ccbf80' : 'olympus',	
-    '0x79e76c14b3bb6236dfc06d2d7ff219c8b070169c' : 'Reserve',	
+    '0x79e76c14b3bb6236dfc06d2d7ff219c8b070169c' : 'Reserve Delegate 1',	
     '0x68378fcb3a27d5613afcfddb590d35a6e751972c' : 'Paladin',	
     '0x8200d84590eceb10c6471268930e2924f34e3d69' : 'Bent',	
-    '0xd733d4cc5b42206a62ed7b1ceec5b4d61898f429' : 'Reserve',
+    '0xd733d4cc5b42206a62ed7b1ceec5b4d61898f429' : 'Reserve Delegate 2',
+    '0x578a4af5cbc3009487a89be88bc560157200795b' : 'Reserve Delegate 3'
 }
 
 
@@ -76,7 +77,9 @@ known_large_curve_holders = {
     '0x847fa1a5337c7f24d7066e467f2e2a0f969ca79f' : 'Frax',
     '0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8' : 'Liquity',
     '0x7a16ff8270133f063aab6c9977183d9e72835428' : 'CRV Founder',
-    '0x52f737774c470e38b4f0109a2c852b129df14302': 'Wintermute(?)'
+    '0x52f737774c470e38b4f0109a2c852b129df14302': 'Wintermute(?)',
+    '0x490b8c6007ffa5d3728a49c2ee199e51f05d2f7e': 'Prisma Fi',
+    '0x51c2cef9efa48e08557a361b52db34061c025a1b': 'JPEGd'
     }
 
 
@@ -105,6 +108,7 @@ gauge_symbols = {
 
 }
 
+# Curve Data
 filename_curve_gauges = 'gauge_to_lp_map'
 
 filename_curve_locker = 'curve_locker'
@@ -125,3 +129,12 @@ filename_curve_gauge_rounds_by_aggregate = 'curve_gauge_rounds_by_aggregate'
 
 filename_curve_liquidity = 'curve_liquidity'
 filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate'
+
+# Convex Data
+filename_convex_delegations = 'convex_delegations'
+filename_convex_locker = 'convex_locker'
+
+# StakeDao Data
+filename_stakedao_delegations = 'stakedao_delegations'
+filename_stakedao_staked_sdcrv = 'stakedao_staked_sdcrv'
+filename_stakedao_locker = 'stakedao_locker'

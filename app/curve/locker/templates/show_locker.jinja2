@@ -31,11 +31,11 @@
         <div class="card border-warning mb-3", style="max-width: 50%;" >
           <div class="card-header">Known As</div>
           <div class="card-body">
-            {% if lockers.iloc[0]['known_as'] =='_' %}
-
-              <h4 class="card-title">{{ lockers.iloc[0]['known_as'] }}</h4>
-            {% else %}
+            {% if lockers.iloc[0]['known_as'] == '_' %}
               <h4 class="card-title"> _ </h4>
+
+            {% else %}
+              <h4 class="card-title">{{ lockers.iloc[0]['known_as'] }}</h4>
 
             {% endif %}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}

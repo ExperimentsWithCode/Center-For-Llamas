@@ -23,7 +23,10 @@
               <p class="card-text">Currently uses "N/A" for gauges which were sourced from scraping the website vs onchain. 
               Mostly refered to as "Core". These pools do not show on the table below due to lack of creation blocktime.
               </p>
-
+              <p class="card-text">Currently there is not a record of all deployments.
+              </p>
+              <p class="card-text">Rows with a <strong>Vote Timestamp</strong> have been whitelisted by governance to recieve CRV issuance as determined by gauge vote.
+              </p>
           </div>
         </div>
 
@@ -42,7 +45,7 @@
     <div class="row">
 
       <div class="card text-white bg-primary mb-3" >
-        <div class="card-header">Gauge Creation</div>
+        <div class="card-header">Gauge's Approved By Governance Per Round</div>
         <div class="card-body">
             {# <h4 class="card-title">??}}</h4> #}
             {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -51,9 +54,10 @@
       </div>
     </div>
 
-  <div class="row">
-      <h4 class="text-primary">Gauge Indexed</h4>
 
+
+  <div class="row">
+      <h4 class="text-primary">Gauge Index</h4>
       <div id="gauge_table"></div>
   </div>
 
@@ -73,25 +77,23 @@
 
           { id: 'gauge_name', name: 'Gauge Name' },
           { id: 'gauge_addr', name: 'Gauge Address',
-              formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[8].data}>${row.cells[6].data}</a>`
-              )
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[6].data.toString()}`
+            )
           },
           { id: 'pool_addr', name: 'Pool Address' },
-          { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
         ],
         data: [
           {% for index, row in df_curve_gauge_registry.iterrows() %}
             {
-              'deployed_timestamp': '{{ row['deployed_timestamp'] }}',
+              'deployed_timestamp': '{{ row['deployed_timestamp'][:10] }}',
               'vote_timestamp': '{{ row['vote_timestamp'] }}',
               'first_period': '{{ row['first_period'] }}',
               'type_name': '{{ row['type_name'] }}',
               'source': '{{ row['source'] }}',
               'gauge_name': '{{ row['gauge_name'] }}',
-              'gauge_addr': '{{ row['gauge_addr'] }}',
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
               'pool_addr': '{{ row['pool_addr'] }}',
-              '_': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`,
 
             },
           {% endfor %}

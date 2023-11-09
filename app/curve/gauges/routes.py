@@ -38,7 +38,7 @@ gauges_bp = Blueprint(
 # @login_required
 def index():
     local_df_curve_gauge_registry = df_curve_gauge_registry.sort_values("deployed_timestamp", axis = 0, ascending = False)
-
+    local_df_curve_gauge_registry
 
 
     df2 = df_curve_gauge_registry.groupby(['first_period_end_date', 'source'])['gauge_addr'].count()
@@ -48,7 +48,7 @@ def index():
                     x=df2['first_period_end_date'],
                     y=df2['gauge_addr'],
                     color='source',
-                    title='Gauges Created Per Round',
+                    title='Gauges Voted in Per Round',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     
@@ -57,14 +57,13 @@ def index():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-
     return render_template(
         'gauge_index.jinja2',
         title='Curve Gauges',
         template='gauge-votes-show',
         body="",
         df_curve_gauge_registry = local_df_curve_gauge_registry,
-        graphJSON = graphJSON
+        graphJSON = graphJSON,
     )
 
 

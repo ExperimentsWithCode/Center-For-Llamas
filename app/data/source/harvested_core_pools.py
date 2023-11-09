@@ -606,6 +606,13 @@ temp_core_pools = {
 
 },
 
+ 'fraxusdp' : {
+    '0xfb860600f1be1f1c72a89b2ef5caf345aff7d39d': 'gauge address',
+    '0xae34574ac03a15cd58a92dc79de7b1a0800f1ce3': 'swap address',
+    '0xfc2838a17d8e8b1d5456e0a351b0708a09211147': 'token address',
+    }
+
+
 }
 def get_core_pools(temp_core_pools):
     data_out = []
@@ -631,6 +638,7 @@ def get_core_pools(temp_core_pools):
                 adapter_addr = address.lower()
             elif 'staking rewards address' in value:
                 staking_rewards_addr = address.lower()
+
         data_out.append({
             'GAUGE_ADDR': gauge_addr,
             'GAUGE_NAME': pool_symbol + ' Curve Gauge',
