@@ -30,9 +30,9 @@ def shift_time_days(time, days=7, forward=True):
 
 
 def get_date_obj(time):
-    if len(time) == 0:
-        return None
     if type(time) == str:
+        if len(time) == 0:
+            return None
         if 'T' in time:
             try:
                 split = time.split("T")
