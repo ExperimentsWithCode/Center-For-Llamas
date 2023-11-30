@@ -10,13 +10,14 @@ def generate_query(min_block_timestamp=None):
         filter_line = ""
 
     query = f"""
-
     SELECT
     BLOCK_TIMESTAMP as block_timestamp,
     CONTRACT_NAME as contract_name,
+    CONTRACT_ADDRESS as contract_address,
     EVENT_NAME as event_name,
     DECODED_LOG:provider::string as provider,
-    DECODED_LOG:value::string as value,
+    (TO_NUMBER(DECODED_LOG:value::string) / POW(10,18)) as value,
+    ORIGIN_FROM_ADDRESS as origin_from_address,
     TX_HASH as tx_hash
     FROM ethereum.core.ez_decoded_event_logs
     WHERE CONTRACT_ADDRESS = lower('0x7f50786A0b15723D741727882ee99a0BF34e3466') -- sdCRV Gauge

@@ -1,5 +1,5 @@
 from flask import current_app as app
-from app.data.reference import filename_convex_locker, filename_convex_locker_aggregate
+from app.data.reference import filename_convex_locker
 
 from app.data.local_storage import (
     pd,
@@ -26,21 +26,31 @@ print("Loading... { convex.locker.models }")
 
 def format_df(df):
     key_list = df.keys()
+    if 'block_timestamp' in key_list:
+        df['block_timestamp'] = df['block_timestamp'].apply(get_date_obj)
 
     if 'locked_amount' in key_list:
         df['locked_amount'] = df['locked_amount'].astype(float)
 
-    if 'epoch_start' in key_list:
+    if '_epoch' in key_list:
         df['epoch_start'] = df['_epoch'].apply(get_dt_from_timestamp)
     
+    elif 'epoch_start' in key_list:
+        df['epoch_start'] = pd.to_datetime(df['epoch_start'])
+
     if 'epoch_end' in key_list:
-        df['epoch_end'] = df['epoch_end'].apply(get_dt_from_timestamp)
+        # df['epoch_end'] = df['epoch_end'].apply(get_dt_from_timestamp)
+        df['epoch_end'] = pd.to_datetime(df['epoch_end'])
+
+    if 'this_epoch' in key_list:
+        # df['epoch_end'] = df['epoch_end'].apply(get_dt_from_timestamp)
+        df['this_epoch'] = pd.to_datetime(df['this_epoch'])
 
     if 'checkpoint' in key_list:
         df['checkpoint'] = df['checkpoint'].apply(get_dt_from_timestamp)
 
-    if 'current_lock' in key_list:
-        df['current_lock'] = df['current_lock'].astype(float)
+    if 'current_locked' in key_list:
+        df['current_locked'] = df['current_locked'].astype(float)
 
     if 'lock_count' in key_list:
         df['lock_count'] = df['lock_count'].astype(int)
@@ -53,8 +63,8 @@ def format_df(df):
 
     return df
 
-def get_df(filename):
-    df = csv_to_df(filename, 'processed')
+def get_df(filename, location):
+    df = csv_to_df(filename, location)
     df = format_df(df)
     return df
 

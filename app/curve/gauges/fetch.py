@@ -173,6 +173,19 @@ def generate_query(min_block_timestamp=None):
 
     ),
 
+    
+    stableswap_ng as (
+    SELECT 
+        BLOCK_TIMESTAMP as block_timestamp,
+        DECODED_LOG:gauge::string as gauge_addr,
+        DECODED_LOG:pool::string as pool_addr,
+        '' as token_addr,
+        'stableswap_ng' as source
+    FROM ethereum.core.ez_decoded_event_logs as logs
+
+    WHERE logs.CONTRACT_ADDRESS = lower('0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf')  -- factory
+    AND logs.EVENT_NAME = 'LiquidityGaugeDeployed'
+    ),
 
     combo as (
     SELECT gauge_addr, pool_addr, token_addr, source, block_timestamp, '' as chain_id FROM v2_deployer
@@ -184,8 +197,11 @@ def generate_query(min_block_timestamp=None):
     SELECT gauge_addr, pool_addr, token_addr, source, block_timestamp,'' as chain_id FROM tricrypto_deployer
     UNION
     SELECT gauge_addr, pool_addr, token_addr, source, block_timestamp, chain_id  FROM multichain_deployer
+    UNION
+    SELECT gauge_addr, pool_addr, token_addr, source, block_timestamp, '' as chain_id  FROM stableswap_ng
 
     ),
+
 
     deployer_meta as (
     SELECT 

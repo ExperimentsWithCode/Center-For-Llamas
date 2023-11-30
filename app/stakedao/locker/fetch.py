@@ -15,8 +15,8 @@ def generate_query(min_block_timestamp=None):
     BLOCK_TIMESTAMP as block_timestamp,
     CONTRACT_NAME as contract_name,
     EVENT_NAME as event_name,
-    DECODED_LOG:prevSupply::string as previous_supply,
-    DECODED_LOG:value::string as value,
+    (TO_NUMBER(DECODED_LOG:prevSupply::string) / POW(10,18)) as previous_supply,
+    (TO_NUMBER(DECODED_LOG:value::string) / POW(10,18)) as value,
     ORIGIN_FROM_ADDRESS as origin_from_address,
     TX_HASH as tx_hash
     FROM ethereum.core.ez_decoded_event_logs
@@ -31,7 +31,7 @@ def generate_query(min_block_timestamp=None):
     CONTRACT_NAME as contract_name,
     EVENT_NAME as event_name,
     DECODED_LOG:provider::string as provider,
-    DECODED_LOG:value::string as value,
+    (TO_NUMBER(DECODED_LOG:value::string) / POW(10,18)) as value,
     DECODED_LOG:ts::int as ts,
     DECODED_LOG:locktime::int as locktime,
     DECODED_LOG:type::int as type,
@@ -50,7 +50,7 @@ def generate_query(min_block_timestamp=None):
     CONTRACT_NAME as contract_name,
     EVENT_NAME as event_name,
     DECODED_LOG:provider::string as provider,
-    DECODED_LOG:value::string as value,
+    (TO_NUMBER(DECODED_LOG:value::string) / POW(10,18)) as value,
     DECODED_LOG:ts::int as ts,
     ORIGIN_FROM_ADDRESS as origin_from_address,
     TX_HASH as tx_hash

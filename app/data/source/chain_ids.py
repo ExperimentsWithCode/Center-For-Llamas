@@ -46,4 +46,5 @@ chain_id_map = {
     420: "Optimism Goerli Testnet",
     30: "Rootstock",
     31: "Rootstock Testnet",
+    8453: "Base"
 }

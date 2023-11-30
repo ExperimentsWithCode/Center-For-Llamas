@@ -43,9 +43,13 @@ def init_app():
 
 
         from .convex.snapshot.routes import convex_snapshot_bp
+        from .convex.locker.routes import convex_vote_locker_bp
+
         from .convex.votium_bounties.routes import votium_bounties_bp
 
         from .stakedao.snapshot.routes import stakedao_snapshot_bp
+        from .stakedao.staked_sdcrv.routes import stakedao_staked_sdcrv_bp
+        from .stakedao.locker.routes import stakedao_locked_vesdt_bp
 
     
         # from .authentication.auth.routes import auth_bp
@@ -81,9 +85,14 @@ def init_app():
         app.register_blueprint(curve_liquidity_bp, url_prefix='/curve/liquidity')
 
         app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
+        app.register_blueprint(convex_vote_locker_bp, url_prefix='/convex/vote_locker')
+
         app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
 
         app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
+        app.register_blueprint(stakedao_staked_sdcrv_bp, url_prefix='/stakedao/staked_sdcrv')
+        app.register_blueprint(stakedao_locked_vesdt_bp, url_prefix='/stakedao/locker')
+
 
         # app.register_blueprint(user_bp, url_prefix='/user')
         # app.register_blueprint(space_bp, url_prefix='/space')

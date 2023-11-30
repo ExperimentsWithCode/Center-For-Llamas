@@ -30,6 +30,8 @@ def shift_time_days(time, days=7, forward=True):
 
 
 def get_date_obj(time):
+    if len(time) == 0:
+        return None
     if type(time) == str:
         if 'T' in time:
             try:
@@ -45,6 +47,10 @@ def get_date_obj(time):
     return time
 
 def get_dt_from_timestamp(timestamp):
+    if len(timestamp) == 0:
+        return None
+    if '.' in timestamp:
+        timestamp = timestamp[:timestamp.find('.')]
     return dt.fromtimestamp(int(timestamp))
 
 # Slight issue on splitting years will split period despite single period.

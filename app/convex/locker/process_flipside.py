@@ -45,6 +45,8 @@ class ProcessConvexLocker():
         self.process_aggregate_user_epoch()
         self.process_aggregate_system()
         self.process_aggregate_epoch()
+        self.sort_locker()
+
 
     def process(self):
         self.df_locker['locked_amount'] = self.df_locker['locked_amount'].astype(float)
@@ -58,6 +60,9 @@ class ProcessConvexLocker():
             return known_large_cvx_holders_addresses[user]
         else:
             return "_"
+
+    def sort_locker(self):
+        self.df_locker = self.df_locker.sort_values("block_timestamp", axis = 0, ascending = False)
 
 
     def display_name(self, user, known_as ):
@@ -76,8 +81,9 @@ class ProcessConvexLocker():
         this_epoch = df.epoch_start.min()
         local_list = []
         while this_epoch <= furthest_epoch:
-            df_local = df[df['epoch_start']<= this_epoch ]
-            df_local = df_local[df_local['epoch_end']> this_epoch ]
+            this_epoch_buff = shift_time_days(this_epoch, 1)
+            df_local = df[df['epoch_start'] <= this_epoch_buff ]
+            df_local = df_local[df_local['epoch_end'] > this_epoch_buff ]
             df_local = df_local.groupby([
                     'epoch_start', 'epoch_end', 'user', 'known_as', 'display_name',
                 ])['locked_amount'].agg(['sum', 'count']).reset_index()
@@ -110,9 +116,10 @@ class ProcessConvexLocker():
             ]).agg(
             locked_amount=pd.NamedAgg(column='locked_amount', aggfunc=sum),
             lock_count=pd.NamedAgg(column='tx_hash', aggfunc=lambda x: len(x.unique())
+
         )).reset_index()
         now_epoch = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_start'] <= dt.now()].epoch_start.max()
-        temp = self.df_aggregate_epoch 
+        # temp = self.df_aggregate_epoch 
         self.df_aggregate_epoch_current = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_end'] >= now_epoch]
         return
     
@@ -123,24 +130,24 @@ class ProcessConvexLocker():
                 'this_epoch',
             ]).agg(
             total_locked=pd.NamedAgg(column='current_locked', aggfunc=sum),
-            lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum)
+            lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
+            user_count=pd.NamedAgg(column='user', aggfunc=lambda x: len(x.unique()))
         ).reset_index()
         return
 
- def get_df_gauge_votes():
+def get_df_convex_locks():
     filename = filename_convex_locker    #+ fallback_file_title
     resp_dict = read_csv(filename, 'raw_data')
-    df_gauge_votes = pd.json_normalize(resp_dict)
+    df = pd.json_normalize(resp_dict)
     try:
-        df_gauge_votes = df_gauge_votes.sort_values("date", axis = 0, ascending = True)
+        df = df.sort_values("block_timestamp", axis = 0, ascending = True)
     except:
-        df_gauge_votes = df_gauge_votes.sort_values("DATE", axis = 0, ascending = True)
-    return df_gauge_votes   
+        df = df.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+    return df   
 
 def process_and_save():
     print("Processing... { convex.locker.models }")
-    # lp = LiquidityProcessor(get_df_gauge_votes())
-    pcl = ProcessConvexLocker(get_df_gauge_votes())
+    pcl = ProcessConvexLocker(get_df_convex_locks())
     pcl_base = pcl.df_locker
     pcl_user = pcl.df_user_epoch
     pcl_agg_user = pcl.df_aggregate_user_epoch
