@@ -25,8 +25,8 @@ def generate_query(min_block_timestamp=None):
     WHERE CONTRACT_ADDRESS = lower('{gnosis_delegations}')
     AND EVENT_NAME = 'SetDelegate'
     AND id = lower('{space_id}')
-    ),
     {filter_line}
+    ),
 
     clear_d as (
     SELECT 
@@ -41,8 +41,8 @@ def generate_query(min_block_timestamp=None):
     WHERE CONTRACT_ADDRESS = lower('{{gnosis_delegations}}')
     AND EVENT_NAME = 'ClearDelegate'
     AND id = lower('{space_id}')
-    )
     {filter_line}
+    )
 
 
     SELECT 

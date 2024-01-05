@@ -103,7 +103,7 @@ def index():
                     x=df_stakedao_sdcrv_known['date'],
                     y=df_stakedao_sdcrv_known['staked_balance'],
                     color='known_as',
-                    # line_shape='linear',
+                    line_shape='hv',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
@@ -170,7 +170,7 @@ def show(user):
                     )
     
     fig.update_layout(
-        title=f"Locked veSDT Balance",
+        title=f"Staked sdCRV Balance",
             xaxis_title="Date",
             yaxis_title="Staked sdCRV",
         #     legend_title="Legend Title",
@@ -190,16 +190,16 @@ def show(user):
     fig = px.bar(local_df_stakedao_sdcrv,
                     x=local_df_stakedao_sdcrv['date'],
                     y=local_df_stakedao_sdcrv['balance_delta'],
-                    # color='known_as',
+                    color='event_name',
                     # line_shape='linear',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
     # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
-        title=f"Locked veSDT Balance",
+        title=f"Staked sdCRV Balance",
             xaxis_title="Date",
-            yaxis_title="Locked veSDT Balance Delta",
+            yaxis_title="Staked sdCRV Balance Delta",
         #     legend_title="Legend Title",
         font=dict(
             family="Courier New, monospace",
@@ -212,7 +212,7 @@ def show(user):
     # # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    # graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template(
         'show_stakedao_staked_sdcrv.jinja2',

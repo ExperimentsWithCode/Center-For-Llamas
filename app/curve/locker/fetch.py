@@ -10,15 +10,49 @@ def generate_query(min_block_timestamp=None):
     else:
         filter_line = ""
 
-    query = f"""SELECT 
-    *,
-    WEEK(BLOCK_TIMESTAMP) as WEEK_NUMBER,
-    DAYOFWEEK(BLOCK_TIMESTAMP) as WEEK_DAY
-
+    query = f""" 
+    with deposits as (
+    SELECT 
+    BLOCK_TIMESTAMP as block_timestamp,
+    CONTRACT_ADDRESS as contract_address,
+    CONTRACT_NAME as contract_name,
+    EVENT_NAME as event_name,
+    (TO_NUMBER(DECODED_LOG:value::string) / POW(10,18)) as value,
+    DECODED_LOG:ts::int as ts,
+    DECODED_LOG:provider::string as provider,
+    DECODED_LOG:locktime::int as locktime,
+    DECODED_LOG:type::int as type,
+    ORIGIN_FROM_ADDRESS as origin_from_address,
+    tx_hash as tx_hash
     FROM ethereum.core.ez_decoded_event_logs
     WHERE CONTRACT_ADDRESS = lower('{curve_locker_address}')
+    AND event_name = 'Deposit'
     {filter_line}
+    ),
+    
+    withdraws as (
+    SELECT 
+    BLOCK_TIMESTAMP as block_timestamp,
+    CONTRACT_ADDRESS as contract_address,
+    CONTRACT_NAME as contract_name,
+    EVENT_NAME as event_name,
+    (TO_NUMBER(DECODED_LOG:value::string) / POW(10,18)) as value,
+    DECODED_LOG:ts::int as ts,
+    DECODED_LOG:provider::string as provider,
+    DECODED_LOG:ts::int as locktime,
+    -1 as type,
+    ORIGIN_FROM_ADDRESS as origin_from_address,
+    tx_hash as tx_hash
+    FROM ethereum.core.ez_decoded_event_logs
+    WHERE CONTRACT_ADDRESS = lower('{curve_locker_address}')
+    AND event_name = 'Withdraw'
+    {filter_line}
+    )
 
+
+    SELECT * from deposits
+    UNION ALL
+    SELECT * from withdraws
     """
     return query
 

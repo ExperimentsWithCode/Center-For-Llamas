@@ -1,11 +1,6 @@
 from flask import current_app as app
 from app.data.reference import (
-    filename_curve_locker_supply,
-    filename_curve_locker_withdraw, 
-    filename_curve_locker_deposit,
-    filename_curve_locker_history,
-    filename_curve_locker_current_locks, 
-    filename_curve_locker_known_locks 
+    filename_curve_locker,
 )
 
 from datetime import datetime as dt
@@ -20,7 +15,18 @@ from app.data.local_storage import (
     csv_to_df
     )
 
-
+from app.utilities.utility import (
+    get_period,
+    get_period_direct, 
+    get_period_end_date, 
+    get_date_obj, 
+    get_dt_from_timestamp,
+    shift_time_days,
+    df_remove_nan,
+    format_plotly_figure,
+    convert_animation_to_gif,
+    calc_lock_efficiency,
+)
 print("Loading... { curve.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
@@ -58,32 +64,45 @@ def format_df(df):
     # df['first_period_end_date'] = df['first_period_end_date'].astype(str)
 
     # All
-    if 'block_number' in key_list:
-        df['block_number']          = df['block_number'].astype(int)
+    # if 'block_number' in key_list:
+    #     df['block_number']          = df['block_number'].astype(int)
+
     if 'block_timetamp' in key_list:
-        df['block_timetamp']        = pd.to_datetime(df['block_timetamp'])
+        df['block_timestamp']       = df['block_timestamp'].apply(get_date_obj)
+
     if 'final_lock_time' in key_list:
-        df['final_lock_time']        = pd.to_datetime(df['final_lock_time'])
-    if 'timestamp' in key_list:
-        df['timestamp']             = pd.to_datetime(df['timestamp'])
-    if 'period_end_date' in key_list:
-        df['period_end_date']       = pd.to_datetime(df['period_end_date']).dt.date
-    if 'ts' in key_list:
-        df['ts']                    = df['ts'].astype(int)
-    if 'balance_adj' in key_list:
-        df['balance_adj']           = df['balance_adj'].astype(float)
-    # Supply
-    if 'prevSupply' in key_list:
-        df['prevSupply']            = df['prevSupply'].astype(float)
-    if 'supply' in key_list:
-        df['supply']                = df['supply'].astype(str)
-    # Deposit
-    if 'locktime' in key_list:
-        df['locktime']              = df['locktime'].astype(float)
-    if 'type' in key_list:
-        df['type']                  = df['type'].astype(float)
-    if 'balance_adj' in key_list:
-        df['balance_adj']           = df['balance_adj'].astype(float)
+        df['final_lock_time']        =df['final_lock_time'].apply(get_date_obj)
+
+    if 'checkpoint_date' in key_list:
+        df['checkpoint_date']       = pd.to_datetime(df['checkpoint_date']).dt.date
+
+    if 'final_lock_date' in key_list:
+        df['final_lock_date']       =  pd.to_datetime(df['checkpoint_date']).dt.date
+
+    if 'value' in key_list:
+        df['value']       = df['value'].astype(float)
+
+    if 'balance_delta' in key_list:
+        df['balance_delta']       = df['balance_delta'].astype(float)
+
+    if 'total_balance_delta' in key_list:
+        df['total_balance_delta']       = df['total_balance_delta'].astype(float)
+
+    if 'total_locked_balance' in key_list:
+        df['total_locked_balance']       = df['total_locked_balance'].astype(float)
+
+    if 'locked_balance' in key_list:
+        df['locked_balance']       = df['locked_balance'].astype(float)
+
+    if 'total_effective_locked_balance' in key_list:
+        df['total_effective_locked_balance']       = df['total_effective_locked_balance'].astype(float)
+
+    if 'effective_locked_balance' in key_list:
+        df['effective_locked_balance']       = df['effective_locked_balance'].astype(float)
+
+    if 'checkpoint' in key_list:
+        df['checkpoint']       = df['checkpoint'].astype(int)
+
     return df
 
 
@@ -92,21 +111,20 @@ def get_df(filename):
     df = format_df(df)
     return df
 
-df_curve_locker_supply = get_df(filename_curve_locker_supply)
-df_curve_locker_withdraw = get_df(filename_curve_locker_withdraw) 
-df_curve_locker_deposit = get_df(filename_curve_locker_deposit)
-df_curve_locker_history = get_df(filename_curve_locker_history)
-df_curve_locker_current_locks = get_df(filename_curve_locker_current_locks)
-df_curve_locker_known_locks = get_df(filename_curve_locker_known_locks) 
+df_curve_vecrv = get_df(filename_curve_locker)
+df_curve_vecrv_known = get_df(filename_curve_locker + '_known') 
+df_curve_vecrv_agg = get_df(filename_curve_locker + '_agg')
+df_curve_vecrv_decay = get_df(filename_curve_locker + '_decay')
+df_curve_vecrv_decay_agg = get_df(filename_curve_locker + '_decay_agg')
 
+platform = 'curve'
+asset = 'vecrv'
+name_prefix = f"df_{platform}_{asset}"
 try:
-    app.config['df_curve_locker_supply'] = df_curve_locker_supply
-    app.config['df_curve_locker_withdraw'] = df_curve_locker_withdraw
-    app.config['df_curve_locker_deposit'] = df_curve_locker_deposit
-
-    app.config['df_curve_locker_history'] = df_curve_locker_history
-    app.config['df_curve_locker_current_locks'] = df_curve_locker_current_locks
-
-    app.config['df_curve_locker_known_locks'] = df_curve_locker_known_locks
+    app.config[f"{name_prefix}"] = df_curve_vecrv
+    app.config[f"{name_prefix}_known"] = df_curve_vecrv_known
+    app.config[f"{name_prefix}_agg"] = df_curve_vecrv_agg
+    app.config[f"{name_prefix}_decay"] = df_curve_vecrv_decay
+    app.config[f"{name_prefix}_decay_agg"] = df_curve_vecrv_decay_agg
 except:
-    print("could not register in app.config\n\tGauges")
+    print("could not register in app.config\n\Curve Locked veCRV")

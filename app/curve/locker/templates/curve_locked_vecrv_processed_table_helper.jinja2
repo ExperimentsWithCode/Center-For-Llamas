@@ -1,0 +1,69 @@
+
+<div class="row">
+
+    <div id='locked_vecrv_table' ></div>
+</div>
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'block_timestamp', name: 'Block Timestamp' },
+          { id: 'known_as', name: 'Known As' },
+          { id: 'provider', name: 'Staker' ,
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[2].data.toString()}`
+            )
+          },
+          
+          { id: 'balance_delta', name: 'Locked Delta',
+            formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+        { id: 'locked_balance', name: 'Locked CRV',
+            formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+          { id: 'event_name', name: 'Event Name' },
+          { id: 'final_lock_time', name: 'Final Lock Time' },
+
+        ],
+        data: [
+          {% for index, row in curve_vecrv.iterrows() %}
+            {
+              'block_timestamp': '{{ row['block_timestamp'] }}',
+              'known_as': '{{ row['known_as'] }}',
+              'provider': `<a href={{ url_for('curve_locker_vecrv_bp.show', user = row['provider']) }}>{{row['provider']}}</a>`,
+
+              'balance_delta': '{{ row['balance_delta']|round(2) }}',
+              'locked_balance': '{{ row['locked_balance']|round(2) }}',
+              'event_name': '{{ row['event_name'] }}',
+              'final_lock_time': '{{ row['final_lock_time'] }}',
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        autoWidth: true,
+
+        pagination: {
+          limit: 20,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-secondary',
+          table: 'table table-hover' 
+        },
+          style: {
+
+            td: {
+              'max-width': '120px',
+              'overflow': 'hidden',
+              'text-overflow': 'ellipsis',
+              'white-space': 'nowrap',
+            }
+
+          }   
+      }).render(document.getElementById('locked_vecrv_table'));
+</script>

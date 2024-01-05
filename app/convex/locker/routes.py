@@ -21,7 +21,10 @@ from app.data.local_storage import pd
 
 from app.convex.locker.models import df_locker_agg_system, df_locker_agg_current, df_locker_agg_epoch, df_locker_agg_user_epoch
 
+from app.utilities.utility import (
+    format_plotly_figure,
 
+)
 
 # Blueprint Configuration
 convex_vote_locker_bp = Blueprint(
@@ -73,11 +76,6 @@ def index():
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
         # height= 1000,
     )
     fig = fig.add_trace(
@@ -102,6 +100,7 @@ def index():
     fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
+    fig = format_plotly_figure(fig)
 
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -114,11 +113,7 @@ def index():
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
+
         # height= 1000,
     )
     fig = fig.add_trace(
@@ -140,6 +135,7 @@ def index():
         secondary_y=False
     )
     fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    fig = format_plotly_figure(fig)
 
     # # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -152,22 +148,9 @@ def index():
             yaxis_title="vlCVX",
             yaxis2_title="Locked Positions",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
         # height= 1000,
     )
-    fig = fig.add_trace(
-        go.Bar(
-            x=df_locker_agg_system.this_epoch,
-            y=df_locker_agg_system.total_locked,
-            name="Total Locked",
-            # color="pool_name"
-        ),
-        secondary_y=False
-    )
+
     fig = fig.add_trace(
         go.Scatter(
             x = df_locker_agg_system.this_epoch,
@@ -189,10 +172,21 @@ def index():
         ),
         secondary_y=True
     )
+    fig = fig.add_trace(
+        go.Bar(
+            x=df_locker_agg_system.this_epoch,
+            y=df_locker_agg_system.total_locked,
+            name="Total Locked",
+            # color="pool_name"
+        ),
+        secondary_y=False
+    )
+
     fig.add_vline(x=dt.now(), line_width=3, line_dash="dash", line_color="black", )
 
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")
+    fig = format_plotly_figure(fig)
 
     # # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -212,13 +206,10 @@ def index():
             xaxis_title="This Epoch",
             yaxis_title="vlCVX Balance",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
         # height= 1000,
     )
+    fig = format_plotly_figure(fig)
+
     graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template(
         'index_convex_vote_locker.jinja2',
@@ -262,11 +253,6 @@ def show(user):
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
         # height= 1000,
     )
     fig = fig.add_trace(
@@ -292,6 +278,7 @@ def show(user):
 
     fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(rangemode="tozero")
+    fig = format_plotly_figure(fig)
 
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -302,11 +289,6 @@ def show(user):
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
         # height= 1000,
     )
     fig = fig.add_trace(
@@ -331,6 +313,7 @@ def show(user):
     fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
+    fig = format_plotly_figure(fig)
 
     # # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -343,11 +326,6 @@ def show(user):
             yaxis_title="vlCVX",
             yaxis2_title="Locked Positions",
         #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
         # height= 1000,
     )
     fig = fig.add_trace(
@@ -373,6 +351,7 @@ def show(user):
 
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")
+    fig = format_plotly_figure(fig)
 
     # # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

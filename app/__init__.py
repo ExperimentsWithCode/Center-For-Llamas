@@ -33,7 +33,7 @@ def init_app():
         from .home.routes import home_bp
         from .curve.gauges.routes import gauges_bp
 
-        from .curve.locker.routes import locker_bp
+        from .curve.locker.routes import curve_locker_vecrv_bp
         from .curve.gauge_votes.routes import gauge_votes_bp
         from .curve.gauge_rounds.routes import gauge_rounds_bp
 
@@ -50,6 +50,8 @@ def init_app():
         from .stakedao.snapshot.routes import stakedao_snapshot_bp
         from .stakedao.staked_sdcrv.routes import stakedao_staked_sdcrv_bp
         from .stakedao.locker.routes import stakedao_locked_vesdt_bp
+
+        
 
     
         # from .authentication.auth.routes import auth_bp
@@ -78,7 +80,7 @@ def init_app():
         app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
 
         app.register_blueprint(gauges_bp, url_prefix='/curve/gauges')
-        app.register_blueprint(locker_bp, url_prefix='/curve/locker')
+        app.register_blueprint(curve_locker_vecrv_bp, url_prefix='/curve/locker')
         app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
         app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
 

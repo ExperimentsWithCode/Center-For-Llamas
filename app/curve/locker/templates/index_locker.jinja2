@@ -109,7 +109,7 @@
               'final_lock_time': '{{ row['final_lock_time'] }}',
               'timestamp': '{{ row['timestamp'] }}',
               'period': '{{ row['period'] }}',
-              '_': `{{ url_for('locker_bp.show', provider = row['provider']) }}`
+              '_': `{{ url_for('curve_locker_vecrv_bp.show', provider = row['provider']) }}`
 
             },
           {% endfor %}

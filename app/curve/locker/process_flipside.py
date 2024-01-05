@@ -1,24 +1,34 @@
 from flask import current_app as app
 from app.data.reference import (
     filename_curve_locker,
-    filename_curve_locker_supply,
-    filename_curve_locker_withdraw, 
-    filename_curve_locker_deposit,
-    filename_curve_locker_history,
-    filename_curve_locker_current_locks, 
-    filename_curve_locker_known_locks 
+    known_large_cvx_holders_addresses
 )
 # from ... import db
-from app.utilities.utility import timed
+
+from datetime import datetime as dt
+from datetime import timedelta
 
 from app.data.local_storage import (
     pd,
     read_json,
     read_csv,
     write_dataframe_csv,
-    write_dfs_to_xlsx
+    write_dfs_to_xlsx,
+    csv_to_df,
+    write_dataframe_csv
     )
-
+from app.utilities.utility import (
+    get_period,
+    get_period_direct, 
+    get_checkpoint_end_date, 
+    get_date_obj, 
+    get_dt_from_timestamp,
+    shift_time_days,
+    df_remove_nan,
+    format_plotly_figure,
+    convert_animation_to_gif,
+    calc_lock_efficiency,
+)
 # filename = 'crv_locker_logs'
 
 import ast
@@ -26,422 +36,330 @@ from datetime import datetime as dt
 from datetime import datetime, timedelta
 
 
-from app.utilities.utility import get_period, get_period_end_date
-from app.data.reference import (
-    known_large_curve_holders,
-    current_file_title,
-    fallback_file_title
-)
+from app.utilities.utility import get_period, get_checkpoint_end_date
 
 
-class Govenor():
-    def __init__(self, address):
-        self.address = address
-        self.actions = {}
-        self.actions_list = []
-        self.supply_list = []
-        self.deposit_list = []
-        self.withdraw_list = []
-        self.final_balance = 0
-        self.final_lock_time = 0
-        self.final_supply = 0
-        self.history = []
-        self.supply_history = []
-        if self.address in known_large_curve_holders:
-            self.known_as = known_large_curve_holders[self.address]
+# class ProcessCurveLocker():
+#     def __init__(self, df):
+#         df = df[df['event_name'] != 'Supply']
+#         self.df = df
+#         self.processed_df = []
+#         self.processed_agg = []
+#         self.processed_known = []
+#         self.processed_decay = []
+#         self.processed_decay_agg = []
+#         self.decay_ranges_x = []
+#         self.decay_ranges_y = []
+#         self.checkpoint_dates = []
+
+#         self.process_types()
+#         self.process_agg()
+#         self.process_agg_known_as()
+#         self.process_decay()
+#         pass
+
+#     def process_types(self):
+#         processed_df = self.df.copy()
+#         # Formatting
+
+#         processed_df['block_timestamp'] = processed_df['block_timestamp'].apply(get_date_obj)
+#         processed_df['value'] = processed_df['value'].astype(float)
+#         processed_df['final_lock_time'] = processed_df['locktime'].apply(get_dt_from_timestamp)
+#         processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
+#         processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
+
+#         # Apply direction of vector
+#         processed_df['balance_delta'] = processed_df.apply(lambda x: self.adjust_withdraws(x), axis=1)
+#         processed_df = processed_df.sort_values('block_timestamp')
+
+#         processed_df['locked_balance'] = processed_df.groupby(
+#             ['provider']
+#             )['balance_delta'].transform(pd.Series.cumsum)
+        
+#         # temp = processed_df.sort_values('block_timestamp').groupby(['date', 'provider']).tail(1)
+#         # temp['date'] = processed_df.date.max()
+#         # temp['balance_delta'] = 0
+#         # temp['tx_hash'] = None
+#         # temp['block_timestamp'] = dt.now()
+#         # temp['origin_from_address'] = None
+
+#         # processed_df = pd.concat([processed_df, temp])
+#         processed_df = self.sort(processed_df, 'block_timestamp')
+#         self.processed_df = processed_df
+
+#     def sort(self, df=[], target='block_timestamp', ascend= True):
+#         if len(df) == 0:
+#             return df
+#         return df.sort_values([target], axis = 0, ascending = ascend)
+
+#     def adjust_withdraws(self, row):
+#         if row['event_name'] == 'Deposit':
+#             return row['value']
+#         elif row['event_name'] == 'Withdraw':
+#             return -1 * row['value']
+            
+#     def known_as(self, user):
+#         if user in known_large_cvx_holders_addresses:
+#             return known_large_cvx_holders_addresses[user]
+#         else:
+#             return "_"
+        
+#     def process_agg(self):
+#         processed_agg = self.processed_df[['date', 'balance_delta']].groupby([
+#                 'date'
+#             ]).agg(
+#             balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
+#         ).reset_index()
+#         processed_agg = self.sort(processed_agg, 'date')
+#         processed_agg['total_locked_balance'] = processed_agg['balance_delta'].transform(pd.Series.cumsum)
+#         self.processed_agg = processed_agg
+
+
+#     def process_agg_known_as(self):
+#         processed_known = self.processed_df[['known_as', 'date', 'balance_delta']].groupby([
+#                 'date', 'known_as',
+#             ]).agg(
+#             balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
+#         ).reset_index()
+
+#         processed_known = self.sort(processed_known, 'date')
+#         processed_known['locked_balance'] = processed_known.groupby('known_as')['balance_delta'].transform(pd.Series.cumsum)
+#         # set end value of current balance w/o delta from last delta
+
+#         self.processed_known = processed_known
+
+    # def lock_efficiency(self):
+        # min self.df.block_timestamp.min()
+
+
+class ProcessCurveLocker():
+    def __init__(self, df):
+        df = df[df['event_name'] != 'Supply']
+        self.df = df
+        self.processed_df = []
+        self.processed_agg = []
+        self.processed_known = []
+        self.processed_decay = []
+        self.processed_decay_agg = []
+        self.decay_ranges_x = []
+        self.decay_ranges_y = []
+        self.checkpoint_dates = []
+
+        self.process_types()
+        self.process_agg()
+        self.process_agg_known_as()
+        self.process_decay()
+        pass
+
+    def process_types(self):
+        processed_df = self.df.copy()
+        # Formatting
+
+        processed_df['block_timestamp'] = processed_df['block_timestamp'].apply(get_date_obj)
+        processed_df['value'] = processed_df['value'].astype(float)
+        processed_df['final_lock_time'] = processed_df['locktime'].apply(get_dt_from_timestamp)
+        processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
+        processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
+
+        # Apply direction of vector
+        processed_df['balance_delta'] = processed_df.apply(lambda x: self.adjust_withdraws(x), axis=1)
+        processed_df = processed_df.sort_values(['block_timestamp', 'final_lock_time'])
+
+        processed_df['locked_balance'] = processed_df.groupby(
+            ['provider']
+            )['balance_delta'].transform(pd.Series.cumsum)
+        
+        # temp = processed_df.sort_values('block_timestamp').groupby(['date', 'provider']).tail(1)
+        # temp['date'] = processed_df.date.max()
+        # temp['balance_delta'] = 0
+        # temp['tx_hash'] = None
+        # temp['block_timestamp'] = dt.now()
+        # temp['origin_from_address'] = None
+
+        # processed_df = pd.concat([processed_df, temp])
+        processed_df = self.sort(processed_df, 'block_timestamp')
+        self.processed_df = processed_df
+
+    def sort(self, df=[], target='block_timestamp', ascend= True):
+        if len(df) == 0:
+            return df
+        return df.sort_values([target], axis = 0, ascending = ascend)
+
+    def adjust_withdraws(self, row):
+        if row['event_name'] == 'Deposit':
+            return row['value']
+        elif row['event_name'] == 'Withdraw':
+            return -1 * row['value']
+            
+    def known_as(self, user):
+        if user in known_large_cvx_holders_addresses:
+            return known_large_cvx_holders_addresses[user]
         else:
-            self.known_as = "_"
-
-    def add_action(self, row):
-        try:
-            # Manual CSV download
-            event_name = row['EVENT_NAME']
-            if row['DECODED_LOG'] == None:
-                # print("No Action!")
-                return
-            log = ast.literal_eval(row['DECODED_LOG'])
-        except:
-            # API sourced data
-            event_name = row['event_name']
-            log = {}
-            if 'decoded_log.prevSupply' in row:
-                if row['decoded_log.prevSupply'] != '' :
-                    log['prevSupply'] = int(row['decoded_log.prevSupply'].split('.')[0])
-
-            if 'decoded_log.supply' in row:
-                if row['decoded_log.supply'] != '' :
-                    log['supply'] = int(row['decoded_log.supply'].split('.')[0])
-
-            if 'decoded_log.locktime' in row:
-                if row['decoded_log.locktime'] != '' :
-                    log['locktime'] = int(row['decoded_log.locktime'].split('.')[0])
-
-            if 'decoded_log.provider' in row:
-                if row['decoded_log.provider'] != '' :
-                    log['provider'] = row['decoded_log.provider']
-
-            if 'decoded_log.ts' in row:
-                if row['decoded_log.ts'] != '' :
-                    log['ts'] = int(row['decoded_log.ts'].split('.')[0])
-
-            if 'decoded_log.type' in row:
-                log['type'] = row['decoded_log.type']
-
-            if 'decoded_log.value' in row:
-                if row['decoded_log.value'] != '' :
-                    log['value'] =int(row['decoded_log.value'].split('.')[0])
-
-            if 'decoded_log.admin' in row:
-                log['admin'] = row['decoded_log.admin']
-
-            if 'block_timestamp' in row:
-                try:
-                    split = row['block_timestamp'].split("T")
-                    row['block_timestamp'] = split[0]+" "+split[1][:-1]
-                except:
-                    pass
-                # print(row['block_timestamp'])
+            return "_"
+        
+    def process_agg(self):
+        processed_agg = self.processed_df[['date', 'balance_delta']].groupby([
+                'date'
+            ]).agg(
+            balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
+        ).reset_index()
+        processed_agg = self.sort(processed_agg, 'date')
+        processed_agg['total_locked_balance'] = processed_agg['balance_delta'].transform(pd.Series.cumsum)
+        self.processed_agg = processed_agg
 
 
-        if event_name == 'Deposit':
-            action = Deposit(row, log)
-            self.deposit_list.append(action)
-            self.final_balance += int(action.value)
-            self.final_lock_time = action.locktime
-        elif event_name == 'Supply':
-            action = Supply(row, log)
-            self.supply_list.append(action)
-            self.final_supply = int(action.supply)
-        elif event_name == 'Withdraw':
-            action = Withdraw(row, log)
-            self.withdraw_list.append(action)
-            self.final_balance -= int(action.value)
+    def process_agg_known_as(self):
+        processed_known = self.processed_df[['known_as', 'date', 'balance_delta']].groupby([
+                'date', 'known_as',
+            ]).agg(
+            balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
+        ).reset_index()
 
-        else:
-            # print("No Action")
-            # print(row)
-            return
-        try:
-            self.actions[row['TX_HASH']] = action
-        except:
-            self.actions[row['tx_hash']] = action
+        processed_known = self.sort(processed_known, 'date')
+        processed_known['locked_balance'] = processed_known.groupby('known_as')['balance_delta'].transform(pd.Series.cumsum)
+        # set end value of current balance w/o delta from last delta
 
-        self.actions_list.append(action)
-        if not event_name == 'Supply':
-            self.history.append({
-                'address': self.address,
-                'known_as': self.known_as,
-                'provider': action.provider,
-                'balance': self.final_balance,
-                'balance_adj': self.final_balance * (10** -18),
-                'final_lock_time': dt.fromtimestamp(self.final_lock_time),
-                'timestamp': dt.strptime(action.block_timestamp, '%Y-%m-%d %H:%M:%S.%f'),
-                'period': get_period(action.week_num, action.week_day, action.block_timestamp),
-                'period_end_date': get_period_end_date(action.block_timestamp),
-                'balance_adj_formatted': "{:,.2f}".format(self.final_balance * (10** -18)),
-            })
+        self.processed_known = processed_known
 
+    # def lock_efficiency(self):
+        # min self.df.block_timestamp.min()
+    def process_decay(self):
+        this_date = get_checkpoint_end_date(self.processed_df.date.min())
+        max_date =  get_checkpoint_end_date(self.processed_df.date.max() + timedelta(days=6))
+        output = []
+        i = 0
+        current_max_y_range = 0
+        ranges_x = []
+        ranges_y = []
+        checkpoint_dates = []
+        # local_df_curve_vecrv = self.processed_df.sort_values('date').groupby(['date', 'provider']).tail(1)
+        while this_date < max_date:
+            # end of end of checkpoint
+            # checkpoint_close = this_date + timedelta(days=91)
+            final_date = this_date + timedelta(days=(365 * 4))
+            # filter data set to range
+            temp_df_curve_vecrv = self.processed_df.copy()
 
-    def format_output(self):
-        output_data = {'supply': self.format_output_supply(),
-                       'deposit': self.format_output_deposit(),
-                        'withdraw': self.format_output_withdraw() }
-        # print (output_data)
-        return output_data
+            temp_df_curve_vecrv = temp_df_curve_vecrv[temp_df_curve_vecrv['date'] < this_date]
+            # group by 
+            
+            # temp_df_curve_vecrv =  temp_df_curve_vecrv.sort_values('date', axis = 0, ascending = False).groupby(['provider']).tail(1)
 
+            # update aggregate_based info info
+            temp_df_curve_vecrv['checkpoint'] = i
+            temp_df_curve_vecrv['checkpoint_date'] = this_date
+            
 
-    def format_output_deposit(self):
-        output_data = []
+            temp_df_curve_vecrv = temp_df_curve_vecrv.groupby([
+                        # 'final_lock_time',
+                        'checkpoint_date',
+                        'checkpoint',
+                        'provider',
+                        'known_as'
+                    ]).agg(
+                    total_locked_balance=pd.NamedAgg(column='balance_delta', aggfunc=sum),
+                    final_lock_time=pd.NamedAgg(column='final_lock_time', aggfunc=max),
+                    # balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
+                    # total_effective_locked_balance=pd.NamedAgg(column='effective_locked_balance', aggfunc=sum),
+            ).reset_index()
 
-        for deposit in self.deposit_list:
-            output_data.append(deposit.format_output())
-        # print(output_data)
-        return output_data
+            this_length = len(temp_df_curve_vecrv) 
 
-    def format_output_withdraw(self):
-        output_data = []
-        for withdraw in self.withdraw_list:
-            output_data.append(withdraw.format_output())
-        # print(output_data)
-        return output_data
-
-    def format_output_supply(self):
-        output_data = []
-        for supply in self.supply_list:
-            output_data.append(supply.format_output())
-        # print(output_data)
-        return output_data
-
-class Deposit():
-    def __init__(self, row, log):
-        try:
-            self.block_number = row['BLOCK_NUMBER']
-            self.block_timestamp = row['BLOCK_TIMESTAMP']
-            self.address = row['ORIGIN_FROM_ADDRESS']
-
-            self.locktime = log['locktime']
-            self.provider = log['provider']
-            self.ts = log['ts']
-            self.type = log['type']
-            self.value = log['value']
-            self.week_num = int(row['WEEK_NUMBER'])
-            self.week_day = int(row['WEEK_DAY'])
-        except:
-            self.block_number = row['block_number']
-            self.block_timestamp = row['block_timestamp']
-            self.address = row['origin_from_address']
-
-            self.locktime = log['locktime']
-            self.provider = log['provider']
-            self.ts = log['ts']
-            self.type = log['type']
-            self.value = log['value']
-            self.week_num = int(row['week_number'])
-            self.week_day = int(row['week_day'])
-
-    def format_output(self):
-        return {
-            'block_number': self.block_number,
-            'block_timestamp': self.block_timestamp,
-            'address': self.address,
-            # 'known_as': self.known_as,
-
-            'locktime': self.locktime,
-            'provider': self.provider,
-            'ts': self.ts,
-            'type': self.type,
-            'value': self.value,
-            'balance_adj': int(self.value) * (10** -18),
-            'period': get_period(self.week_num, self.week_day, self.block_timestamp),
-        }
-
-class Supply():
-    def __init__(self, row, log):
-        try:
-            self.block_number = row['BLOCK_NUMBER']
-            self.block_timestamp = row['BLOCK_TIMESTAMP']
-            self.address = row['ORIGIN_FROM_ADDRESS']
-
-            self.previous_supply = log['prevSupply']
-            self.supply =log['supply']
-
-            self.week_num = int(row['WEEK_NUMBER'])
-            self.week_day = int(row['WEEK_DAY'])
-
-        except:
-            self.block_number = row['block_number']
-            self.block_timestamp = row['block_timestamp']
-            self.address = row['origin_from_address']
-
-            self.previous_supply = log['prevSupply']
-            self.supply =log['supply']
-
-            self.week_num = int(row['week_number'])
-            self.week_day = int(row['week_day'])
-
-    def format_output(self):
-        return {
-            'block_number': self.block_number,
-            'block_timestamp': self.block_timestamp,
-            'address': self.address,
-            'previous_supply': self.previous_supply,
-            'supply': self.supply,
-            'previous_supply_adj': self.previous_supply * (10**-18),
-            'supply_adj': self.supply * (10**-18),
-            'supply_difference_adj': (self.supply -  self.previous_supply) * (10**-18),
-            'period': get_period(self.week_num, self.week_day, self.block_timestamp),
-            'period_end_date': get_period_end_date(self.block_timestamp),
-
-        }
-
-
-class Withdraw():
-    def __init__(self, row, log):
-        try:
-            self.block_number = row['BLOCK_NUMBER']
-            self.block_timestamp = row['BLOCK_TIMESTAMP']
-            self.address = row['ORIGIN_FROM_ADDRESS']
-
-
-            self.provider = log['provider']
-            self.ts = log['ts']
-            self.value = log['value']
-
-            self.week_num = int(row['WEEK_NUMBER'])
-            self.week_day = int(row['WEEK_DAY'])
-        except:
-            self.block_number = row['block_number']
-            self.block_timestamp = row['block_timestamp']
-            self.address = row['origin_from_address']
-            self.provider = log['provider']
-            self.ts = log['ts']
-            self.value = log['value']
-            self.week_num = int(row['week_number'])
-            self.week_day = int(row['week_day'])
-
-    def format_output(self):
-        return {
-            'block_number': self.block_number,
-            'block_timestamp': self.block_timestamp,
-            'address': self.address,
-            'provider': self.provider,
-            'ts': self.ts,
-            'value': self.value,
-            'balance_adj': int(self.value) * (10** -18),
-            'period': get_period(self.week_num, self.week_day, self.block_timestamp),
-        }
-
-
-class Locker():
-    def __init__(self):
-        self.govenors = {}
-
-    def new_govenor(self, row):
-        try:
-            address = row['ORIGIN_FROM_ADDRESS']
-            if not row['DECODED_LOG'] == None:
-                log = ast.literal_eval(row['DECODED_LOG'])
-                if 'provider' in log:
-                    address = log['provider']
-        except:
-            address = row['origin_from_address']
-            if  'decoded_log.provider' in row:
-                address = row['decoded_log.provider']
-
-        if not address in self.govenors:
-            g = Govenor(address)
-            self.govenors[address] = g
-        return self.govenors[address]
-
-    def process_locks(self, df):
-        for index, row in df.iterrows():
-            g = self.new_govenor(row)
-            if g:
-                a = g.add_action(row)
+            if this_length > 0:
+            # calc and apply efficiency
+                temp_df_curve_vecrv['efficiency'] = temp_df_curve_vecrv.apply(
+                    lambda x: calc_lock_efficiency(this_date, x['final_lock_time']), axis=1
+                    )
+                temp_df_curve_vecrv['total_effective_locked_balance'] = temp_df_curve_vecrv['efficiency'] * temp_df_curve_vecrv['total_locked_balance'] 
             else:
-                print("")
+                i+= 1
+                this_date = this_date + timedelta(days=7)
+                continue
 
-    def format_output(self):
-        output_data = {'supply': [],
-                        'deposit': [],
-                        'withdraw': [],
-                        }
-        for k in self.govenors:
-            # print(k)
-            g = self.govenors[k]
-            g_out =  g.format_output()
-            # print(g_out)
-            # print(output_data)
+            # Create informative records
+            if len(temp_df_curve_vecrv) > 0:
+                ranges_x.append([this_date, final_date])
+                max_bal = temp_df_curve_vecrv['total_locked_balance'].max()
+                if max_bal > current_max_y_range:
+                    ranges_y.append([0, max_bal * 1.1])
+                    current_max_y_range = max_bal
+                else:
+                    ranges_y.append([0, current_max_y_range * 1.1])
 
-            output_data['supply'] += g_out['supply']
-            output_data['withdraw'] += g_out['withdraw']
-            output_data['deposit'] += g_out['deposit']
-        return output_data
-
-    def format_history_output(self):
-        output_data = []
-        for k in self.govenors:
-            g = self.govenors[k]
-            output_data += g.history
-        return output_data
+                checkpoint_dates.append(this_date)
 
 
-# @timed
-def get_df_locker():
-    filename = filename_curve_locker #+ current_file_title
-    locker_dict = read_csv(filename, 'raw_data')
-    df_locker = pd.json_normalize(locker_dict)
+            i+= 1
+            this_date = this_date + timedelta(days=7)
+
+            output.append(temp_df_curve_vecrv)
+
+        self.decay_ranges_x = ranges_x
+        self.decay_ranges_y = ranges_y
+        self.checkpoint_dates = checkpoint_dates
+        self.processed_decay = pd.concat(output)
+        self.processed_decay_agg = self.processed_decay.groupby([
+                'checkpoint_date',
+                'checkpoint',
+            ]).agg(
+                total_locked_balance=pd.NamedAgg(column='total_locked_balance', aggfunc=sum),
+                total_effective_locked_balance=pd.NamedAgg(column='total_effective_locked_balance', aggfunc=sum),
+            ).reset_index()
+        
+        
+        
+        
+        
+
+def process_and_save(filename= filename_curve_locker, platform='curve', asset='vecrv'):
+    print("Processing... { "+platform+".locker.models }")
+    ve_asset = ProcessCurveLocker(csv_to_df(filename, 'raw_data'))
+    ve_asset_base = ve_asset.processed_df
+    ve_asset_known = ve_asset.processed_known
+    ve_asset_agg = ve_asset.processed_agg
+    ve_asset_decay = ve_asset.processed_decay
+    ve_asset_decay_agg = ve_asset.processed_decay_agg
+
+    write_dataframe_csv(filename, ve_asset_base, 'processed')
+    write_dataframe_csv(filename+"_known", ve_asset_known, 'processed')
+    write_dataframe_csv(filename+"_agg", ve_asset_agg, 'processed')
+    write_dataframe_csv(filename+"_decay", ve_asset_decay, 'processed')
+    write_dataframe_csv(filename+"_decay_agg", ve_asset_decay_agg, 'processed')
+
+    name_prefix = f"df_{platform}_{asset}"
     try:
-        df_locker = df_locker.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+        app.config[f"{name_prefix}"] = ve_asset_base
+        app.config[f"{name_prefix}_known"] = ve_asset_known
+        app.config[f"{name_prefix}_agg"] = ve_asset_agg
+        app.config[f"{name_prefix}_decay"] = ve_asset_decay
+        app.config[f"{name_prefix}_decay_agg"] = ve_asset_decay_agg
+
+        # app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
     except:
-        df_locker = df_locker.sort_values("block_timestamp", axis = 0, ascending = True)
-
-    return df_locker
-
-
-def get_lock_diffs(final_lock_time, df = []):
-    now = datetime.now()
-    # Calc remaining lock
-    now = now.date()
-    ## Weeks until lock expires
-    if len(df)> 0:
-        final_lock_time = df.iloc[0]['final_lock_time']    
-    local_final_lock_time = final_lock_time.date()
-    diff_lock_time = local_final_lock_time - now
-    diff_lock_weeks = diff_lock_time.days / 7
-    ## Max potential weeks locked
-    four_years_forward = now + timedelta(days=(7 * 52 * 4))
-    diff_max_lock = four_years_forward - now
-    diff_max_weeks = diff_max_lock.days / 7
-
-    return diff_lock_weeks, diff_max_weeks
-
-# @timed
-def get_locker_obj():
-    locker = Locker()
-    locker.process_locks(get_df_locker())
-    return locker
-
-# @timed
-def get_history(locker):
-    history_data = locker.format_history_output()
-    df_curve_locker_history = pd.json_normalize(history_data)
-    df_curve_locker_history = df_curve_locker_history.sort_values("timestamp", axis = 0, ascending = True)
-    return df_curve_locker_history
-
-# @timed
-def get_current_locks(df_curve_locker_history):
-    now = dt.now()
-    df_curve_locker_current_locks = df_curve_locker_history.groupby('provider', as_index=False).last()
-    df_curve_locker_current_locks = df_curve_locker_current_locks[df_curve_locker_current_locks['balance_adj'] > 2]
-    df_curve_locker_current_locks = df_curve_locker_current_locks[df_curve_locker_current_locks['final_lock_time'] > now]
-    df_curve_locker_current_locks = df_curve_locker_current_locks.sort_values("balance_adj", axis = 0, ascending = False)
-    return df_curve_locker_current_locks
-
-
-def process_and_save():
-    print("Processing... { curve.locker.models }")
-
-    locker = get_locker_obj()
-
-    x = locker.format_output()
-    df_curve_locker_supply = pd.json_normalize(x['supply'])
-    write_dataframe_csv(filename_curve_locker_supply, df_curve_locker_supply, 'processed')
-
-    df_curve_locker_withdraw = pd.json_normalize(x['withdraw'])
-    write_dataframe_csv(filename_curve_locker_withdraw, df_curve_locker_withdraw, 'processed')
-
-    df_curve_locker_deposit = pd.json_normalize(x['deposit'])
-    write_dataframe_csv(filename_curve_locker_deposit, df_curve_locker_deposit, 'processed')
-
-    df_curve_locker_history  = get_history(locker)
-    write_dataframe_csv(filename_curve_locker_history, df_curve_locker_history, 'processed')
-
-    df_curve_locker_current_locks = get_current_locks(df_curve_locker_history)
-    write_dataframe_csv(filename_curve_locker_current_locks, df_curve_locker_current_locks, 'processed')
-
-    df_curve_locker_known_locks = df_curve_locker_current_locks.groupby(['known_as']).sum('balance_adj').reset_index()
-    write_dataframe_csv(filename_curve_locker_known_locks, df_curve_locker_known_locks, 'processed')
-
-    try:
-        app.config['df_curve_locker_supply'] = df_curve_locker_supply
-        app.config['df_curve_locker_withdraw'] = df_curve_locker_withdraw
-        app.config['df_curve_locker_deposit'] = df_curve_locker_deposit
-
-        app.config['df_curve_locker_history'] = df_curve_locker_history
-        app.config['df_curve_locker_current_locks'] = df_curve_locker_current_locks
-
-        app.config['df_curve_locker_known_locks'] = df_curve_locker_known_locks
-    except:
-        print("could not register in app.config\n\tCurve Locker")
+        print(f"could not register in app.config\n\t{platform} Locked {asset}")
     return {
-            'df_curve_locker_supply': df_curve_locker_supply,
-            'df_curve_locker_withdraw': df_curve_locker_withdraw,
-            'df_curve_locker_deposit': df_curve_locker_deposit,
-            'df_curve_locker_history': df_curve_locker_history,
-            'df_curve_locker_current_locks': df_curve_locker_current_locks,
-            'df_curve_locker_known_locks': df_curve_locker_known_locks,
-            }
+        f"{name_prefix}" : ve_asset_base,
+        f"{name_prefix}_known" : ve_asset_known,
+        f"{name_prefix}_agg" : ve_asset_agg,
+        f"{name_prefix}_decay" : ve_asset_decay,
+        f"{name_prefix}_decay_agg" : ve_asset_decay_agg,
 
+        # 'df_curve_liquidity_aggregates': df_curve_liquidity_aggregates,
+    }
 
+# def get_lock_diffs(final_lock_time, df = []):
+#     now = datetime.now()
+#     # Calc remaining lock
+#     now = now.date()
+#     ## Weeks until lock expires
+#     if len(df)> 0:
+#         final_lock_time = df.iloc[0]['final_lock_time']    
+#     local_final_lock_time = final_lock_time.date()
+#     diff_lock_time = local_final_lock_time - now
+#     diff_lock_weeks = diff_lock_time.days / 7
+#     ## Max potential weeks locked
+#     four_years_forward = now + timedelta(days=(7 * 52 * 4))
+#     diff_max_lock = four_years_forward - now
+#     diff_max_weeks = diff_max_lock.days / 7
 
+#     return diff_lock_weeks, diff_max_weeks

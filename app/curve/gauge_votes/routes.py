@@ -5,12 +5,15 @@ from flask import Blueprint, render_template, redirect, url_for
 from flask import Response
 from flask import request
 
-from datetime import datetime
+from datetime import datetime as dt
 import json
 import plotly
 import plotly.express as px
 
+from app.utilities.utility import (
+    format_plotly_figure,
 
+)
 
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -35,7 +38,7 @@ gauge_votes_bp = Blueprint(
 @gauge_votes_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    now = datetime.now()
+    now = dt.now()
     df_current_gauge_votes
     # Filter Data
     local_df_gauge_votes = df_current_gauge_votes[[
@@ -67,6 +70,7 @@ def index():
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
+    fig = format_plotly_figure(fig)
 
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -85,6 +89,7 @@ def index():
     
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
+    fig = format_plotly_figure(fig)
 
     # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -103,7 +108,7 @@ def index():
 @gauge_votes_bp.route('/show/<string:user>', methods=['GET'])
 # @login_required
 def show(user):
-    now = datetime.now()
+    now = dt.now()
     user = user.lower()
     # Filter Data
     if not (df_gauge_votes_formatted['user'] == user).any():
@@ -149,6 +154,7 @@ def show(user):
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
         # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     # fig.update_layout(autotypenumbers='convert types')
+    fig = format_plotly_figure(fig)
 
     # # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -171,6 +177,8 @@ def show(user):
 
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
+    # fig.add_vline(x=now, line_width=2, line_dash="dash", line_color="black" )
+    fig = format_plotly_figure(fig)
 
     # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -189,8 +197,11 @@ def show(user):
 
                     )
     
+    fig.add_vline(x=now, line_width=2, line_dash="dash", line_color="black" )
+
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
+    fig = format_plotly_figure(fig)
 
     # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

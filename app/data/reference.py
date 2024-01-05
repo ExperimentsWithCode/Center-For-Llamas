@@ -31,7 +31,7 @@ known_large_cvx_holders = {
 
 known_large_cvx_holders_addresses = {
     '0xaac0aa431c237c2c0b5f041c8e59b3f1a43ac78f' : 'c2tp.eth',
-    '0xb1748c79709f4ba2dd82834b8c82d4a505003f27' : 'Frax',
+    '0xb1748c79709f4ba2dd82834b8c82d4a505003f27' : 'Frax (2)',
     '0x272b065a43ef59ea470fbfd9be76ad1b43aab651' : 'some chad',
     '0xfd05d3c7fe2924020620a8be4961bbaa747e6305' : 'BadgerDAO',
     '0x51c2cef9efa48e08557a361b52db34061c025a1b' : 'JPEGD',
@@ -57,17 +57,41 @@ known_large_cvx_holders_addresses = {
     '0xb742da24d6d5803b6c5e4f5bf0ff2c0ef1e94f55' : 'StakeCapital.eth',
     '0xdc4e6dfe07efca50a197df15d9200883ef4eb1c8' : 'Angle',
     '0x65bb797c2b9830d891d87288f029ed8dacc19705' : 'Stargate',
+    '0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb' : 'Convergence',
+    '0xdbbfc051d200438dd5847b093b22484b842de9e7' : 'APWine',
+    '0x9d5df30f475cea915b1ed4c0cca59255c897b61b' : 'Inverse DAO',
+    '0xab125ccb7660b717fc3a1df5d04ac4cfc3558d8a' : 'Mento',
+    '0x6feb7be522db641a5c0f246924d8a92cf3218692' : 'Temple',
+    '0x73eb240a06f0e0747c698a219462059be6aaccc8' : 'Llamas',
+    '0x3dfc49e5112005179da613bde5973229082dac35' : 'BAO Finance',
+    '0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb' : 'Convergence',
+
     # Non Votium Delegations
     '0x14f83ff95d4ec5e8812ddf42da1232b0ba1015e6' : 'Badger',	
     '0x58f1cac30786754d8128ca7a1e5cf8f29a780044' : 'Bent',	
-    '0x5180db0237291a6449dda9ed33ad90a38787621c' : 'Frax',	
+    '0x5180db0237291a6449dda9ed33ad90a38787621c' : 'Frax (Delegate)',	
     '0x9b8b04b6f82cd5e1dae58ca3614d445f93defc5c' : 'Silo',	
     '0x131bd1a2827cceb2945b2e3b91ee1bf736ccbf80' : 'Olympus',	
     '0x79e76c14b3bb6236dfc06d2d7ff219c8b070169c' : 'Reserve Delegate 1',	
     '0x68378fcb3a27d5613afcfddb590d35a6e751972c' : 'Paladin',	
     '0x8200d84590eceb10c6471268930e2924f34e3d69' : 'Bent',	
     '0xd733d4cc5b42206a62ed7b1ceec5b4d61898f429' : 'Reserve Delegate 2',
-    '0x578a4af5cbc3009487a89be88bc560157200795b' : 'Reserve Delegate 3'
+    '0x578a4af5cbc3009487a89be88bc560157200795b' : 'Reserve Delegate 3',
+
+    # Crv Holders
+    '0x52f541764e6e90eebc5c21ff570de0e2d63766b6' : 'StakeDAO (sdCRV)',
+    '0x49640905aae77308f1d35f370efd5c08a790f1cc' : '0xcalibur',
+    '0xf147b8125d2ef93fb6965db97d6746952a133934' : 'Yearn (yCRV)',
+    '0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83' : 'Keeper (KP3RETH)',
+    '0xa52fd396891e7a74b641a2cb1a6999fcf56b077e' : 'Redacted?',
+    '0xa0fb1b11cca5871fb0225b64308e249b97804e99' : 'Aladin',
+    '0x989aeb4d175e16225e39e87d0d97a3360524ad80' : 'Convex (cvxCRV)',
+    '0x847fa1a5337c7f24d7066e467f2e2a0f969ca79f' : 'Frax',
+    '0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8' : 'Liquity',
+    '0x7a16ff8270133f063aab6c9977183d9e72835428' : 'CRV Founder',
+    '0x52f737774c470e38b4f0109a2c852b129df14302': 'Wintermute(?)',
+    '0x490b8c6007ffa5d3728a49c2ee199e51f05d2f7e': 'Prisma Fi',
+    '0x51c2cef9efa48e08557a361b52db34061c025a1b': 'JPEGd',
 }
 
 
@@ -119,12 +143,6 @@ gauge_symbols = {
 filename_curve_gauges = 'gauge_to_lp_map'
 
 filename_curve_locker = 'curve_locker'
-filename_curve_locker_supply = 'curve_locker_supply'
-filename_curve_locker_withdraw = 'curve_locker_withdraw'
-filename_curve_locker_deposit = 'curve_locker_deposit'
-filename_curve_locker_history = 'curve_locker_history'
-filename_curve_locker_current_locks = 'curve_locker_current_locks'
-filename_curve_locker_known_locks = 'curve_locker_known_locks'
 
 filename_curve_gauge_votes = 'curve_gauge_votes'
 filename_curve_gauge_votes_all = 'curve_gauge_votes_all'
@@ -145,3 +163,6 @@ filename_convex_locker = 'convex_locker'
 filename_stakedao_delegations = 'stakedao_delegations'
 filename_stakedao_staked_sdcrv = 'stakedao_staked_sdcrv'
 filename_stakedao_locker = 'stakedao_locker'
+
+
+filename_warden_vesdt_boost_delegation = 'warden_vesdt_boost_delegation'

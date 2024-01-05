@@ -1,0 +1,72 @@
+<div class="row">
+
+    <div id='locked_vecrv_decay_table' ></div>
+</div>
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'checkpoint', name: 'Checkpoint',
+            {% include 'utility_sort_int.jinja2' %} 
+          },
+          { id: 'checkpoint_date', name: 'Checkpoint Date' },
+          { id: 'known_as', name: 'Known As' },
+          { id: 'provider', name: 'Staker' ,
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[2].data.toString()}`
+            )
+          },
+          
+          { id: 'total_locked_balance', name: 'Locked CRV',
+            formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+        { id: 'total_effective_locked_balance', name: 'veCRV Balance',
+            formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+          { id: 'efficiency', name: 'Efficiency' },
+          { id: 'final_lock_time', name: 'Final Lock Time' },
+
+        ],
+        data: [
+          {% for index, row in curve_vecrv_decay.iterrows() %}
+            {
+              'checkpoint': '{{ row['checkpoint'] }}',
+              'checkpoint_date': '{{ row['checkpoint_date'] }}',
+              'known_as': '{{ row['known_as'] }}',
+              'provider': `<a href={{ url_for('curve_locker_vecrv_bp.show', user = row['provider']) }}>{{row['provider']}}</a>`,
+
+              'total_locked_balance': '{{ row['total_locked_balance']|round(2) }}',
+              'total_effective_locked_balance': '{{ row['total_effective_locked_balance']|round(2) }}',
+              'efficiency': '{{ row['efficiency']  }}',
+              'final_lock_time': '{{ row['final_lock_time'] }}',
+
+            },
+          {% endfor %}
+        ],
+        search: true,
+        sort: true,
+        autoWidth: true,
+
+        pagination: {
+          limit: 50,
+          summary: true
+        },
+        className: {
+          {# td: 'my-td-class', #}
+          th: 'table-primary',
+          table: 'table table-hover' 
+        },
+          style: {
+
+            td: {
+              'max-width': '120px',
+              'overflow': 'hidden',
+              'text-overflow': 'ellipsis',
+              'white-space': 'nowrap',
+            }
+
+          }   
+      }).render(document.getElementById('locked_vecrv_decay_table'));
+</script>

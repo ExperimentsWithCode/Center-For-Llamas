@@ -295,7 +295,7 @@ def voter(voter):
                     )
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
-
+    fig.update_yaxes(rangemode="tozero")
     # # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 

@@ -7,6 +7,9 @@ from app.data.local_storage import (
     pd,
     )
 
+import PIL
+import io
+
 def timed(f):
   @wraps(f)
   def wrapper(*args, **kwds):
@@ -117,6 +120,18 @@ def get_convex_period_direct(time, target=5):
     # elif week_num % 10 = 0:
     return f"{vote_year}.{week_num}"
 
+def get_checkpoint_end_date(this_time):
+    # set day to upcoming thursday
+    x = get_date_obj(this_time)
+    week_day = int(x.weekday())
+    if week_day >= 4:
+        week_day_adj = 4 + (7 - week_day)
+    else:
+        week_day_adj = 4 - week_day
+    return x + timedelta(days=week_day_adj)
+
+# Slow replace w/ above once function 
+#   Is wrong about year changes
 def get_period_end_date(time):
     # this is terrible. 
     # I know its terrible. 
@@ -127,11 +142,13 @@ def get_period_end_date(time):
     week_day = int(time.weekday())      # starts sunday
 
     month = int(time.month)
+    year = int(time.year)
     if week_num > 50 and month == 1:
         week_num = 1
     if week_day >= 5:
         week_num += 1
     # print(time)
+    
     try:
         date_out = date.fromisocalendar(time.year, week_num, 1) 
     except:
@@ -151,3 +168,100 @@ def concat_all(df_list, sort_list = ["this_period"]):
         df_concat = pd.concat([df_concat, df])
     df_concat = df_concat.sort_values(sort_list, axis = 0, ascending = False)
     return df_concat
+
+
+def format_plotly_figure(fig, _height=None):
+    if _height:
+        fig.update_layout(
+            font=dict(
+                family="Courier New, monospace",
+                size=14,
+                color="RebeccaPurple"
+            ),
+            # height= 1000,
+        )
+    else:
+        fig.update_layout(
+            font=dict(
+                family="Courier New, monospace",
+                size=14,
+                color="RebeccaPurple"
+            ),
+            height= _height,
+        )
+    return fig
+
+def convert_animation_to_gif(fig, fig_name, path='app/generated_images/'):
+    # generate images for each step in animation
+    frames = []
+    for s, fr in enumerate(fig.frames):
+        # set main traces to appropriate traces within plotly frame
+        fig.update(data=fr.data)
+        fig.update(layout=fr.layout)
+        # move slider to correct place
+        fig.layout.sliders[0].update(active=s)
+        # fig.layout.title[0].update(active=fr.)
+        # generate image of current state
+        frames.append(PIL.Image.open(io.BytesIO(fig.to_image(format="png"))))
+        
+    # create animated GIF
+    frames[0].save(
+            f"{path}{fig_name}.gif",
+            save_all=True,
+            append_images=frames[1:],
+            optimize=True,
+            duration=500,
+            loop=1,
+        )
+    
+def calc_lock_efficiency(action_time, final_lock_time):
+    # if type(action_time) == str:
+    action_time = get_checkpoint_end_date(action_time)
+    # action_time = action_time.date
+    if type(final_lock_time) == str:
+        final_lock_time = get_checkpoint_end_date(final_lock_time)
+        # final_lock_time = final_lock_time.date
+    else:
+        final_lock_time =  final_lock_time.date()
+        final_lock_time = get_checkpoint_end_date(final_lock_time)
+    # 4 years forward date
+    four_years_forward = action_time + timedelta(days=(365 * 4))
+    # four_years_forward = four_years_forward.date()
+
+    # time deltas
+    diff_lock_time = final_lock_time - action_time
+    diff_max_lock = four_years_forward - action_time
+
+    # ratio
+    ## Add 1 to offset locks week of max lock are max locked
+    lock_weeks = int((diff_lock_time / pd.Timedelta(days=7)))
+    max_weeks = int(diff_max_lock / pd.Timedelta(days=7))
+
+    if lock_weeks / max_weeks > 1:
+        print(action_time, final_lock_time)
+    return lock_weeks / max_weeks if lock_weeks / max_weeks <= 1 else 1
+
+def get_lock_diffs(final_lock_time):
+    dt.now()
+    action_time = dt.now().date()
+        # action_time = action_time.date
+    if type(final_lock_time) == str:
+        final_lock_time = get_checkpoint_end_date(final_lock_time)
+        # final_lock_time = final_lock_time.date
+    else:
+        final_lock_time =  final_lock_time.date()
+        final_lock_time = get_checkpoint_end_date(final_lock_time)
+    # 4 years forward date
+    four_years_forward = action_time + timedelta(days=(7 * 52 * 4))
+    # four_years_forward = four_years_forward.date()
+
+    # time deltas
+    diff_lock_time = final_lock_time - action_time 
+    diff_max_lock = four_years_forward - action_time
+
+    # ratio
+    ## Add 1 to offset locks week of max lock are max locked
+    lock_weeks = int((diff_lock_time / pd.Timedelta(days=7)))
+    max_weeks = int(diff_max_lock / pd.Timedelta(days=7))
+    
+    return int(lock_weeks), int(max_weeks)

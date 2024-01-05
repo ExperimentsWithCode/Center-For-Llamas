@@ -73,7 +73,7 @@ def generate_aggregation(df_lock_history, df_gauge_votes_formatted):
         temp_vote = df_gauge_votes_formatted[df_gauge_votes_formatted['period'] <= this_period]
 
         # Filter for most recent vote/lock per user per gauge
-        temp_lock = temp_lock.sort_values('timestamp').groupby(['provider']).tail(1000)
+        temp_lock = temp_lock.sort_values('timestamp').groupby(['provider']).tail(10000)
         temp_vote = temp_vote.sort_values('time').groupby(['user', 'gauge_addr', 'symbol']).tail(1)
 
         # combine vote and lock information
