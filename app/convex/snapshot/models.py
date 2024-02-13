@@ -72,7 +72,7 @@ df_convex_snapshot_vote_choice = a
 convex_snapshot_proposal_choice_map = b 
 
 df_convex_snapshot_vote_aggregates = get_aggregates(df_convex_snapshot_vote_choice)
-
+write_dataframe_csv('df_convex_snapshot_vote_choice', df_convex_snapshot_vote_choice)
 
 try:
     app.config['convex_snapshot_proposal_choice_map'] = convex_snapshot_proposal_choice_map

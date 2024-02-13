@@ -7,7 +7,7 @@ from app.data.reference import (
 )
 
 # from ... import db
-from app.utilities.utility import timed
+# from app.utilities.utility import timed
 
 from app.data.local_storage import (
     pd,
@@ -20,7 +20,13 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_period_end_date
+from app.utilities.utility import (
+    get_period, 
+    get_period_end_date, 
+    get_checkpoint_timestamp, 
+    get_checkpoint_id
+)
+
 from app.data.reference import (
     known_large_curve_holders,
     gauge_names,
@@ -212,7 +218,9 @@ class Vote():
             "name": self.name,
             "symbol": self.symbol,
             "period": get_period(self.week_num, self.week_day, self.time),
-            "period_end_date": get_period_end_date(self.time)
+            "period_end_date": get_period_end_date(self.time),
+            "checkpoint_id": get_checkpoint_id(self.time),
+            "checkpoint_timestamp": get_checkpoint_timestamp(self.time)
         }
 
 

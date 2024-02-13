@@ -24,7 +24,10 @@ def format_df(df):
         df['weight']               = df['weight'].astype(int)
     if 'period_end_date' in key_list:
         df['period_end_date'] = pd.to_datetime(df['period_end_date']).dt.date
-
+    if 'checkpoint_timestamp' in key_list:
+        df['checkpoint_timestamp'] = pd.to_datetime(df['checkpoint_timestamp'])
+    if 'checkpoint_id' in key_list:
+        df['checkpoint_id'] = df['checkpoint_id'].astype(int)
     return df
 
 

@@ -88,11 +88,11 @@ to_do =markdown.markdown(
 
 # New Views
 * Convex
-    * [] Locked
+    * [X] Locked
     * [] Delegate Snapshot
 * StakeDAO
-    * [] staked sdCRV
-    * [] Locked (veSDT)
+    * [X] staked sdCRV
+    * [X] Locked (veSDT)
         * [] Delegated Locked (veSDT) 
     * [] Delegate Snapshot
 * Votium v2

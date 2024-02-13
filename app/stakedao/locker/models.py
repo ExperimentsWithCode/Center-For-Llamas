@@ -145,6 +145,11 @@ def format_df(df):
     if 'checkpoint' in key_list:
         df['checkpoint']       = df['checkpoint'].astype(int)
 
+    if 'checkpoint_id' in key_list:
+        df['checkpoint_id']       = df['checkpoint_id'].astype(int)
+
+    if 'checkpoint_timestamp' in key_list:
+        df['checkpoint_timestamp']       = pd.to_datetime(df['checkpoint_timestamp'])
     return df
 
 

@@ -48,15 +48,15 @@ def index():
 
 
     # Filter Data
-    local_df_curve_vecrv = df_curve_vecrv.sort_values('date').groupby(['provider']).tail(1)
+    local_df_curve_vecrv = df_curve_vecrv.sort_values('block_timestamp').groupby(['provider']).tail(1)
     # local_df_curve_vecrv = local_df_curve_vecrv.sort_values('date').groupby(['provider']).head(1)
     local_df_curve_vecrv = local_df_curve_vecrv.sort_values('locked_balance',  axis = 0, ascending = False)
     local_df_curve_vecrv = local_df_curve_vecrv[local_df_curve_vecrv['final_lock_time'] > dt.now()]
 
     # Fancy Decay
     processed_known_decay = df_curve_vecrv_decay[
-        ['known_as', 'checkpoint_date', 'total_locked_balance', 'total_effective_locked_balance']].groupby([
-            'checkpoint_date', 'known_as',
+        ['known_as', 'checkpoint_timestamp', 'total_locked_balance', 'total_effective_locked_balance']].groupby([
+            'checkpoint_timestamp', 'known_as',
         ]).agg(
         total_locked_balance=pd.NamedAgg(column='total_locked_balance', aggfunc=sum),
         total_effective_locked_balance=pd.NamedAgg(column='total_effective_locked_balance', aggfunc=sum),
@@ -73,7 +73,7 @@ def index():
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = df_curve_vecrv_decay_agg.checkpoint_date,
+            x = df_curve_vecrv_decay_agg.checkpoint_timestamp,
             y = df_curve_vecrv_decay_agg.total_effective_locked_balance / df_curve_vecrv_decay_agg.total_locked_balance, 
             name = "Efficiency",
             # line_color='black',
@@ -86,7 +86,7 @@ def index():
 
     fig = fig.add_trace(
         go.Scatter(
-            x=df_curve_vecrv_decay_agg.checkpoint_date,
+            x=df_curve_vecrv_decay_agg.checkpoint_timestamp,
             y=df_curve_vecrv_decay_agg.total_locked_balance,
             name="Locked",
             fill='tozeroy',
@@ -98,7 +98,7 @@ def index():
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = df_curve_vecrv_decay_agg.checkpoint_date,
+            x = df_curve_vecrv_decay_agg.checkpoint_timestamp,
             y = df_curve_vecrv_decay_agg.total_effective_locked_balance, 
             name = "Effectively Locked",
             fill='tozeroy',
@@ -121,7 +121,7 @@ def index():
 
 
     fig = px.line(df_curve_vecrv_agg,
-                    x=df_curve_vecrv_agg['date'],
+                    x=df_curve_vecrv_agg['checkpoint_timestamp'],
                     y=df_curve_vecrv_agg['balance_delta'],
                     # color='known_as',
                     # line_shape='linear',
@@ -142,7 +142,7 @@ def index():
 
     
     fig = px.line(processed_known_decay,
-                    x=processed_known_decay['checkpoint_date'],
+                    x=processed_known_decay['checkpoint_timestamp'],
                     y=processed_known_decay['total_effective_locked_balance'],
                     color='known_as',
                     line_shape='hv',
@@ -211,7 +211,7 @@ def show(user):
     local_df_curve_vecrv = local_df_curve_vecrv.sort_values(['block_timestamp', 'final_lock_time'],  axis = 0, ascending = False)
 
     local_df_curve_vecrv_decay = df_curve_vecrv_decay[df_curve_vecrv_decay['provider'] == user]
-    local_df_curve_vecrv_decay = local_df_curve_vecrv_decay.sort_values(['checkpoint', 'final_lock_time'],  axis = 0, ascending = False)
+    local_df_curve_vecrv_decay = local_df_curve_vecrv_decay.sort_values(['checkpoint_id', 'final_lock_time'],  axis = 0, ascending = False)
     # local_df_locker = df_locker[df_locker['user'] == user]
 
     # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.now()]
@@ -228,7 +228,7 @@ def show(user):
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = local_df_curve_vecrv_decay.checkpoint_date,
+            x = local_df_curve_vecrv_decay.checkpoint_timestamp,
             y = local_df_curve_vecrv_decay.total_effective_locked_balance / local_df_curve_vecrv_decay.total_locked_balance, 
             name = "Efficiency",
             # line_color='black',
@@ -241,7 +241,7 @@ def show(user):
 
     fig = fig.add_trace(
         go.Scatter(
-            x=local_df_curve_vecrv_decay.checkpoint_date,
+            x=local_df_curve_vecrv_decay.checkpoint_timestamp,
             y=local_df_curve_vecrv_decay.total_locked_balance,
             name="Locked",
             fill='tozeroy',
@@ -253,7 +253,7 @@ def show(user):
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = local_df_curve_vecrv_decay.checkpoint_date,
+            x = local_df_curve_vecrv_decay.checkpoint_timestamp,
             y = local_df_curve_vecrv_decay.total_effective_locked_balance, 
             name = "Effectively Locked",
             fill='tozeroy',

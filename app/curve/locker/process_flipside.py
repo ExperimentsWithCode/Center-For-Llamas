@@ -18,16 +18,15 @@ from app.data.local_storage import (
     write_dataframe_csv
     )
 from app.utilities.utility import (
-    get_period,
-    get_period_direct, 
-    get_checkpoint_end_date, 
+    timed,
     get_date_obj, 
     get_dt_from_timestamp,
-    shift_time_days,
-    df_remove_nan,
-    format_plotly_figure,
-    convert_animation_to_gif,
+    # shift_time_days,
+    # df_remove_nan,
+    # format_plotly_figure,
+    # convert_animation_to_gif,
     calc_lock_efficiency,
+    calc_lock_efficiency_by_checkpoint,
 )
 # filename = 'crv_locker_logs'
 
@@ -36,101 +35,13 @@ from datetime import datetime as dt
 from datetime import datetime, timedelta
 
 
-from app.utilities.utility import get_period, get_checkpoint_end_date
-
-
-# class ProcessCurveLocker():
-#     def __init__(self, df):
-#         df = df[df['event_name'] != 'Supply']
-#         self.df = df
-#         self.processed_df = []
-#         self.processed_agg = []
-#         self.processed_known = []
-#         self.processed_decay = []
-#         self.processed_decay_agg = []
-#         self.decay_ranges_x = []
-#         self.decay_ranges_y = []
-#         self.checkpoint_dates = []
-
-#         self.process_types()
-#         self.process_agg()
-#         self.process_agg_known_as()
-#         self.process_decay()
-#         pass
-
-#     def process_types(self):
-#         processed_df = self.df.copy()
-#         # Formatting
-
-#         processed_df['block_timestamp'] = processed_df['block_timestamp'].apply(get_date_obj)
-#         processed_df['value'] = processed_df['value'].astype(float)
-#         processed_df['final_lock_time'] = processed_df['locktime'].apply(get_dt_from_timestamp)
-#         processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
-#         processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
-
-#         # Apply direction of vector
-#         processed_df['balance_delta'] = processed_df.apply(lambda x: self.adjust_withdraws(x), axis=1)
-#         processed_df = processed_df.sort_values('block_timestamp')
-
-#         processed_df['locked_balance'] = processed_df.groupby(
-#             ['provider']
-#             )['balance_delta'].transform(pd.Series.cumsum)
-        
-#         # temp = processed_df.sort_values('block_timestamp').groupby(['date', 'provider']).tail(1)
-#         # temp['date'] = processed_df.date.max()
-#         # temp['balance_delta'] = 0
-#         # temp['tx_hash'] = None
-#         # temp['block_timestamp'] = dt.now()
-#         # temp['origin_from_address'] = None
-
-#         # processed_df = pd.concat([processed_df, temp])
-#         processed_df = self.sort(processed_df, 'block_timestamp')
-#         self.processed_df = processed_df
-
-#     def sort(self, df=[], target='block_timestamp', ascend= True):
-#         if len(df) == 0:
-#             return df
-#         return df.sort_values([target], axis = 0, ascending = ascend)
-
-#     def adjust_withdraws(self, row):
-#         if row['event_name'] == 'Deposit':
-#             return row['value']
-#         elif row['event_name'] == 'Withdraw':
-#             return -1 * row['value']
-            
-#     def known_as(self, user):
-#         if user in known_large_cvx_holders_addresses:
-#             return known_large_cvx_holders_addresses[user]
-#         else:
-#             return "_"
-        
-#     def process_agg(self):
-#         processed_agg = self.processed_df[['date', 'balance_delta']].groupby([
-#                 'date'
-#             ]).agg(
-#             balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
-#         ).reset_index()
-#         processed_agg = self.sort(processed_agg, 'date')
-#         processed_agg['total_locked_balance'] = processed_agg['balance_delta'].transform(pd.Series.cumsum)
-#         self.processed_agg = processed_agg
-
-
-#     def process_agg_known_as(self):
-#         processed_known = self.processed_df[['known_as', 'date', 'balance_delta']].groupby([
-#                 'date', 'known_as',
-#             ]).agg(
-#             balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
-#         ).reset_index()
-
-#         processed_known = self.sort(processed_known, 'date')
-#         processed_known['locked_balance'] = processed_known.groupby('known_as')['balance_delta'].transform(pd.Series.cumsum)
-#         # set end value of current balance w/o delta from last delta
-
-#         self.processed_known = processed_known
-
-    # def lock_efficiency(self):
-        # min self.df.block_timestamp.min()
-
+from app.utilities.utility import (
+    get_period, 
+    get_checkpoint_end_date, 
+    get_checkpoint_timestamp, 
+    get_checkpoint_id,
+    get_checkpoint_timestamp_from_id
+)
 
 class ProcessCurveLocker():
     def __init__(self, df):
@@ -141,9 +52,9 @@ class ProcessCurveLocker():
         self.processed_known = []
         self.processed_decay = []
         self.processed_decay_agg = []
-        self.decay_ranges_x = []
-        self.decay_ranges_y = []
-        self.checkpoint_dates = []
+        # self.decay_ranges_x = []
+        # self.decay_ranges_y = []
+        # self.checkpoint_timestamps = []
 
         self.process_types()
         self.process_agg()
@@ -151,6 +62,7 @@ class ProcessCurveLocker():
         self.process_decay()
         pass
 
+    @timed
     def process_types(self):
         processed_df = self.df.copy()
         # Formatting
@@ -159,8 +71,12 @@ class ProcessCurveLocker():
         processed_df['value'] = processed_df['value'].astype(float)
         processed_df['final_lock_time'] = processed_df['locktime'].apply(get_dt_from_timestamp)
         processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
-        processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
+        # processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
+        processed_df['checkpoint_timestamp'] = processed_df['block_timestamp'].apply(get_checkpoint_timestamp)
+        processed_df['checkpoint_id'] = processed_df['block_timestamp'].apply(get_checkpoint_id)
 
+        processed_df['final_checkpoint_timestamp'] = processed_df['final_lock_time'].apply(get_checkpoint_timestamp)
+        processed_df['final_checkpoint_id'] = processed_df['final_lock_time'].apply(get_checkpoint_id)
         # Apply direction of vector
         processed_df['balance_delta'] = processed_df.apply(lambda x: self.adjust_withdraws(x), axis=1)
         processed_df = processed_df.sort_values(['block_timestamp', 'final_lock_time'])
@@ -197,25 +113,27 @@ class ProcessCurveLocker():
         else:
             return "_"
         
+    @timed
     def process_agg(self):
-        processed_agg = self.processed_df[['date', 'balance_delta']].groupby([
-                'date'
+        processed_agg = self.processed_df[['checkpoint_id', 'checkpoint_timestamp', 'balance_delta']].groupby([
+                'checkpoint_id',
+                'checkpoint_timestamp'
             ]).agg(
             balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
         ).reset_index()
-        processed_agg = self.sort(processed_agg, 'date')
+        processed_agg = self.sort(processed_agg, 'checkpoint_id')
         processed_agg['total_locked_balance'] = processed_agg['balance_delta'].transform(pd.Series.cumsum)
         self.processed_agg = processed_agg
 
-
+    @timed
     def process_agg_known_as(self):
-        processed_known = self.processed_df[['known_as', 'date', 'balance_delta']].groupby([
-                'date', 'known_as',
+        processed_known = self.processed_df[['known_as', 'checkpoint_id', 'checkpoint_timestamp', 'balance_delta']].groupby([
+                'checkpoint_id', 'known_as',
             ]).agg(
             balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
         ).reset_index()
 
-        processed_known = self.sort(processed_known, 'date')
+        processed_known = self.sort(processed_known, 'checkpoint_id')
         processed_known['locked_balance'] = processed_known.groupby('known_as')['balance_delta'].transform(pd.Series.cumsum)
         # set end value of current balance w/o delta from last delta
 
@@ -223,42 +141,44 @@ class ProcessCurveLocker():
 
     # def lock_efficiency(self):
         # min self.df.block_timestamp.min()
+    @timed
     def process_decay(self):
-        this_date = get_checkpoint_end_date(self.processed_df.date.min())
-        max_date =  get_checkpoint_end_date(self.processed_df.date.max() + timedelta(days=6))
+        this_checkpoint = self.processed_df.checkpoint_id.min()
+        max_checkpoint =  self.processed_df.checkpoint_id.max()
         output = []
         i = 0
         current_max_y_range = 0
-        ranges_x = []
-        ranges_y = []
-        checkpoint_dates = []
-        # local_df_curve_vecrv = self.processed_df.sort_values('date').groupby(['date', 'provider']).tail(1)
-        while this_date < max_date:
+        # ranges_x = []
+        # ranges_y = []
+        # checkpoint_timestamps = []
+        #
+        while this_checkpoint <= max_checkpoint:
+            # print(f"This Checkpoint ID: {this_checkpoint}")
+            this_checkpoint_timestamp = get_checkpoint_timestamp_from_id(this_checkpoint)
+            # print(f"\t{this_checkpoint_timestamp}")
             # end of end of checkpoint
-            # checkpoint_close = this_date + timedelta(days=91)
-            final_date = this_date + timedelta(days=(365 * 4))
+
             # filter data set to range
+
             temp_df_curve_vecrv = self.processed_df.copy()
-
-            temp_df_curve_vecrv = temp_df_curve_vecrv[temp_df_curve_vecrv['date'] < this_date]
-            # group by 
-            
-            # temp_df_curve_vecrv =  temp_df_curve_vecrv.sort_values('date', axis = 0, ascending = False).groupby(['provider']).tail(1)
-
+            temp_df_curve_vecrv = temp_df_curve_vecrv[temp_df_curve_vecrv['checkpoint_id'] <= this_checkpoint]
+   
             # update aggregate_based info info
-            temp_df_curve_vecrv['checkpoint'] = i
-            temp_df_curve_vecrv['checkpoint_date'] = this_date
+            temp_df_curve_vecrv['checkpoint_id'] = this_checkpoint
+            temp_df_curve_vecrv['checkpoint_timestamp'] = this_checkpoint_timestamp
             
-
             temp_df_curve_vecrv = temp_df_curve_vecrv.groupby([
                         # 'final_lock_time',
-                        'checkpoint_date',
-                        'checkpoint',
+                        'checkpoint_timestamp',
+                        'checkpoint_id',
                         'provider',
                         'known_as'
                     ]).agg(
                     total_locked_balance=pd.NamedAgg(column='balance_delta', aggfunc=sum),
                     final_lock_time=pd.NamedAgg(column='final_lock_time', aggfunc=max),
+                    final_checkpoint_id=pd.NamedAgg(column='final_checkpoint_id', aggfunc=max),
+                    final_checkpoint_timestamp=pd.NamedAgg(column='final_checkpoint_timestamp', aggfunc=max),
+
                     # balance_delta=pd.NamedAgg(column='balance_delta', aggfunc=sum),
                     # total_effective_locked_balance=pd.NamedAgg(column='effective_locked_balance', aggfunc=sum),
             ).reset_index()
@@ -268,39 +188,33 @@ class ProcessCurveLocker():
             if this_length > 0:
             # calc and apply efficiency
                 temp_df_curve_vecrv['efficiency'] = temp_df_curve_vecrv.apply(
-                    lambda x: calc_lock_efficiency(this_date, x['final_lock_time']), axis=1
+                    lambda x: calc_lock_efficiency_by_checkpoint(this_checkpoint, x['final_checkpoint_id']), axis=1
                     )
                 temp_df_curve_vecrv['total_effective_locked_balance'] = temp_df_curve_vecrv['efficiency'] * temp_df_curve_vecrv['total_locked_balance'] 
-            else:
-                i+= 1
-                this_date = this_date + timedelta(days=7)
-                continue
 
             # Create informative records
-            if len(temp_df_curve_vecrv) > 0:
-                ranges_x.append([this_date, final_date])
-                max_bal = temp_df_curve_vecrv['total_locked_balance'].max()
-                if max_bal > current_max_y_range:
-                    ranges_y.append([0, max_bal * 1.1])
-                    current_max_y_range = max_bal
-                else:
-                    ranges_y.append([0, current_max_y_range * 1.1])
+            # if len(temp_df_curve_vecrv) > 0:
+                # ranges_x.append([this_checkpoint_timestamp, final_checkpoint_timestamp])
+                # max_bal = temp_df_curve_vecrv['total_locked_balance'].max()
+                # if max_bal > current_max_y_range:
+                #     ranges_y.append([0, max_bal * 1.1])
+                #     current_max_y_range = max_bal
+                # else:
+                #     ranges_y.append([0, current_max_y_range * 1.1])
 
-                checkpoint_dates.append(this_date)
-
-
-            i+= 1
-            this_date = this_date + timedelta(days=7)
+                # checkpoint_timestamps.append(this_date)
 
             output.append(temp_df_curve_vecrv)
+            this_checkpoint = this_checkpoint + 1
 
-        self.decay_ranges_x = ranges_x
-        self.decay_ranges_y = ranges_y
-        self.checkpoint_dates = checkpoint_dates
+
+        # self.decay_ranges_x = ranges_x
+        # self.decay_ranges_y = ranges_y
+        # self.checkpoint_timestamps = checkpoint_timestamps
         self.processed_decay = pd.concat(output)
         self.processed_decay_agg = self.processed_decay.groupby([
-                'checkpoint_date',
-                'checkpoint',
+                'checkpoint_timestamp',
+                'checkpoint_id',
             ]).agg(
                 total_locked_balance=pd.NamedAgg(column='total_locked_balance', aggfunc=sum),
                 total_effective_locked_balance=pd.NamedAgg(column='total_effective_locked_balance', aggfunc=sum),

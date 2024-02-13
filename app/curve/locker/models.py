@@ -100,9 +100,16 @@ def format_df(df):
     if 'effective_locked_balance' in key_list:
         df['effective_locked_balance']       = df['effective_locked_balance'].astype(float)
 
-    if 'checkpoint' in key_list:
-        df['checkpoint']       = df['checkpoint'].astype(int)
-
+    if 'checkpoint_id' in key_list:
+        df['checkpoint_id']       = df['checkpoint_id'].astype(int)
+    if 'checkpoint_timestamp' in key_list:
+        df['checkpoint_timestamp']       = pd.to_datetime(df['checkpoint_timestamp'])
+    if 'final_checkpoint_id' in key_list:
+        df['final_checkpoint_id']       = df['final_checkpoint_id'].astype(int)
+    if 'final_checkpoint_timestamp' in key_list:
+        df['final_checkpoint_timestamp']       = pd.to_datetime(df['final_checkpoint_timestamp'])
+    if 'efficiency' in key_list:
+        df['efficiency']       = df['efficiency'].astype(float)
     return df
 
 

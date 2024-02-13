@@ -16,7 +16,9 @@ def timed(f):
     start = time()
     result = f(*args, **kwds)
     elapsed = time() - start
+    print("-"*50)
     print ("\t%s took \n\t\t%d time to finish" % (f.__name__, elapsed))
+    print("-"*50)
     return result
   return wrapper
 
@@ -55,6 +57,30 @@ def get_dt_from_timestamp(timestamp):
     if '.' in timestamp:
         timestamp = timestamp[:timestamp.find('.')]
     return dt.fromtimestamp(int(timestamp))
+
+# updated get_date_obj which can handle more variance
+def get_datetime_obj(time):
+    if type(time) == str:
+        if len(time) == 0:
+            return None
+        if 'T' in time:
+            try:
+                split = time.split("T")
+                time = split[0]+" "+split[1][:-1]
+            except:
+                pass
+        if '.' in time:
+            try:
+                split = time.split(".")
+                time = split[0]
+            except:
+                pass
+        time = time+"-UTC"
+        try:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f-%Z')
+        except:
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S-%Z')      
+    return time
 
 # Slight issue on splitting years will split period despite single period.
 def get_period(week_num, week_day, time, target=5):
@@ -216,16 +242,16 @@ def convert_animation_to_gif(fig, fig_name, path='app/generated_images/'):
     
 def calc_lock_efficiency(action_time, final_lock_time):
     # if type(action_time) == str:
-    action_time = get_checkpoint_end_date(action_time)
+    action_time = get_checkpoint_timestamp(action_time)
     # action_time = action_time.date
-    if type(final_lock_time) == str:
-        final_lock_time = get_checkpoint_end_date(final_lock_time)
-        # final_lock_time = final_lock_time.date
-    else:
-        final_lock_time =  final_lock_time.date()
-        final_lock_time = get_checkpoint_end_date(final_lock_time)
+    # if type(final_lock_time) == str:
+    #     final_lock_time = get_checkpoint_timestamp(final_lock_time)
+    #     # final_lock_time = final_lock_time.date
+    # else:
+    #     final_lock_time =  final_lock_time.date()
+    final_lock_time = get_checkpoint_timestamp(final_lock_time)
     # 4 years forward date
-    four_years_forward = action_time + timedelta(days=(365 * 4))
+    four_years_forward = action_time + timedelta(seconds=365 * 4 * 86400)
     # four_years_forward = four_years_forward.date()
 
     # time deltas
@@ -234,8 +260,8 @@ def calc_lock_efficiency(action_time, final_lock_time):
 
     # ratio
     ## Add 1 to offset locks week of max lock are max locked
-    lock_weeks = int((diff_lock_time / pd.Timedelta(days=7)))
-    max_weeks = int(diff_max_lock / pd.Timedelta(days=7))
+    lock_weeks = int((diff_lock_time / pd.Timedelta(seconds= 7 * 86400)))
+    max_weeks = int(diff_max_lock / pd.Timedelta(seconds= 7 * 86400))
 
     if lock_weeks / max_weeks > 1:
         print(action_time, final_lock_time)
@@ -243,16 +269,17 @@ def calc_lock_efficiency(action_time, final_lock_time):
 
 def get_lock_diffs(final_lock_time):
     dt.now()
-    action_time = dt.now().date()
+    action_time = dt.now()
         # action_time = action_time.date
-    if type(final_lock_time) == str:
-        final_lock_time = get_checkpoint_end_date(final_lock_time)
-        # final_lock_time = final_lock_time.date
-    else:
-        final_lock_time =  final_lock_time.date()
-        final_lock_time = get_checkpoint_end_date(final_lock_time)
+    # if type(final_lock_time) == str:
+    #     final_lock_time = get_checkpoint_end_date(final_lock_time)
+    #     # final_lock_time = final_lock_time.date
+    # else:
+    #     final_lock_time =  final_lock_time.date()
+    #     final_lock_time = get_checkpoint_end_date(final_lock_time)
+    final_lock_time = get_checkpoint_timestamp(final_lock_time)
     # 4 years forward date
-    four_years_forward = action_time + timedelta(days=(7 * 52 * 4))
+    four_years_forward = action_time + timedelta(seconds=365 * 4 * 86400)
     # four_years_forward = four_years_forward.date()
 
     # time deltas
@@ -265,3 +292,96 @@ def get_lock_diffs(final_lock_time):
     max_weeks = int(diff_max_lock / pd.Timedelta(days=7))
     
     return int(lock_weeks), int(max_weeks)
+
+
+"""
+Checkpoints
+"""
+# Needs more dynamic generation
+def generate_checkpoints(start_time = '2020-08-20 00:06:58.919591+00:00'):
+    week =  7 * 86400 
+    start_date = get_datetime_obj(start_time)
+    print(start_date)
+    #
+    i = 0
+    checkpoints = []
+    # 181 is weak input. Fix.
+    while i < (181 + 52*8):
+        checkpoint_date = start_date + timedelta(seconds = week*i)
+        # print(checkpoint_date)
+        checkpoints.append({
+            'id': i, 
+            'checkpoint_timestamp': checkpoint_date
+            })
+        i += 1
+    return checkpoints
+
+df_default_checkpoints = pd.json_normalize(generate_checkpoints())
+
+def get_checkpoint(timestamp, df_checkpoints = df_default_checkpoints):
+    time_obj = get_date_obj(timestamp)
+    date_diff = time_obj - df_checkpoints.checkpoint_timestamp.min() 
+    this_id = round(date_diff.days / 7)
+    if this_id < 1:
+        this_id = 0
+    # print(f"id: {this_id}")
+    this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+    # print(this_checkpoint)
+    try:
+        while this_checkpoint.iloc[0].checkpoint_timestamp < time_obj:
+            this_id += 1
+            this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+        while this_checkpoint.iloc[0].checkpoint_timestamp > time_obj:
+            this_id -= 1
+            temp_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+            if len(temp_checkpoint) > 0:
+                if temp_checkpoint.iloc[0].checkpoint_timestamp < time_obj:
+                    break
+                else:
+                    this_checkpoint.iloc[0].checkpoint_timestamp = temp_checkpoint
+            else:
+                break
+        return this_checkpoint.iloc[0]
+    except Exception as e:
+        print(e)
+        print(timestamp)
+        print(f"ID: {this_id}")
+        return None
+
+
+
+def get_checkpoint_id(timestamp):
+    this_checkpoint = get_checkpoint(timestamp)
+    return this_checkpoint.id
+
+def get_checkpoint_timestamp(timestamp):
+    this_checkpoint = get_checkpoint(timestamp)
+    return this_checkpoint.checkpoint_timestamp
+
+def get_checkpoint_timestamp_from_id(id, df_checkpoints = df_default_checkpoints):
+    this_checkpoint = df_checkpoints[df_checkpoints['id'] == id]
+    return this_checkpoint.iloc[0].checkpoint_timestamp
+
+
+def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint):
+
+    # 4 years forward date
+    max_lock_diff = round(365 * 4 / 7) - 1
+    checkpoint_diff = final_lock_checkpoint - action_checkpoint
+    if checkpoint_diff < 0:
+        return 0
+    # four_years_forward = action_checkpoint + timedelta(seconds=365 * 4 * 86400)
+    # four_years_forward = four_years_forward.date()
+
+    # ratio
+    ## Add 1 to offset locks week of max lock are max locked
+    # lock_weeks = int((max_lock_diff / pd.Timedelta(seconds= 7 * 86400)))
+    # max_weeks = int(diff_max_lock / pd.Timedelta(seconds= 7 * 86400))
+
+    if checkpoint_diff / max_lock_diff > 1:
+        print(action_checkpoint, final_lock_checkpoint)
+        efficiency = 1
+    else:
+        efficiency = checkpoint_diff / max_lock_diff
+
+    return efficiency

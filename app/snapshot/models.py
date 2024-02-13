@@ -339,7 +339,7 @@ class Proposal():
                 if self.fails_logged < 3:
                     print("== Failed")
                     print("\tproposal")
-                    print(self.proposal.proposal_title)
+                    print(self.proposal_title)
                     print(_choices)
                     print(type(_choices))
                     print("\tvote")
