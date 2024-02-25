@@ -2,7 +2,7 @@
 
 
 <div class ="row">
-    {% with unique_end_dates = df_gauge_rounds.period_end_date.unique() %}
+    {% with unique_end_dates = df_gauge_rounds.checkpoint_timestamp.unique() %}
 
         <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -32,7 +32,7 @@
         <div id="myTabContent" class="tab-content">
         <div class="tab-pane fade active show" id="thisRound" role="tabpanel">
 
-            {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.iloc[0]['period_end_date']] %}
+            {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.iloc[0]['checkpoint_timestamp']] %}
                 {% with id="vote_table_1" %}
                     {% if table_type == 'show' %}
                         {% include 'gauge_rounds_show_table_helper.jinja2' %} 
@@ -50,7 +50,7 @@
             <div class="tab-pane fade" id="priorRound" role="tabpanel">
             {% if unique_end_dates|length > 1 %}
 
-                {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.period_end_date.unique()[1] ] %}
+                {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.checkpoint_timestamp.unique()[1] ] %}
                     {% with id="vote_table_2" %}
                         {% if table_type == 'show' %}
                             {% include 'gauge_rounds_show_table_helper.jinja2' %} 
@@ -67,7 +67,7 @@
             {% if unique_end_dates|length > 2 %}
                 <div class="tab-pane fade" id="twoPriorRound" role="tabpanel">
 
-                    {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['period_end_date'] == df_gauge_rounds.period_end_date.unique()[2] ] %}
+                    {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.checkpoint_timestamp.unique()[2] ] %}
                         {% with id="vote_table_3" %}
                             {% if table_type == 'show' %}
                                 {% include 'gauge_rounds_show_table_helper.jinja2' %} 

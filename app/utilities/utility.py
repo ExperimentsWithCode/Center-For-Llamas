@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from datetime import date, timedelta
+from datetime import date, timedelta, tzinfo
 
 from functools import wraps
 from time import time
@@ -25,6 +25,23 @@ def timed(f):
 def df_remove_nan(df):
     return df.where(pd.notnull(df), None)
 
+
+## Datetime stuff
+ZERO = timedelta(0)
+
+class UTC(tzinfo):
+  def utcoffset(self, dt):
+    return ZERO
+  def tzname(self, dt):
+    return "UTC"
+  def dst(self, dt):
+    return ZERO
+
+utc = UTC()
+
+def get_now():
+    return get_datetime_obj(dt.utcnow())
+
 def shift_time_days(time, days=7, forward=True):
     time = get_date_obj(time)
     if forward:
@@ -35,21 +52,22 @@ def shift_time_days(time, days=7, forward=True):
 
 
 def get_date_obj(time):
-    if type(time) == str:
-        if len(time) == 0:
-            return None
-        if 'T' in time:
-            try:
-                split = time.split("T")
-                time = split[0]+" "+split[1][:-1]
-                # row['block_timestamp'] = dt.strptime(row['block_timestamp'], '%Y-%m-%d %H:%M:%S.%f'),
-            except:
-                pass
-        try:
-            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
-        except:
-            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')      
-    return time
+    return get_datetime_obj(time)
+    # if type(time) == str:
+    #     if len(time) == 0:
+    #         return None
+    #     if 'T' in time:
+    #         try:
+    #             split = time.split("T")
+    #             time = split[0]+" "+split[1][:-1]
+    #             # row['block_timestamp'] = dt.strptime(row['block_timestamp'], '%Y-%m-%d %H:%M:%S.%f'),
+    #         except:
+    #             pass
+    #     try:
+    #         time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
+    #     except:
+    #         time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')      
+    # return time
 
 def get_dt_from_timestamp(timestamp):
     if len(timestamp) == 0:
@@ -58,6 +76,7 @@ def get_dt_from_timestamp(timestamp):
         timestamp = timestamp[:timestamp.find('.')]
     return dt.fromtimestamp(int(timestamp))
 
+# Attempts to be timezone aware
 # updated get_date_obj which can handle more variance
 def get_datetime_obj(time):
     if type(time) == str:
@@ -79,8 +98,14 @@ def get_datetime_obj(time):
         try:
             time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f-%Z')
         except:
-            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S-%Z')      
-    return time
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S-%Z')   
+    # elif type(time) == date:
+    #     year = str(time.year) 
+    #     month = str(time.month) if time.month >= 10 else "0"+ str(time.month)
+    #     day = str(time.day) if time.day >= 10 else "0"+ str(time.day)
+    #     time_string = f"{year}-{month}-{day} 23:59:59-UTC"
+    #     time = dt.strptime(time_string, '%Y-%m-%d %H:%M:%S-%Z')
+    return time.replace(tzinfo=utc)
 
 # Slight issue on splitting years will split period despite single period.
 def get_period(week_num, week_day, time, target=5):
@@ -268,8 +293,8 @@ def calc_lock_efficiency(action_time, final_lock_time):
     return lock_weeks / max_weeks if lock_weeks / max_weeks <= 1 else 1
 
 def get_lock_diffs(final_lock_time):
-    dt.now()
-    action_time = dt.now()
+    action_time = get_checkpoint_timestamp(dt.utcnow())
+
         # action_time = action_time.date
     # if type(final_lock_time) == str:
     #     final_lock_time = get_checkpoint_end_date(final_lock_time)
@@ -319,7 +344,7 @@ def generate_checkpoints(start_time = '2020-08-20 00:06:58.919591+00:00'):
 df_default_checkpoints = pd.json_normalize(generate_checkpoints())
 
 def get_checkpoint(timestamp, df_checkpoints = df_default_checkpoints):
-    time_obj = get_date_obj(timestamp)
+    time_obj = get_datetime_obj(timestamp)
     date_diff = time_obj - df_checkpoints.checkpoint_timestamp.min() 
     this_id = round(date_diff.days / 7)
     if this_id < 1:
@@ -362,6 +387,13 @@ def get_checkpoint_timestamp_from_id(id, df_checkpoints = df_default_checkpoints
     this_checkpoint = df_checkpoints[df_checkpoints['id'] == id]
     return this_checkpoint.iloc[0].checkpoint_timestamp
 
+def get_checkpoint_id_from_date(input_date, df_checkpoints = df_default_checkpoints):
+    this_checkpoint = df_checkpoints[df_checkpoints['checkpoint_timestamp'].dt.date < input_date]
+    return this_checkpoint.iloc[-1].id 
+
+def get_checkpoint_timestamp_from_date(input_date, df_checkpoints = df_default_checkpoints):
+    this_checkpoint = df_checkpoints[df_checkpoints['checkpoint_timestamp'].dt.date < input_date]
+    return this_checkpoint.iloc[-1].checkpoint_timestamp 
 
 def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint):
 

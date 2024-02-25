@@ -6,10 +6,10 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'checkpoint', name: 'Checkpoint',
+          { id: 'checkpoint_id', name: 'Checkpoint ID',
             {% include 'utility_sort_int.jinja2' %} 
           },
-          { id: 'checkpoint_date', name: 'Checkpoint Date' },
+          { id: 'checkpoint_timestamp', name: 'Checkpoint Date' },
           { id: 'known_as', name: 'Known As' },
           { id: 'provider', name: 'Staker' ,
             formatter: (_, row) => gridjs.html(
@@ -32,8 +32,8 @@
         data: [
           {% for index, row in curve_vecrv_decay.iterrows() %}
             {
-              'checkpoint': '{{ row['checkpoint'] }}',
-              'checkpoint_date': '{{ row['checkpoint_date'] }}',
+              'checkpoint_id': '{{ row['checkpoint_id'] }}',
+              'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
               'known_as': '{{ row['known_as'] }}',
               'provider': `<a href={{ url_for('curve_locker_vecrv_bp.show', user = row['provider']) }}>{{row['provider']}}</a>`,
 

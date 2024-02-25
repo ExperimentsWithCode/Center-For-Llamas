@@ -41,8 +41,8 @@ curve_liquidity_bp = Blueprint(
 @curve_liquidity_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    # now = dt.now()
-    local_df_curve_liquidity_aggregates = df_curve_liquidity_aggregates.groupby(['pool_address', 'gauge_addr'], as_index=False).last()
+    # now = dt.utcnow()
+    local_df_curve_liquidity_aggregates = df_curve_liquidity_aggregates.groupby(['pool_addr', 'gauge_addr'], as_index=False).last()
     # Filter Data
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
@@ -61,7 +61,7 @@ def index():
 @curve_liquidity_bp.route('/show/<string:gauge_addr>', methods=['GET'])
 # @login_required
 def show(gauge_addr):
-    now = dt.now()
+    now = dt.utcnow()
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
@@ -70,7 +70,7 @@ def show(gauge_addr):
         ]
 
     local_all_df_curve_liquidity = local_all_df_curve_liquidity.sort_values(
-        ["date", 'liquidity'], axis = 0, ascending = False
+        ["block_timestamp", 'balance_usd'], axis = 0, ascending = False
         )
     
     local_agg_df_curve_liquidity = df_curve_liquidity_aggregates[
@@ -78,13 +78,14 @@ def show(gauge_addr):
         ]
 
     local_agg_df_curve_liquidity = local_agg_df_curve_liquidity.sort_values(
-        ["date", 'liquidity'], axis = 0, ascending = True
+        ["block_timestamp", 'total_balance_usd'], axis = 0, ascending = True
         )
+    local_chart_agg_filter = local_agg_df_curve_liquidity[local_agg_df_curve_liquidity['total_vote_power'] > 5000]
 
     if len(local_all_df_curve_liquidity) > 0:
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.update_layout(
-            title=f"Liquidity vs Votes Filtered By: {local_agg_df_curve_liquidity.iloc[0]['pool_name']} ",
+            title=f"Liquidity (USD) and Votes: {local_agg_df_curve_liquidity.iloc[0]['gauge_symbol']} ",
             #     xaxis_title="X Axis Title",
             #     yaxis_title="Y Axis Title",
             #     legend_title="Legend Title",
@@ -93,26 +94,26 @@ def show(gauge_addr):
                 size=18,
                 color="RebeccaPurple"
             ),
-            height= 1000,
+            # height= 1000,
         )
         fig = fig.add_trace(
-            go.Bar(
-                x=local_agg_df_curve_liquidity.date,
-                y=local_agg_df_curve_liquidity.liquidity,
+            go.Box(
+                x=local_agg_df_curve_liquidity.checkpoint_timestamp,
+                y=local_agg_df_curve_liquidity.total_balance_usd,
                 name="Liquidity",
                 # color="pool_name"
             ),
             secondary_y=False
         )
         fig = fig.add_trace(
-            go.Scatter(
-                x = local_agg_df_curve_liquidity.date,
-                y = local_agg_df_curve_liquidity.total_votes, 
+            go.Box(
+                x = local_agg_df_curve_liquidity.checkpoint_timestamp,
+                y = local_agg_df_curve_liquidity.total_vote_power, 
                 name = "Total Votes",
-                line_shape='hvh',
-                line_width=3,
+                # line_shape='hvh',
+                # line_width=3,
             ),
-            secondary_y=True
+            # secondary_y=True
         )
         fig.update_layout(autotypenumbers='convert types')
         fig.update_yaxes(rangemode="tozero")
@@ -123,7 +124,7 @@ def show(gauge_addr):
 
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.update_layout(
-            title=f"Liquidity vs Votes Filtered By: {local_agg_df_curve_liquidity.iloc[0]['pool_name']} [Native Units]",
+            title=f"Liquidity (USD) / Votes: {local_agg_df_curve_liquidity.iloc[0]['gauge_symbol']}",
             #     xaxis_title="X Axis Title",
             #     yaxis_title="Y Axis Title",
             #     legend_title="Legend Title",
@@ -132,37 +133,37 @@ def show(gauge_addr):
                 size=18,
                 color="RebeccaPurple"
             ),
-            height= 1000,
+            # height= 1000,
         )
         fig = fig.add_trace(
-            go.Bar(
-                x=local_agg_df_curve_liquidity.date,
-                y=local_agg_df_curve_liquidity.liquidity_native,
-                name="Liquidity",
+            go.Box(
+                x=local_chart_agg_filter.checkpoint_timestamp,
+                y=local_chart_agg_filter.liquidity_usd_over_votes,
+                name="Liquidity (USD) / Votes",
                 # color="pool_name"
             ),
             secondary_y=False
         )
-        fig = fig.add_trace(
-            go.Scatter(
-                x = local_agg_df_curve_liquidity.date,
-                y = local_agg_df_curve_liquidity.total_votes, 
-                name = "Total Votes",
-                line_shape='hvh',
-                line_width=3,
-            ),
-            secondary_y=True
-        )
+        # fig = fig.add_trace(
+        #     go.Box(
+        #         x = local_agg_df_curve_liquidity.checkpoint_timestamp,
+        #         y = local_agg_df_curve_liquidity.total_vote_power, 
+        #         name = "Total Votes",
+        #         # line_shape='hvh',
+        #         # line_width=3,
+        #     ),
+        #     # secondary_y=True
+        # )
         fig.update_layout(autotypenumbers='convert types')
         fig.update_yaxes(rangemode="tozero")
 
 
         graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-        fig = px.bar(local_all_df_curve_liquidity, x="date", y="liquidity", color="token_symbol", title="Liquidity By Asset")
+        fig = px.bar(local_all_df_curve_liquidity, x="block_timestamp", y="balance_usd", color="symbol", title="Liquidity (USD) By Asset")
         graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-        fig = px.bar(local_all_df_curve_liquidity, x="date", y="liquidity_native", color="token_symbol", title="Native Liquidity By Asset")
+        fig = px.bar(local_all_df_curve_liquidity, x="block_timestamp", y="balance", color="symbol", title="Liquidity (Native) By Asset")
         graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     else:

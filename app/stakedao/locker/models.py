@@ -72,7 +72,7 @@ from app.utilities.utility import (
 print("Loading... { stakedao.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
-    now = dt.now()
+    now = dt.utcnow()
     # Calc remaining lock
     now = now.date()
     ## Weeks until lock expires

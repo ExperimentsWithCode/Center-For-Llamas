@@ -51,41 +51,44 @@
 
   
 
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+{# <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script type='text/javascript'>
   var graphs = {{graphJSON | safe}};
   Plotly.plot('chart',graphs,{});
-</script>
+</script> #}
 
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'date', name: 'date' },
-            { id: 'pool_name', name: 'Pool Name' },
-            { id: 'liquidity', name: 'Liquidity',
-                formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
-                {% include 'utility_sort_float.jinja2' %} 
+            { id: 'block_timestamp', name: 'Timestamp' },
+            { id: 'checkpoint_id', name: 'Checkpoint Id' },
 
-            },
-            { id: 'liquidity_native', name: 'Liquidity Native',
+            { id: 'gauge_name', name: 'Gauge Name' },
+            { id: 'total_balance', name: 'Balance',
                 formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
-            { id: 'token_symbol', name: 'Tradeable Assets'},
-            { id: 'gauge_addr', name: 'Gauge Address' },
-            { id: 'percent', name: 'Percent',
+            { id: 'total_balance_usd', name: 'Balance USD',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+            },
+            { id: 'total_vote_power', name: 'Vote Power',
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
             { id: 'liquidity_over_votes', name: 'Liquidity/Votes',
-                {# formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, #}
+                {# formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, #}
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
-            { id: 'pool_address', name: 'Pool Address',
+            { id: 'tradable_assets', name: 'Tradeable Assets'},
+            { id: 'gauge_addr', name: 'Gauge Address' },
+
+            { id: 'pool_addr', name: 'Pool Address',
                 formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[9].data}>${row.cells[8].data}</a>`
+                `<a href=${row.cells[10].data}>${row.cells[9].data}</a>`
               )
             },
 
@@ -95,17 +98,19 @@
         data: [
           {% for index, row in df_curve_liquidity_aggregates.iterrows() %}
             {
-                'date': '{{ row['date'] }}',
-                'pool_name': '{{ row['pool_name'] }}',
+                'block_timestamp': '{{ row['block_timestamp'] }}',
+                'checkpoint_id': '{{ row['checkpoint_id'] }}',
+                'gauge_name': '{{ row['gauge_name'] }}',
 
-                'liquidity': '{{ row['liquidity'] | round(2) }}',
-                'liquidity_native': '{{ row['liquidity_native']| round(2) }}',
-                'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
+                'total_balance': '{{ row['total_balance'] | round(2) }}',
+                'total_balance_usd': '{{ row['total_balance_usd']| round(2) }}',
+                'total_vote_power': '{{ row['total_vote_power'] |  replace("'", "")  }}',
+                'liquidity_over_votes': '{{ row['liquidity_over_votes']  }}',
+
+                'tradable_assets': "{{ row['tradable_assets'] }}",
 
                 'gauge_addr': '{{ row['gauge_addr'] }}',
-                'percent': '{{ row['percent'] | round(4) }}',
-                'liquidity_over_votes': '{{ row['liquidity_over_votes']  }}',
-                'pool_address': '{{ row['pool_address'] }}',
+                'pool_addr': '{{ row['pool_addr'] }}',
 
                 '_': `{{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_addr']) }}`
 

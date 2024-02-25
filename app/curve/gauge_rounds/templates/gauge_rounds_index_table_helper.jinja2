@@ -11,10 +11,10 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'this_period', name: 'Round',
+            { id: 'checkpoint_id', name: 'Checkpoint',
                 {% include 'utility_sort_float.jinja2' %} 
             },
-            { id: 'period_end_date', name: 'Round End Date' },
+            { id: 'checkpoint_timestamp', name: 'Round End Date' },
             { id: 'gauge_addr', name: 'Gauge Address',
                 formatter: (_, row) => gridjs.html(
                   `${row.cells[2].data.toString()}`
@@ -26,25 +26,21 @@
                 {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'vote_percent', name: 'Percent',
+              formatter: (_, row) =>  `${row.cells[5].data.toString()}%`,
                 {% include 'utility_sort_float.jinja2' %} 
-            },
-            { id: 'vecrv_voter_count', name: '# veCRV Voter',
-                {% include 'utility_sort_int.jinja2' %} 
-            },
+            }
 
         ],
         data: [
           {% for index, row in df_gauge_rounds.iterrows() %}
             {
-                'this_period': '{{ row['this_period']  }}',
-                'period_end_date': '{{ row['period_end_date'] }}',
-                'gauge_addr': '{{ row['gauge_addr'] }}',
+                'checkpoint_id': '{{ row['checkpoint_id']  }}',
+                'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
                 'gauge_addr':  `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
                 
-                'symbol': '{{ row['symbol'] }}',
+                'symbol': '{{ row['gauge_symbol'] }}',
                 'total_vote_power': '{{ row['total_vote_power']|round(2) }}',
-                'vote_percent': '{{ row['vote_percent'] |round(4) }}' ,
-                'vecrv_voter_count': '{{ row['vecrv_voter_count'] }}',
+                'vote_percent': '{{ (row['total_vote_percent']*100)|round(3) }}' ,
             },
           {% endfor %}
         ],

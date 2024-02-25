@@ -54,22 +54,24 @@ def query_and_save(_query, _filename, _df_base = [], _page_size = 5000):
         if len(query_result_set.records) >= _page_size:
             keep_going = True
             while keep_going:
-                print(f"querying page: {i}")
+                print(f"Querying Page: {i}")
                 extended_result_set = sdk.get_query_results(
                     query_result_set.query_id,
                     page_number=i,
                     page_size=_page_size
                 )
-                # Metrics
-                print_metrics(query_result_set)
+                # Metrics (don't provide novel info on new pages)
+                # print_metrics(query_result_set)
                 
                 # Concat Dataframes
                 df_local = pd.json_normalize(extended_result_set.records)
                 df_output = pd.concat([df_output, df_local], ignore_index=True)
                 
                 # Check if continue
-                print(len(extended_result_set.records) < _page_size)
-                print(len(extended_result_set.records))
+                result_length = len(extended_result_set.records) 
+                print(f"\tCompleted? {result_length} {result_length < _page_size} ")
+                # print(len(extended_result_set.records) < _page_size)
+                # print(len(extended_result_set.records))
                 if len(extended_result_set.records) < _page_size:
                     keep_going = False
                 i += 1

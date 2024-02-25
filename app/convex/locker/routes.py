@@ -52,7 +52,7 @@ def index():
 
     
     # Filter Data
-    df_locker_agg_user_epoch_current = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] >= dt.now()]
+    df_locker_agg_user_epoch_current = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] >= dt.utcnow()]
     df_locker_agg_user_epoch_current = df_locker_agg_user_epoch_current[
         df_locker_agg_user_epoch_current['this_epoch'] == df_locker_agg_user_epoch_current.this_epoch.min()
         ]
@@ -97,7 +97,7 @@ def index():
         ),
         # secondary_y=True
     )
-    fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
     fig = format_plotly_figure(fig)
@@ -134,7 +134,7 @@ def index():
         ),
         secondary_y=False
     )
-    fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig = format_plotly_figure(fig)
 
     # # Build Plotly object
@@ -182,7 +182,7 @@ def index():
         secondary_y=False
     )
 
-    fig.add_vline(x=dt.now(), line_width=3, line_dash="dash", line_color="black", )
+    fig.add_vline(x=dt.utcnow(), line_width=3, line_dash="dash", line_color="black", )
 
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")
@@ -200,7 +200,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Convex vlCVX Balances",
             xaxis_title="This Epoch",
@@ -242,7 +242,7 @@ def show(user):
     local_df_locker_agg_user_epoch = df_locker_agg_user_epoch[df_locker_agg_user_epoch['user'] == user]
     local_df_locker = df_locker[df_locker['user'] == user]
 
-    local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.now()]
+    local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.utcnow()]
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 
@@ -274,7 +274,7 @@ def show(user):
         ),
         # secondary_y=True
     )
-    fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(rangemode="tozero")
@@ -310,7 +310,7 @@ def show(user):
         ),
         # secondary_y=True
     )
-    fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
     fig = format_plotly_figure(fig)
@@ -347,7 +347,7 @@ def show(user):
         ),
         secondary_y=True
     )
-    fig.add_vline(x=dt.now(), line_width=3, line_dash="dash", line_color="black", )
+    fig.add_vline(x=dt.utcnow(), line_width=3, line_dash="dash", line_color="black", )
 
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")

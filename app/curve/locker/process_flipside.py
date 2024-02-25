@@ -89,7 +89,7 @@ class ProcessCurveLocker():
         # temp['date'] = processed_df.date.max()
         # temp['balance_delta'] = 0
         # temp['tx_hash'] = None
-        # temp['block_timestamp'] = dt.now()
+        # temp['block_timestamp'] = dt.utcnow()
         # temp['origin_from_address'] = None
 
         # processed_df = pd.concat([processed_df, temp])

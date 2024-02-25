@@ -38,7 +38,7 @@ gauge_votes_bp = Blueprint(
 @gauge_votes_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    now = dt.now()
+    now = dt.utcnow()
     df_current_gauge_votes
     # Filter Data
     local_df_gauge_votes = df_current_gauge_votes[[
@@ -108,7 +108,7 @@ def index():
 @gauge_votes_bp.route('/show/<string:user>', methods=['GET'])
 # @login_required
 def show(user):
-    now = dt.now()
+    now = dt.utcnow()
     user = user.lower()
     # Filter Data
     if not (df_gauge_votes_formatted['user'] == user).any():

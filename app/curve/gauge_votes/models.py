@@ -26,6 +26,8 @@ def format_df(df):
         df['period_end_date'] = pd.to_datetime(df['period_end_date']).dt.date
     if 'checkpoint_timestamp' in key_list:
         df['checkpoint_timestamp'] = pd.to_datetime(df['checkpoint_timestamp'])
+    if 'block_timestamp' in key_list:
+        df['block_timestamp'] = pd.to_datetime(df['block_timestamp'])
     if 'checkpoint_id' in key_list:
         df['checkpoint_id'] = df['checkpoint_id'].astype(int)
     return df

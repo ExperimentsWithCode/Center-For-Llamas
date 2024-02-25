@@ -1,5 +1,6 @@
 from flask import current_app as app
 from app.data.reference import filename_curve_liquidity, filename_curve_liquidity_aggregate
+import numpy as np
 
 from app.data.local_storage import (
     pd,
@@ -15,25 +16,69 @@ from app.utilities.utility import timed
 
 print("Loading... { curve.liquidity.models }")
 
+def nullify_amount(value):
+    if value == 'null' or value == '' or value == '-':
+        return np.nan
+    return float(value)
 
 def format_df(df):
     key_list = df.keys()
     # All
-    if 'liquidity_native' in key_list:
-        df['liquidity_native']  = df['liquidity_native'].astype(float)
+    if 'balance' in key_list:
+        df['balance']  = df['balance'].astype(float)
 
-    if 'liquidity' in key_list:
-        df['liquidity']         = df['liquidity'].astype(float)
+    if 'balance_usd' in key_list:
+        df['balance_usd'] = df.apply(
+            lambda x: nullify_amount(x['balance_usd']), 
+            axis=1)
 
-    if 'total_votes' in key_list:
-        df['total_votes']       = df['total_votes'].astype(float)
+    if 'calc_price' in key_list:
+        df['calc_price']= df.apply(
+            lambda x: nullify_amount(x['calc_price']), 
+            axis=1)
 
-    if 'percent' in key_list:
-        df['percent']           = df['percent'].astype(float)
+    if 'price' in key_list:
+        df['price']= df.apply(
+            lambda x: nullify_amount(x['price']), 
+            axis=1)
+         
+    if 'total_balance' in key_list:
+        df['total_balance']  = df['total_balance'].astype(float)
 
-    if 'date' in key_list:
-        df['date']       = pd.to_datetime(df['date']).dt.date
+    if 'total_balance_usd' in key_list:
+        df['total_balance_usd'] = df.apply(
+            lambda x: nullify_amount(x['total_balance_usd']), 
+            axis=1)
+        
+    if 'total_vote_power' in key_list:
+        df['total_vote_power']= df.apply(
+            lambda x: nullify_amount(x['total_vote_power']), 
+            axis=1)
+    if 'total_vote_percent' in key_list:
+        df['total_vote_percent']= df.apply(
+            lambda x: nullify_amount(x['total_vote_percent']), 
+            axis=1)
+        
+    if 'liquidity_usd_over_votes' in key_list:
+        df['liquidity_usd_over_votes']= df.apply(
+            lambda x: nullify_amount(x['liquidity_usd_over_votes']), 
+            axis=1)
+    if 'liquidity_over_votes' in key_list:
+        df['liquidity_over_votes']= df.apply(
+            lambda x: nullify_amount(x['liquidity_over_votes']), 
+            axis=1)
+        
+    if 'block_timestamp' in key_list:
+        df['block_timestamp']       = pd.to_datetime(df['block_timestamp'])
 
+    if 'checkpoint_id' in key_list:
+        df['checkpoint_id']       = df['checkpoint_id'].astype(int)
+
+    if 'checkpoint_timestamp' in key_list:
+        df['checkpoint_timestamp']       = pd.to_datetime(df['checkpoint_timestamp'])
+
+    if 'calc_price' in key_list:
+        df['calc_price']         = df['calc_price'].astype(float)
     # if 'liquidity_over_votes' in key_list:
     #     df['liquidity_over_votes'] = df['liquidity_over_votes'].astype(float)
 

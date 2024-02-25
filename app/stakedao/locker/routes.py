@@ -96,7 +96,7 @@ def index():
         # secondary_y=True
     )
 
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
     fig.update_layout(autotypenumbers='convert types')
 
     fig.update_yaxes(range=[0,1], secondary_y=True)
@@ -115,7 +115,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Locked veSDT Total Balance Changes",
             xaxis_title="Date",
@@ -141,7 +141,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"StakeDAO Locked veSDT Balances",
             xaxis_title="Date",
@@ -205,7 +205,7 @@ def show(user):
     local_df_stakedao_vesdt = df_stakedao_vesdt[df_stakedao_vesdt['provider'] == user]
     # local_df_locker = df_locker[df_locker['user'] == user]
 
-    # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.now()]
+    # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.utcnow()]
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 
@@ -258,7 +258,7 @@ def show(user):
         # secondary_y=True
     )
 
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
     fig.update_layout(autotypenumbers='convert types')
 
     fig.update_yaxes(range=[0,1], secondary_y=True)
@@ -277,7 +277,7 @@ def show(user):
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Locked veSDT Balance",
             xaxis_title="Date",

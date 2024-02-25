@@ -104,7 +104,7 @@ def csv_to_df(filename, path='source'):
     df = pd.json_normalize(resp_dict)
     return df
 
-def df_to_csv(df, filename, path='source'):
+def df_to_csv(df, filename, path='output'):
     cwd = get_cwd()
-    full_filename = cwd+ path + '/' + filename+'.csv'
+    full_filename = f"{cwd}/app/data/{path}/{filename}.csv"
     df.to_csv(full_filename) 

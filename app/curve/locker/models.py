@@ -30,7 +30,7 @@ from app.utilities.utility import (
 print("Loading... { curve.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
-    now = dt.now()
+    now = dt.utcnow()
     # Calc remaining lock
     now = now.date()
     ## Weeks until lock expires
@@ -76,8 +76,6 @@ def format_df(df):
     if 'checkpoint_date' in key_list:
         df['checkpoint_date']       = pd.to_datetime(df['checkpoint_date']).dt.date
 
-    if 'final_lock_date' in key_list:
-        df['final_lock_date']       =  pd.to_datetime(df['checkpoint_date']).dt.date
 
     if 'value' in key_list:
         df['value']       = df['value'].astype(float)

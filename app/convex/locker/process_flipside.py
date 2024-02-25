@@ -13,11 +13,11 @@ from app.data.local_storage import (
     write_dataframe_csv,
     write_dfs_to_xlsx
     )
-from app.utilities.utility import get_period
+# from app.utilities.utility import get_period
 
 from app.utilities.utility import (
-    get_period_direct, 
-    get_period_end_date, 
+    # get_period_direct, 
+    # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
     shift_time_days,
@@ -118,7 +118,7 @@ class ProcessConvexLocker():
             lock_count=pd.NamedAgg(column='tx_hash', aggfunc=lambda x: len(x.unique())
 
         )).reset_index()
-        now_epoch = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_start'] <= dt.now()].epoch_start.max()
+        now_epoch = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_start'] <= dt.utcnow()].epoch_start.max()
         # temp = self.df_aggregate_epoch 
         self.df_aggregate_epoch_current = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_end'] >= now_epoch]
         return

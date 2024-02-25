@@ -18,6 +18,7 @@ from app.data.local_storage import pd
 from app.utilities.utility import (
     format_plotly_figure,
     get_lock_diffs,
+    get_now,
 )
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -51,7 +52,7 @@ def index():
     local_df_curve_vecrv = df_curve_vecrv.sort_values('block_timestamp').groupby(['provider']).tail(1)
     # local_df_curve_vecrv = local_df_curve_vecrv.sort_values('date').groupby(['provider']).head(1)
     local_df_curve_vecrv = local_df_curve_vecrv.sort_values('locked_balance',  axis = 0, ascending = False)
-    local_df_curve_vecrv = local_df_curve_vecrv[local_df_curve_vecrv['final_lock_time'] > dt.now()]
+    local_df_curve_vecrv = local_df_curve_vecrv[local_df_curve_vecrv['final_lock_time'] > get_now()]
 
     # Fancy Decay
     processed_known_decay = df_curve_vecrv_decay[
@@ -109,7 +110,7 @@ def index():
         # secondary_y=True
     )
 
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
     fig.update_layout(autotypenumbers='convert types')
 
     fig.update_yaxes(range=[0,1], secondary_y=True)
@@ -128,7 +129,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Locked vecrv Total Balance Changes",
             xaxis_title="Date",
@@ -149,7 +150,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Curve Locked veCRV Balances",
             xaxis_title="Date",
@@ -170,7 +171,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')
     fig = format_plotly_figure(fig)        
@@ -214,7 +215,7 @@ def show(user):
     local_df_curve_vecrv_decay = local_df_curve_vecrv_decay.sort_values(['checkpoint_id', 'final_lock_time'],  axis = 0, ascending = False)
     # local_df_locker = df_locker[df_locker['user'] == user]
 
-    # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.now()]
+    # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.utcnow()]
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 
@@ -264,7 +265,7 @@ def show(user):
         # secondary_y=True
     )
 
-    # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black" )
+    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
     fig.update_layout(autotypenumbers='convert types')
 
     fig.update_yaxes(range=[0,1], secondary_y=True)
@@ -281,7 +282,7 @@ def show(user):
     #                 # facet_row=facet_row,
     #                 # facet_col_wrap=facet_col_wrap
     #                 )
-    # # fig.add_vline(x=dt.now(), line_width=2, line_dash="dash", line_color="black")
+    # # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     # fig.update_layout(
     #     title=f"Locked vecrv Total Balance Changes",
     #         xaxis_title="Date",

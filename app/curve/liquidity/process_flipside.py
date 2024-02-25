@@ -3,7 +3,8 @@ from app.data.reference import filename_curve_liquidity, filename_curve_liquidit
 
 from datetime import datetime as dt
 from datetime import datetime, timedelta
-from app.utilities.utility import timed
+import numpy as np
+
 import traceback
 
 
@@ -14,343 +15,392 @@ from app.data.local_storage import (
     write_dataframe_csv,
     write_dfs_to_xlsx
     )
-from app.utilities.utility import get_period
+from app.utilities.utility import (
+    get_checkpoint_id_from_date,
+    get_checkpoint_timestamp_from_date,
+    df_default_checkpoints,
+    concat_all,
+    utc,
+    timed
+)
 
 try:
     gauge_registry = app.config['gauge_registry']
-    df_all_by_gauge = app.config['df_all_by_gauge']
+    df_checkpoints_agg = app.config['df_checkpoints_agg']
 
 except:
     from app.curve.gauges.models import gauge_registry
-    from app.curve.gauge_rounds.models import df_all_by_gauge
+    from app.curve.gauge_rounds.models import df_checkpoints_agg
 
-class LiquidityProcessor():
-    def __init__(self, _df_liquidity):
+class Oracle():
+    def __init__(self, df_liquidity):
+        self.df_liquidity = self.format_input(df_liquidity)
+        self.df_exchanges = self.process_exchange_rates()
+        self.df_oracles = self.process_oracle()
+        self.df_oracles_agg = self.resample_aggregates()
+
+    @timed
+    def format_input(self, df):
+        df['amount'] = df.apply(
+                lambda x: self.nullify_amount(x['amount']), 
+                axis=1)
+        # nulify amount sets price to 0 if null
+        df['price'] = df.apply(
+                lambda x: self.nullify_amount(x['price']), 
+                axis=1)
+        df['block_timestamp'] = pd.to_datetime(df['block_timestamp'])
+        df = self.flush_shitcoins(df)
+        return df
+    
+    def nullify_amount(self, value):
+        if value == 'null' or value == '' or value == '-':
+            return np.nan
+        return float(value)
+    """
+    Break Out Exchange Rates
+    """
+    # Isolates swaps and derrives exchange rates
+    def process_exchange_rates(self):
+        target_list = ['pool_addr', 'tx_hash']
+        df = self.get_likely_swaps(self.df_liquidity, target_list)
+        df = self.split_pricing(df, target_list)
+        df = self.reduce_exchange_rates(df)
+        return df
+    
+    # Clear out tokens that appear to be spam  
+    @timed
+    def flush_shitcoins(self, df):
+        df_counts = df.groupby(['pool_addr', 'token_addr']).size().reset_index(name='counts')
+        df_combo_counts = pd.merge(
+            df, 
+            df_counts, 
+            how='left', 
+            on = ['pool_addr', 'token_addr' ], 
+            )
+        df_combo_counts = df_combo_counts[df_combo_counts['counts'] > 3]    # Magic is here
+        df_combo_counts = df_combo_counts.drop(['counts'], axis=1)
+        return df_combo_counts
+
+    @timed
+    def get_counts(self, df, target_list, count_name="counts"):
+        df_counts = df.groupby(target_list).size().reset_index(name=count_name)
+        df_combo_counts = pd.merge(
+            df, 
+            df_counts, 
+            how='left', 
+            on = target_list, 
+            )
+        return df_combo_counts
+
+    # isolate tx hash with two transfers
+    @timed
+    def get_likely_swaps(self, df, target_list):
+        # Split into tx hash w/ 2 transfers to identify potential swaps
+        df = self.get_counts(df, target_list)
+        df = df[df['counts'] == 2]
+        # Convert values types
+        return df
+
+    # isolate likely swaps where 
+    #   one token transfers in, the other transfers out
+    @timed
+    def split_pricing(self, df, target_list):
+        # Identifies inner joins where one token transfers in, the other transfers out
+        df_combo_positive = df[df['amount'] > 0 ]
+        df_combo_negative = df[df['amount'] < 0 ]
+        df_oracle = pd.merge(
+            df_combo_positive, 
+            df_combo_negative, 
+            how='inner', 
+            on = target_list, 
+            )
+        
+        # Calc exchange rate based on this
+        df_oracle['exchange_rate_x_over_y'] = abs(df_oracle['amount_x'] / df_oracle['amount_y'])
+        df_oracle['exchange_rate_y_over_x'] = abs(df_oracle['amount_y'] / df_oracle['amount_x'])
+
+        return df_oracle
+
+
+    # deals with fallout of all the merges
+    @timed
+    def reduce_exchange_rates(self, df):
+        df_x = df[[
+            'block_timestamp_x',
+            'symbol_x',
+            'token_addr_x',
+            'symbol_y',
+            'token_addr_y',
+            'has_price_x',
+            'price_x',
+            'price_y',
+            'exchange_rate_y_over_x' ,
+            # 'calc_price_x'
+            ]]
+        df_y = df[[
+            'block_timestamp_x',
+            'symbol_y',
+            'token_addr_y',
+            'symbol_x',
+            'token_addr_x',
+            'has_price_y',
+            'price_y',
+            'price_x',
+            'exchange_rate_x_over_y' ,
+            # 'calc_price_y'
+            ]]
+
+        df_x = df_x.rename(columns={
+            "block_timestamp_x": 'block_timestamp',
+            "symbol_x": 'symbol',
+            'token_addr_x': 'token_addr',
+            "symbol_y": 'comp_symbol',
+            'token_addr_y': 'comp_token_addr',
+            "has_price_x": 'has_price',
+            'price_x': 'price',
+            'price_y': 'comp_price',
+            'exchange_rate_y_over_x': 'exchange_rate',
+            # 'calc_price_x': 'calc_price'           
+            })
+        df_y = df_y.rename(columns={
+            "block_timestamp_x": 'block_timestamp',
+            "symbol_y": 'symbol',
+            'token_addr_y': 'token_addr',
+            "symbol_x": 'comp_symbol',
+            'token_addr_x': 'comp_token_addr',
+            "has_price_y": 'has_price',
+            'price_y': 'price',
+            'price_x': 'comp_price',
+
+            'exchange_rate_x_over_y': 'exchange_rate',
+            # 'calc_price_y': 'calc_price'           
+            })
+        return concat_all([df_x, df_y],['block_timestamp'])
+
+      # Derrives price from exchange rate and comp price
+    
+    """
+    Derrive Pricing
+    """
+    def process_oracle(self):
+        df = self.resample_micro(self.df_exchanges)
+        df = self.resample_macro(df)
+        return df
+    
+    def calc_price(self, row):
+       # If price, use price
+        if np.isnan(row[f"price"]):
+            # if no price on b, can't calc a price
+            if np.isnan(row[f"comp_price"]):
+                return np.nan 
+            # else calc price of A off exchange price and b
+            return abs( row['exchange_rate'] * row["comp_price"] )
+        return row[f"price"]
+      
+    # resample prices and exchange rates
+    @timed
+    def resample_micro(self, df):
+        df2 = df.set_index(['block_timestamp'])
+        # Pricing
+        df_prices = df2.groupby(
+            ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
+            ).resample('1D')['price'].mean().reset_index()
+        df_prices
+        # reduce
+        df_prices = df_prices.dropna()
+        df_prices_reduced = df_prices[['symbol', 'token_addr', 'block_timestamp', 'price']]
+        # resample exchange rates 
+        df_exchange_rates = df2.groupby(
+            ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
+            ).resample('1D')['exchange_rate'].mean().ffill().reset_index()
+        df_exchange_rates
+        # Rename for merging comps
+        df_prices_reduced_comp = df_prices_reduced.rename(columns={
+            "token_addr": 'comp_token_addr',
+            "symbol": 'comp_symbol',
+            "price": 'comp_price',     
+            })
+        # Merge
+        df_combo_oracle_mid = pd.merge(
+            df_exchange_rates, 
+            df_prices_reduced_comp, 
+            how='left', 
+            on = ['block_timestamp', 'comp_symbol', 'comp_token_addr'  ], 
+            )
+        df_combo_oracle = pd.merge(
+            df_combo_oracle_mid, 
+            df_prices_reduced, 
+            how='left', 
+            on = ['block_timestamp', 'symbol', 'token_addr'  ], 
+            )
+        return df_combo_oracle
+    # calc pricing 
+    @timed
+    def resample_macro(self, df):
+        # Reduce Oracle
+        df2 = df.set_index(['block_timestamp'])
+        df_combo_oracle_reduced = df2.groupby(
+            ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
+            ).resample('1D')['exchange_rate', 'price', 'comp_price'].mean().reset_index()
+        # Calc Price
+        df_combo_oracle_reduced['calc_price'] = df_combo_oracle_reduced.apply(
+                lambda x: self.calc_price(x),
+        axis=1)
+        return df_combo_oracle_reduced
+    # reduce to single price
+    @timed
+    def resample_aggregates(self):
+        # Reduce Oracle
+        df2 = self.df_oracles.set_index(['block_timestamp'])
+        df_aggregate_pricing = df2.groupby(
+            ['symbol', 'token_addr', ]
+            ).resample('1D')['calc_price'].mean().reset_index()
+        return df_aggregate_pricing
+
+class Liquidity():
+    def __init__(self, df_liquidity, df_checkpoints_agg, gauge_registry):
+        self.oracle = Oracle(df_liquidity)
+        self.df_liquidity = self.oracle.df_liquidity
+        # External Reference
+        self.df_checkpoints_agg = df_checkpoints_agg
         self.gauge_registry = gauge_registry
-        self.df_all_by_gauge = df_all_by_gauge
-        self.df_liquidity = _df_liquidity
-        self.output = []
-        self.all_by_gauge_address = {}
-        self.period_filtered_by_gauge = {}
-        self.last_output_per_gauge_per_asset = {}
-        self.total_records = {}
-        self.process_liquidity()
+        self.df_processed_liquidity = self.process_liquidity()
 
     def process_liquidity(self):
-        self.output = []
-        for index, row in self.df_liquidity.iterrows():
-            # if index % 1000 == 0:
-                # print(f"index: {index}")
-            # Process Row
-            is_success = self.process_row(row)
-            # Some Rows fail to find a gauge. If so skip to next row
-            if not is_success:
-                # print("not successful")
-                continue
-            # Need to determine if gaps in data. 
-            # And if so, fill them
-            gauge_addr = self.output[-1]['gauge_addr']
-            token_symbol = self.output[-1]['token_symbol']
-            this_output = self.output[-1]
-
-            # Most spam only has one balance change. 
-            ##  To fight filling in spam transactions, 
-            ##  Track how many records there are per gauge/token
-            if not gauge_addr in self.total_records:
-                self.total_records[gauge_addr] = {}
-                self.total_records[gauge_addr][token_symbol] = 0
-            elif not token_symbol in self.total_records[gauge_addr]:
-                self.total_records[gauge_addr][token_symbol] = 0
-            self.total_records[gauge_addr][token_symbol] += 1
-            
-            # If first record then start here and skip filling in missing data
-            if (
-                gauge_addr in self.last_output_per_gauge_per_asset and
-                token_symbol in self.last_output_per_gauge_per_asset[gauge_addr]
-                ):
-                last_output = self.last_output_per_gauge_per_asset[gauge_addr][token_symbol]
-            else:
-                last_output = None
-            # Loop to fill in missing dates between records
-            while self.is_there_a_gap(this_output, last_output):
-                last_output = last_output.copy()
-                date = last_output['date']
-                date_next = date +  timedelta(days=1)
-                last_output['date'] = date_next
-                last_output['delta_native'] = 0
-                last_output['delta_usd'] = 0
-                self.process_row(last_output, False)
-            if not gauge_addr in self.last_output_per_gauge_per_asset:
-                self.last_output_per_gauge_per_asset[gauge_addr] = {}
-            self.last_output_per_gauge_per_asset[gauge_addr][token_symbol] = this_output
-        # Loop to fill in missing between last and today
-        # print("MADE IT TO FILLING IN FINAL GAPS")
-        # print(f"~Today: {now}")
-        self.fill_in_gaps_to_current_date()
-
-    def is_there_a_gap(self, this_output, last_output, this_output_is_date=False):
-        # If Return True, next record procssed is 1 day later than last_ouput
-        # As such there is always a minimum of 1 day buffer in when True is returned
-        if last_output:
-            if this_output_is_date:
-                # Current record does not exist (so process one more time to create current days record)
-                date_spread = this_output - last_output['date']
-                # print(f"Date Now {this_output}\tDate Compare {last_output['date']}")
-                # print(f"Date spread {date_spread}")
-                if date_spread.days >= 1:
-                    # print("\n\tProcess next day\n")
-                    return True
-            else:
-                # Current record exists
-                date_spread = this_output['date'] - last_output['date']
-                if date_spread.days > 1:
-                    # print(f"\tfill in: {last_output['date']} to {this_output['date']} | Days to go: {date_spread.days - 1}")
-                    # print(f"\t\t{last_output['display_symbol']} | {last_output['token_symbol']}")
-                    return True
-        return False
-    
-
-    def fill_in_gaps_to_current_date(self):
-        # Loop to fill in missing between last and today
-        # print("MADE IT TO FILLING IN FINAL GAPS")
-        now = dt.now().date()
-        # print(f"~Today: {now}")
-        for gauge_key in self.last_output_per_gauge_per_asset.keys():
-            record = self.last_output_per_gauge_per_asset[gauge_key]
-            for asset_key in record.keys():
-                # Filter out records where there was only one balance update to fight spam tokens
-                if self.total_records[gauge_key][asset_key] < 2:
-                    # print(f"\tSkipping Token: {asset_key}")
-                    continue
-                # print(f"Gauge: \n\t{gauge_key} \n Asset \n\t{asset_key}")
-                last_output = record[asset_key]
-                # print(last_output)
-                while self.is_there_a_gap(now, last_output, True):
-                    last_output = last_output.copy()
-                    date = last_output['date']
-                    date_next = date +  timedelta(days=1)
-                    last_output['date'] = date_next
-                    last_output['delta_native'] = 0
-                    last_output['delta_usd'] = 0        
-                    self.process_row(last_output, False)
-
-
-    def process_row(self, row, is_row_raw= True):
-        if is_row_raw:
-            date = row['date'] if 'date' in row else row['DATE']
-            date = dt.strptime(date[:10],'%Y-%m-%d')
-            date = date.date()
-            token_address = row['contract_address'] if 'contract_address' in row else row['CONTRACT_ADDRESS']
-            token_name = row['token_name'] if 'token_name' in row else row['TOKEN_NAME']
-            pool_address = row['user_address'] if 'user_address' in row else row['USER_ADDRESS']
-            token_symbol = row['symbol'] if 'symbol' in row else row['SYMBOL']
-            has_price = row['has_price'] if 'has_price' in row else row['HAS_PRICE']
-            # bal_delta = row['bal_delta'] if 'bal_delta' in row else row['BAL_DELTA']
-            # bal_delta_usd = row['bal_delta_usd'] if 'bal_delta_usd' in row else row['BAL_DELTA_USD']
-            current_bal = row['current_bal'] if 'current_bal' in row else row['CURRENT_BAL']
-            current_bal_usd = row['current_bal_usd'] if 'current_bal_usd' in row else row['CURRENT_BAL_USD']
-            current_bal = float(current_bal)
-            current_bal_usd = float(current_bal_usd)
-            has_price = False if has_price == 'False' or has_price == 'false' else True
-        else:
-            date = row['date']
-            token_address = row['token_address']
-            token_name = row['token_name']
-            token_symbol = row['token_symbol']
-
-            pool_address = row['pool_address']
-            has_price = row['has_price']
-            # bal_delta = row['native_delta']
-            # bal_delta_usd = row['usd_delta']
-            current_bal = row['liquidity_native']
-            current_bal_usd = row['liquidity'] 
-            # print(f"\t\tFilling {date}")    
-
-        try:
-            # Try to match pool with a gauge address
-            if pool_address in self.gauge_registry.pools:
-                gauge_addr = self.gauge_registry.pools[pool_address].gauge_addr
-                pool_name = self.gauge_registry.pools[pool_address].pool_name
-                pool_symbol = self.gauge_registry.pools[pool_address].pool_symbol
-                if not pool_symbol:
-                    if self.gauge_registry.pools[pool_address].token_symbol:
-                        pool_symbol = self.gauge_registry.pools[pool_address].pool_symbol
-
-
-            else: 
-                # print("Couldn't find in gauge_registry")
-                return False
-        
-            # Minimize filter by gauge address
-            # all_by_gauge_address[gauge_addr] = gauge votes filtered by that gauge address
-            if not gauge_addr in self.all_by_gauge_address:
-                df_all_by_gauge_search = self.df_all_by_gauge[
-                    self.df_all_by_gauge.gauge_addr.isin([gauge_addr])
-                ]
-                self.all_by_gauge_address[gauge_addr] = df_all_by_gauge_search
-
-            df_all_by_gauge_search = self.all_by_gauge_address[gauge_addr]
-
-            # Minimize Filter by Date
-            ##  Store last date search          
-            ##  period_filtered_by_gauge[gauge_addr] = gauge votes 
-            ##    filtered by that gauge address before this date     
-            if not gauge_addr in self.period_filtered_by_gauge:
-                temp_df_1 = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date <= date]
-                self.period_filtered_by_gauge[gauge_addr] = temp_df_1      
-
-            ## Get difference between Date and last Period End Date
-            period_filtered_this_gauge = self.period_filtered_by_gauge[gauge_addr]
-            if len(period_filtered_this_gauge) == 0:
-                date_spread = 0
-            else:
-                date_spread = date - period_filtered_this_gauge.iloc[0]['period_end_date'] 
-                date_spread = date_spread.days    
-            ## If more than a week, update vote information to more recent. 
-            if is_row_raw:
-                temp_df_3 = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date < date]
-                temp_df_3.sort_values(['period_end_date'], axis = 0, ascending = False)
-
-            elif date_spread > 7 or len(period_filtered_this_gauge) == 0:
-                temp_df_2 = df_all_by_gauge_search[df_all_by_gauge_search.period_end_date < date]
-                temp_df_2.sort_values(['period_end_date'], axis = 0, ascending = False)
-                self.period_filtered_by_gauge[gauge_addr] = temp_df_2
-
-                temp_df_3 = self.period_filtered_by_gauge[gauge_addr] 
-            else:
-                temp_df_3 = self.period_filtered_by_gauge[gauge_addr] 
-
-
-            # ## Filter shitty vote percent
-            try:
-                vote_percent = temp_df_3.iloc[0]['vote_percent']
-                total_vote_power = temp_df_3.iloc[0]['total_vote_power']
-            #     if vote_percent < 0.0001:
-            #         liquidity_vs_percent = 0
-            #         liquidity_vs_votes = 0
-            #     else:
-            #         liquidity_vs_percent = current_bal_usd / vote_percent
-            #         liquidity_vs_votes = current_bal_usd / temp_df_3.iloc[0]['total_vote_power']
-            except Exception as e:
-                vote_percent = 0      
-                total_vote_power = 0
-            self.output.append({
-                # from this source
-                'date': date,
-                'pool_address': pool_address,
-                'pool_name': pool_name,
-                'pool_symbol': pool_symbol,
-                'gauge_addr': gauge_addr,
-                'liquidity_native': current_bal,
-                'liquidity': current_bal_usd,
-
-                # new vs prior version
-                'has_price': has_price,
-                # 'native_delta': bal_delta,
-                # 'usd_delta': bal_delta_usd,
-                'token_name': token_name,
-                'token_address': token_address,
-                'token_symbol': token_symbol,
-
-                # derrived from others
-
-                'total_votes': total_vote_power,
-                # 'symbol': temp_df_3.iloc[0]['symbol'],
-                'percent': vote_percent,
-                # 'liquidty_vs_percent': liquidity_vs_percent,
-                # 'liquidty_vs_votes': liquidity_vs_votes,
-
-                # 'tradeable_assets': tradeable_assets,
-                'display_name': f"{pool_name} ({pool_address[0:6]})",
-                'display_symbol': f"{pool_symbol} ({pool_address[0:6]})"
-                })
-            
-        except Exception as e:
-            print(f"Could not process pool {pool_name} \n\t {pool_address}")
-            print(e)
-            print(traceback.format_exc())
-            return False 
-        return True
-    
-    # WIP
-    ## Sometimes removes pools if only single deposit and no further action
-    ## But tradeoff feels reasonable to purge spam
-    def purge_shitcoins(self, df):
-        for gauge_key in self.total_records:
-            for asset_key in self.total_records[gauge_key]:
-                if self.total_records[gauge_key][asset_key] < 2:
-                    # print(f"Removing {asset_key} from {gauge_key}")
-                    df = df[~(
-                            (df['token_symbol'] == asset_key) & 
-                            (df['gauge_addr'] == gauge_key)
-                        )]
+        df = self.prime_context()
+        df = self.merge_pricing(df)
+        df = self.merge_checkpoints(df)
+        df = self.process_liquidity_over_votes(df)
+        df = df.sort_values(['block_timestamp', 'checkpoint_id', 'balance_usd'], ascending=True)
         return df
-            
-    def get_df(self):
-        out_df = self.purge_shitcoins(pd.json_normalize(self.output))
-        try:
-            out_df = out_df.sort_values(['date', 'liquidity'], axis = 0, ascending = False)
-        except:
-            pass
-        return out_df 
+
+
+    def estimate_checkpoint(self, min_checkpoint_timestamp, target_timestamp):
+        diff = target_timestamp - min_checkpoint_timestamp
+        return round(diff.days/7) - 1
+
+    # Prep w/ gauge/checkpoint info
+    @timed
+    def prime_context(self):
+        min_checkpoint_timestamp = self.df_checkpoints_agg.checkpoint_timestamp.min().replace(tzinfo=utc)
+
+        # resample
+        df2 = self.df_liquidity.set_index(['block_timestamp'])
+        df = df2.groupby(
+            ['pool_addr', 'symbol', 'token_addr']
+            ).resample('1D')['amount'].sum().ffill().reset_index()
+
+        # Calc a cumulative balance to interact w/ price
+        df = df.sort_values(['block_timestamp'], ascending=True)
+        df['balance'] = df.groupby(['pool_addr', 'symbol', 'token_addr'])['amount'].transform(pd.Series.cumsum)
+        df = df[df['balance'] > 0]
+        # additive
+        df['checkpoint_id'] = df.apply(
+            lambda x: self.estimate_checkpoint(min_checkpoint_timestamp, x['block_timestamp']), 
+            axis=1)
+        
+        df['gauge_addr'] = df.apply(
+            lambda x: self.gauge_registry.get_gauge_addr_from_pool(x['pool_addr']), 
+            axis=1)
+
+        df['gauge_source'] = df.apply(
+            lambda x: self.gauge_registry.get_gauge_source_from_pool(x['pool_addr']), 
+            axis=1)
+        
+
+        return df
     
+    #Combine liquidity and checkpoint data
+    @timed
+    def merge_checkpoints(self, df):
+        df_combo = pd.merge(
+            df, 
+            self.df_checkpoints_agg, 
+            how='left', 
+            on = ['checkpoint_id', 'gauge_addr' ], 
+            )
+        return df_combo
+
+    @timed
+    def merge_pricing(self, df):
+        # Merge price and balance data
+        df_combo = pd.merge(
+            df, 
+            self.oracle.df_oracles_agg, 
+            how='left', 
+            on = ['block_timestamp', 'symbol', 'token_addr' ], 
+            )
+        print(df_combo.keys())
+        # calc USD priced balance
+        df_combo['balance_usd'] = df_combo.apply(
+            lambda x: self.calc_amount_usd(x), 
+            axis=1)
+        return df_combo
+
+    def calc_amount_usd(self, row):
+        if np.isnan(row['calc_price']):
+            return np.nan
+        return row['balance'] * row['calc_price']
+
+    @timed
+    def process_liquidity_over_votes(self, df):
+        # df
+        df['liquidity_over_votes'] = df['balance'] / df['total_vote_power']
+        df['liquidity_usd_over_votes'] = df['balance_usd'] / df['total_vote_power']
+        return df
+     
 
 def get_df_gauge_votes():
     filename = filename_curve_liquidity    #+ fallback_file_title
-    resp_dict = read_csv(filename, 'raw_data')
+    resp_dict = read_csv(filename, 'source')
     df_gauge_votes = pd.json_normalize(resp_dict)
     try:
-        df_gauge_votes = df_gauge_votes.sort_values("date", axis = 0, ascending = True)
+        df_gauge_votes = df_gauge_votes.sort_values("block_timestamp", axis = 0, ascending = True)
     except:
-        df_gauge_votes = df_gauge_votes.sort_values("DATE", axis = 0, ascending = True)
+        df_gauge_votes = df_gauge_votes.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df_gauge_votes
 
-def get_aggregates(df):
-    df_curve_liquidity_aggregates = df.groupby([
-            'date',
-            'pool_address',
-            'pool_name',
-            'pool_symbol',
-            'gauge_addr',
-            'display_name',
-            'display_symbol'
-        ]).agg(
-        liquidity_native=pd.NamedAgg(column='liquidity_native', aggfunc=sum),
-        liquidity=pd.NamedAgg(column='liquidity', aggfunc=sum),
-        # native_delta=pd.NamedAgg(column='native_delta', aggfunc=sum),
-
-        # usd_delta=pd.NamedAgg(column='usd_delta', aggfunc=sum),
-        total_votes=pd.NamedAgg(column='total_votes', aggfunc=max),
-        percent=pd.NamedAgg(column='percent', aggfunc=max),
-        token_symbol=pd.NamedAgg(column='token_symbol', aggfunc=list),
-        has_price=pd.NamedAgg(column='has_price', aggfunc=list),
-
-    ).reset_index()
-
-    df_curve_liquidity_aggregates['liquidity_over_votes'] = (
-        df_curve_liquidity_aggregates['liquidity'].divide(df_curve_liquidity_aggregates['total_votes'])
-    )
-
-    df_curve_liquidity_aggregates['liquidity_native_over_votes'] = (
-        df_curve_liquidity_aggregates['liquidity_native'].divide(df_curve_liquidity_aggregates['total_votes'])
-    )
-    df_curve_liquidity_aggregates.sort_values("date", axis = 0, ascending = False )
-    return df_curve_liquidity_aggregates
+def process_checkpoint_aggs(df):
+    df = df[df['balance']> 0]
+    # Aggregate info down to particular gauges
+    df_aggs = df.groupby([
+                # 'final_lock_time',
+                'checkpoint_timestamp',
+                'checkpoint_id',
+                'block_timestamp',
+                'gauge_addr',
+                'gauge_name',
+                'gauge_symbol',
+                'pool_addr',
+            ]).agg(
+            total_vote_power=pd.NamedAgg(column='total_vote_power', aggfunc='mean'),
+            total_balance=pd.NamedAgg(column='balance', aggfunc=sum),
+            total_balance_usd=pd.NamedAgg(column='balance_usd', aggfunc=sum),
+            tradable_assets=pd.NamedAgg(column='symbol', aggfunc=list),
+            ).reset_index()
+    df_aggs['liquidity_over_votes'] = df_aggs['total_balance'] / df_aggs['total_vote_power']
+    df_aggs['liquidity_usd_over_votes'] = df_aggs['total_balance_usd'] / df_aggs['total_vote_power']
+    df_aggs = df_aggs.sort_values(['block_timestamp', 'total_vote_power'])
+    return df_aggs
 
 def process_and_save():
     print("Processing... { curve.liquidity.models }")
-    lp = LiquidityProcessor(get_df_gauge_votes())
-    df_curve_liquidity = lp.get_df()
-    df_curve_liquidity_aggregates = get_aggregates(df_curve_liquidity)
-    write_dataframe_csv(filename_curve_liquidity, df_curve_liquidity, 'processed')
+    liquidity = Liquidity(get_df_gauge_votes(), df_checkpoints_agg, gauge_registry)
+    df_curve_liquidity = liquidity.df_processed_liquidity
+    # df_exchanges = liquidity.oracle.df_exchanges
+    # df_oracles_agg = liquidity.oracle.df_oracles_agg
 
+    df_curve_liquidity_aggregates = process_checkpoint_aggs(df_curve_liquidity)
+
+    write_dataframe_csv(filename_curve_liquidity, df_curve_liquidity, 'processed')
     write_dataframe_csv(filename_curve_liquidity_aggregate, df_curve_liquidity_aggregates, 'processed')
+
     try:
         # app.config['df_active_votes'] = df_active_votes
         app.config['df_curve_liquidity'] = df_curve_liquidity
         app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
     except:
-        print("could not register in app.config\n\tGauge Votes")
+        print("could not register in app.config\n\tGauge Liquidity")
     return {
         # 'df_active_votes': df_active_votes,
         'df_curve_liquidity': df_curve_liquidity,

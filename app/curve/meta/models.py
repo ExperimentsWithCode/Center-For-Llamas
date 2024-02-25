@@ -15,7 +15,7 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_period_end_date
+from app.utilities.utility import get_period, get_checkpoint_timestamp
 from app.data.reference import (
     known_large_curve_holders,
     gauge_names,
@@ -28,11 +28,11 @@ from flask import current_app as app
 try:
     # df_curve_locker_history = app.config['df_curve_locker_history']
     # df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
-    df_all_by_gauge = app.config['df_all_by_gauge']
+    df_checkpoints_agg = app.config['df_checkpoints_agg']
 except:
     # from app.curve.gauge_votes.models import df_gauge_votes_formatted
     # from app.curve.locker.models import df_curve_locker_history
-    from app.curve.gauge_rounds.models import df_all_by_gauge
+    from app.curve.gauge_rounds.models import df_checkpoints_agg
 
 
 
@@ -42,9 +42,9 @@ print("Loading... { curve.meta.models }")
 def generate_round_differences(df, current_round = 0, compare_round=1):
     output = []
 
-    temp = df.sort_values(['period_end_date'], axis = 0, ascending = False)
+    temp = df.sort_values(['checkpoint_timestamp'], axis = 0, ascending = False)
 
-    period_list = df_all_by_gauge.this_period.unique()
+    period_list = df_checkpoints_agg.this_period.unique()
     period_list.sort()
 
     this_period = period_list[-1 - current_round]
@@ -59,11 +59,11 @@ def generate_round_differences(df, current_round = 0, compare_round=1):
         temp.this_period == last_period
     ]
 
-    period_end_date_list = df.period_end_date.unique()
+    checkpoint_timestamp_list = df.checkpoint_timestamp.unique()
 
     for index, current_row in filter_this_period.iterrows():
         # This Period
-        period_end_date = current_row['period_end_date']
+        checkpoint_timestamp = current_row['checkpoint_timestamp']
 
         gauge_addr = current_row['gauge_addr']
         name = current_row['name']
@@ -81,12 +81,12 @@ def generate_round_differences(df, current_round = 0, compare_round=1):
             total_vote_power_1 = current_row_last_round.iloc[0]['total_vote_power']
             vote_percent_1 = current_row_last_round.iloc[0]['vote_percent']
             vecrv_voter_count_1 = current_row_last_round.iloc[0]['vecrv_voter_count']
-            period_end_date_1 = current_row_last_round.iloc[0]['period_end_date']
+            period_end_date_1 = current_row_last_round.iloc[0]['checkpoint_timestamp']
         except:
             total_vote_power_1 = 0
             vote_percent_1  = 0
             vecrv_voter_count_1 = 0
-            period_end_date_1 = period_end_date_list[current_round + compare_round]
+            checkpoint_timestamp_1 = checkpoint_timestamp_list[current_round + compare_round]
 
 
         output.append({
@@ -96,8 +96,8 @@ def generate_round_differences(df, current_round = 0, compare_round=1):
             'display_name': symbol +" ("+ gauge_addr[0:6] + ")",
 
             'period': this_period,
-            'period_end_date': period_end_date,
-            'period_end_date_compared': period_end_date_1,
+            'checkpoint_timestamp': checkpoint_timestamp,
+            'checkpoint_timestamp_compared': checkpoint_timestamp_1,
 
             'vote_delta':  (vote_percent - vote_percent_1) / vote_percent_1 if vote_percent_1 else 0,
             'vote_percent':  vote_percent,
@@ -129,8 +129,8 @@ def _format_df(df):
     return df[
         ['gauge_addr', 
         'name', 
-        'period_end_date', 
-        'period_end_date_compared', 
+        'checkpoint_timestamp', 
+        'checkpoint_timestamp_compared', 
         'power_difference',
         'power_delta', 
         'total_vote_power',
@@ -143,7 +143,7 @@ def _format_df(df):
         ]]
 
 def get_meta(round=0, top_x = 20, compare_round=1):
-    output = generate_round_differences(df_all_by_gauge, round, compare_round)
+    output = generate_round_differences(df_checkpoints_agg, round, compare_round)
     df_vote_deltas = pd.json_normalize(output)
     df_head, df_tail = generate_head_and_tail(df_vote_deltas, top_x)
     return df_head, df_tail

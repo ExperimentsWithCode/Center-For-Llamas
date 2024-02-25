@@ -142,6 +142,24 @@ class GaugeRegistry():
             return self.shorthand_pools[gauge_addr]
         else:
             return None
+        
+    def get_gauge_addr_from_pool(self, pool_addr):
+        if pool_addr in self.pools:
+            return self.pools[pool_addr].gauge_addr
+    
+    def get_gauge_name_from_pool(self, pool_addr):
+        if pool_addr in self.pools:
+            return self.pools[pool_addr].gauge_name
+
+    def get_gauge_symbol_from_pool(self, pool_addr):
+        if pool_addr in self.pools:
+            return self.pools[pool_addr].gauge_symbol
+
+    def get_gauge_source_from_pool(self, pool_addr):
+        if pool_addr in self.pools:
+            return self.pools[pool_addr].source
+    
+
 
 class Gauge_Set():
     def __init__(self, row, prior_record=None):

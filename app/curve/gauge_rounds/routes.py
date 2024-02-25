@@ -19,7 +19,7 @@ import plotly.express as px
 
 
 # from .forms import AMMForm
-from .models import  df_all_by_user, df_all_by_gauge
+from .models import  df_checkpoints, df_checkpoints_agg
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
@@ -47,21 +47,21 @@ def index():
     now = datetime.now()
 
     # Filter Data
-
-    # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
-    period_end_dates = df_all_by_gauge.period_end_date.unique()
-    period_end_dates = sorted(period_end_dates)
-    current_period = period_end_dates[-1]
-    prior_period = period_end_dates[-2]
-    df_current_votes = df_all_by_gauge[df_all_by_gauge['period_end_date'] == current_period]
-    df_prior_votes = df_all_by_gauge[df_all_by_gauge['period_end_date'] == prior_period]
+    local_df_checkpoints_agg = df_checkpoints_agg.sort_values(['checkpoint_id', 'total_vote_power'], ascending=False)
+    # local_df_gauge_votes = df_checkpoints_agg.groupby(['voter', 'gauge_addr'], as_index=False).last()
+    checkpoint_timestamps = local_df_checkpoints_agg.checkpoint_timestamp.unique()
+    checkpoint_timestamps = sorted(checkpoint_timestamps)
+    current_checkpoint = local_df_checkpoints_agg.checkpoint_id.max()
+    prior_checkpoint = current_checkpoint - 1
+    df_current_votes = local_df_checkpoints_agg[local_df_checkpoints_agg['checkpoint_id'] == current_checkpoint]
+    df_prior_votes = local_df_checkpoints_agg[local_df_checkpoints_agg['checkpoint_id'] == prior_checkpoint]
 
 
     # Build chart
-    fig = px.bar(df_all_by_gauge,
-                    x=df_all_by_gauge['period_end_date'],
-                    y=df_all_by_gauge['total_vote_power'],
-                    color='symbol',
+    fig = px.bar(local_df_checkpoints_agg,
+                    x=local_df_checkpoints_agg['checkpoint_timestamp'],
+                    y=local_df_checkpoints_agg['total_vote_power'],
+                    color='gauge_symbol',
                     title='Gauge Round Vote Weights',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
@@ -77,8 +77,8 @@ def index():
     # # Build chart
     fig = px.pie(df_current_votes, 
                 values=df_current_votes['total_vote_power'],
-                names=df_current_votes['symbol'],
-                title=f"Current Round Vote Distribution {current_period}",
+                names=df_current_votes['gauge_symbol'],
+                title=f"Current Round Vote Distribution {current_checkpoint}",
                 hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
@@ -91,8 +91,8 @@ def index():
     # # Build chart
     fig = px.pie(df_prior_votes, 
                 values=df_prior_votes['total_vote_power'],
-                names=df_prior_votes['symbol'],
-                title=f"Prior Round Vote Distribution {prior_period}",
+                names=df_prior_votes['gauge_symbol'],
+                title=f"Prior Round Vote Distribution {prior_checkpoint}",
                 hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
@@ -107,7 +107,7 @@ def index():
         title='Curve Gauge Rounds',
         template='gauge-round-index',
         body="",
-        meta_gauge_aggregate_votes = df_all_by_gauge,
+        meta_gauge_aggregate_votes = local_df_checkpoints_agg,
         sum_current_votes = df_current_votes.total_vote_power.sum(),
         sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         graphJSON = graphJSON,
@@ -128,8 +128,8 @@ def show(gauge_addr):
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['weight'] > 0]
     # local_df_gauge_votes = local_df_gauge_votes.sort_values("time", axis = 0, ascending = False)
-    local_df_gauge_rounds = df_all_by_user[df_all_by_user['gauge_addr'] == gauge_addr]
-    local_df_gauge_rounds = local_df_gauge_rounds.sort_values(["this_period", 'vote_power'], axis = 0, ascending = False)
+    local_df_gauge_rounds = df_checkpoints[df_checkpoints['gauge_addr'] == gauge_addr]
+    local_df_gauge_rounds = local_df_gauge_rounds.sort_values(["checkpoint_id", 'vote_power'], axis = 0, ascending = False)
 
     if len(local_df_gauge_rounds) == 0:
         return render_template(
@@ -140,29 +140,29 @@ def show(gauge_addr):
             local_df_curve_gauge_registry = local_df_curve_gauge_registry,
             )
     
-    period_end_dates = df_all_by_gauge.period_end_date.unique()
-    period_end_dates = sorted(period_end_dates)
-    if len(period_end_dates) >= 2:
-        current_period = period_end_dates[-1]
-        prior_period = period_end_dates[-2]
-    elif len(period_end_dates == 1):
-        current_period = period_end_dates[-1]
+    checkpoint_timestamps = df_checkpoints_agg.checkpoint_timestamp.unique()
+    checkpoint_timestamps = sorted(checkpoint_timestamps)
+    if len(checkpoint_timestamps) >= 2:
+        current_period = checkpoint_timestamps[-1]
+        prior_period = checkpoint_timestamps[-2]
+    elif len(checkpoint_timestamps == 1):
+        current_period = checkpoint_timestamps[-1]
         prior_period = None
 
-    df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == current_period]
+    df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['checkpoint_timestamp'] == current_period]
     if prior_period:
-        df_prior_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == prior_period]
+        df_prior_votes = local_df_gauge_rounds[local_df_gauge_rounds['checkpoint_timestamp'] == prior_period]
     else:
         df_prior_votes == []
 
-    # df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['period_end_date'] == max_value]
+    # df_current_votes = local_df_gauge_rounds[local_df_gauge_rounds['checkpoint_timestamp'] == max_value]
     
     # # Build chart
     fig = px.pie(df_current_votes, 
                 values=df_current_votes['vote_power'],
-                names=df_current_votes['user'],
+                names=df_current_votes['voter'],
                 title='Current Round Voter Distribution',
-                hover_data=['known_as_x'], labels={'known_as_x':'known_as'}
+                hover_data=['known_as'], labels={'known_as':'known_as'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
         # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -173,9 +173,9 @@ def show(gauge_addr):
 
         # # Build chart
     fig = px.bar(local_df_gauge_rounds,
-                    x=local_df_gauge_rounds['period_end_date'],
+                    x=local_df_gauge_rounds['checkpoint_timestamp'],
                     y=local_df_gauge_rounds['vote_power'],
-                    color='user',
+                    color='voter',
                     title='Votes Per Gauge Round',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
@@ -188,9 +188,9 @@ def show(gauge_addr):
 
         # # Build chart
     fig = px.bar(local_df_gauge_rounds,
-                    x=local_df_gauge_rounds['period_end_date'],
+                    x=local_df_gauge_rounds['checkpoint_timestamp'],
                     y=local_df_gauge_rounds['vote_power'],
-                    color='known_as_x',
+                    color='known_as',
                     title='Votes Per Round',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
@@ -204,9 +204,9 @@ def show(gauge_addr):
         # # Build chart
     fig = px.pie(df_current_votes, 
                 values=df_current_votes['vote_power'],
-                names=df_current_votes['known_as_x'],
+                names=df_current_votes['known_as'],
                 title='Current Round Voter Distribution',
-                hover_data=['known_as_x'], labels={'known_as_x':'known_as'}
+                hover_data=['known_as'], labels={'known_as':'known_as'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
         # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
