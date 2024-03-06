@@ -21,7 +21,8 @@ from app.utilities.utility import (
     get_date_obj, 
     get_dt_from_timestamp,
     shift_time_days,
-    df_remove_nan
+    df_remove_nan,
+    get_now
 )
 # try:
 #     df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
@@ -50,7 +51,12 @@ class ProcessConvexLocker():
 
     def process(self):
         self.df_locker['locked_amount'] = self.df_locker['locked_amount'].astype(float)
-        self.df_locker['epoch_start'] = self.df_locker['_epoch'].apply(get_dt_from_timestamp)
+        self.df_locker['epoch_start'] = self.df_locker.apply(
+            lambda x: get_dt_from_timestamp(x['_epoch']), 
+            axis=1)
+        
+        
+        
         self.df_locker['epoch_end'] = self.df_locker['epoch_start'].apply(lambda x: shift_time_days(x,16*7))
         self.df_locker['known_as'] = self.df_locker['user'].apply(lambda x: self.known_as(x))
         self.df_locker['display_name'] = self.df_locker.apply(lambda x: self.display_name(x['user'], x['known_as']), axis=1)
@@ -118,7 +124,7 @@ class ProcessConvexLocker():
             lock_count=pd.NamedAgg(column='tx_hash', aggfunc=lambda x: len(x.unique())
 
         )).reset_index()
-        now_epoch = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_start'] <= dt.utcnow()].epoch_start.max()
+        now_epoch = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_start'] <= get_now()].epoch_start.max()
         # temp = self.df_aggregate_epoch 
         self.df_aggregate_epoch_current = self.df_aggregate_epoch[self.df_aggregate_epoch['epoch_end'] >= now_epoch]
         return

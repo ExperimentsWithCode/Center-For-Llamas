@@ -27,6 +27,7 @@ from app.utilities.utility import (
     # convert_animation_to_gif,
     calc_lock_efficiency,
     calc_lock_efficiency_by_checkpoint,
+    nullify_amount,
 )
 # filename = 'crv_locker_logs'
 
@@ -66,17 +67,24 @@ class ProcessCurveLocker():
     def process_types(self):
         processed_df = self.df.copy()
         # Formatting
+        processed_df = processed_df[
+            processed_df['event_name'].isin(['Deposit', 'Withdraw'])
+            ]
 
         processed_df['block_timestamp'] = processed_df['block_timestamp'].apply(get_date_obj)
-        processed_df['value'] = processed_df['value'].astype(float)
+        processed_df['value'] = processed_df.apply(
+            lambda x: nullify_amount(x['value']), 
+            axis=1)
         processed_df['final_lock_time'] = processed_df['locktime'].apply(get_dt_from_timestamp)
         processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
         # processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
+        print(processed_df.head())
         processed_df['checkpoint_timestamp'] = processed_df['block_timestamp'].apply(get_checkpoint_timestamp)
         processed_df['checkpoint_id'] = processed_df['block_timestamp'].apply(get_checkpoint_id)
 
-        processed_df['final_checkpoint_timestamp'] = processed_df['final_lock_time'].apply(get_checkpoint_timestamp)
         processed_df['final_checkpoint_id'] = processed_df['final_lock_time'].apply(get_checkpoint_id)
+        processed_df['final_checkpoint_timestamp'] = processed_df['final_lock_time'].apply(get_checkpoint_timestamp)
+ 
         # Apply direction of vector
         processed_df['balance_delta'] = processed_df.apply(lambda x: self.adjust_withdraws(x), axis=1)
         processed_df = processed_df.sort_values(['block_timestamp', 'final_lock_time'])

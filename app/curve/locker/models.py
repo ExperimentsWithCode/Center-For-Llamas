@@ -26,6 +26,7 @@ from app.utilities.utility import (
     format_plotly_figure,
     convert_animation_to_gif,
     calc_lock_efficiency,
+    # nullify_amount,
 )
 print("Loading... { curve.locker.models }")
 

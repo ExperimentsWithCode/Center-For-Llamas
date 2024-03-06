@@ -1,6 +1,6 @@
 from flask import current_app as app
 from app.data.reference import filename_curve_liquidity, filename_curve_liquidity_aggregate
-import numpy as np
+from app.utilities.utility import nullify_amount
 
 from app.data.local_storage import (
     pd,
@@ -16,10 +16,10 @@ from app.utilities.utility import timed
 
 print("Loading... { curve.liquidity.models }")
 
-def nullify_amount(value):
-    if value == 'null' or value == '' or value == '-':
-        return np.nan
-    return float(value)
+# def nullify_amount(value):
+#     if value == 'null' or value == '' or value == '-':
+#         return np.nan
+#     return float(value)
 
 def format_df(df):
     key_list = df.keys()

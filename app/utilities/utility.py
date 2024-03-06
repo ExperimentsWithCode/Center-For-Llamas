@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 from datetime import date, timedelta, tzinfo
-
+import numpy as np
 from functools import wraps
 from time import time
 from app.data.local_storage import (
@@ -74,7 +74,7 @@ def get_dt_from_timestamp(timestamp):
         return None
     if '.' in timestamp:
         timestamp = timestamp[:timestamp.find('.')]
-    return dt.fromtimestamp(int(timestamp))
+    return dt.fromtimestamp(int(timestamp)).replace(tzinfo=utc)
 
 # Attempts to be timezone aware
 # updated get_date_obj which can handle more variance
@@ -94,11 +94,17 @@ def get_datetime_obj(time):
                 time = split[0]
             except:
                 pass
-        time = time+"-UTC"
+        if '+' in time:
+            try:
+                split = time.split('+')
+                time = split[0]
+            except:
+                pass
+
         try:
-            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f-%Z')
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S.%f')
         except:
-            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S-%Z')   
+            time = dt.strptime(time,'%Y-%m-%d %H:%M:%S')   
     # elif type(time) == date:
     #     year = str(time.year) 
     #     month = str(time.month) if time.month >= 10 else "0"+ str(time.month)
@@ -318,7 +324,10 @@ def get_lock_diffs(final_lock_time):
     
     return int(lock_weeks), int(max_weeks)
 
-
+def nullify_amount(value):
+    if value == 'null' or value == '' or value == '-':
+        return np.nan
+    return float(value)
 """
 Checkpoints
 """
@@ -346,7 +355,13 @@ df_default_checkpoints = pd.json_normalize(generate_checkpoints())
 def get_checkpoint(timestamp, df_checkpoints = df_default_checkpoints):
     time_obj = get_datetime_obj(timestamp)
     date_diff = time_obj - df_checkpoints.checkpoint_timestamp.min() 
-    this_id = round(date_diff.days / 7)
+    try:
+        this_id = round(date_diff.days / 7)
+    except:
+        print(timestamp)
+        print(time_obj)
+        print(df_checkpoints.checkpoint_timestamp.min())
+        print(date_diff)
     if this_id < 1:
         this_id = 0
     # print(f"id: {this_id}")
