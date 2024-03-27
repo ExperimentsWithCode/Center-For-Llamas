@@ -12,7 +12,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'period_end_date', name: 'Round End Date' },
+            { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
             { id: 'proposal_title', name: 'Title' },
             { id: 'choice', name: 'Gauge Choice',
                 formatter: (_, row) => gridjs.html(
@@ -26,7 +26,7 @@
             { id: 'voter_count', name: '# Voters',
                 {% include 'utility_sort_float.jinja2' %} 
              },
-            { id: 'period', name: 'Round' },
+            { id: 'checkpoint_id', name: 'Checkpoint ID' },
             { id: 'proposal_end', name: 'Proposal End Date' },
             {# { id: 'bounties_total', name: 'Bounties Total' },
             { id: 'bounty_currencies', name: 'Bounty Currencies' }, #}
@@ -35,7 +35,7 @@
         data: [
           {% for index, row in df_snapshot.iterrows() %}
             {
-                'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
+                'checkpoint_timestamp': '{{ row['checkpoint_timestamp'].strftime("%Y-%m-%d") }}',
                 'proposal_title': '{{ row['proposal_title'] }}',
 
                 {% if snapshot_space == "stakedao"  %}
@@ -46,7 +46,7 @@
                 'total_vote_power': '{{ row['total_vote_power'] |round(2) }}',
                 'voter_count': '{{ row['cvx_voter_count'] }}',
                 'actions': null,
-                'period': {{row['period']}},
+                'checkpoint_id': {{row['checkpoint_id']}},
                 'proposal_end': '{{ row['proposal_end'] }}',
                 {# 'bounty': '${{ row['bounties_total'] |round(2)}}',
                 'bounty_currency': '{{ row['bounty_currencies'] }}', #}

@@ -213,7 +213,7 @@ def get_proposals(space_id, first, skip):
     """
     results = run_query(query)
     if results:
-        print(results['data']['proposals'])
+        # print(results['data']['proposals'])
         return results['data']['proposals']
     return results
 # {

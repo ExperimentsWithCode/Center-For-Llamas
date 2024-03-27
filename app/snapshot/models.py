@@ -11,7 +11,7 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_period_end_date, get_period_direct
+from app.utilities.utility import  get_checkpoint_id, get_checkpoint
 from app.data.reference import (
     known_large_curve_holders,
     current_file_title,
@@ -22,6 +22,11 @@ import traceback
 
 
 from app.data.reference import known_large_cvx_holders_addresses
+
+try:
+    from flask import current_app as app
+except:
+    pass
 
 try:
     gauge_registry = app.config['gauge_registry']
@@ -171,7 +176,7 @@ class Snapshot():
                 for proposal_id in space.proposals:
                     proposal = space.proposals[proposal_id]
                     # print(proposal)
-                    output_data[ get_period_direct(proposal.proposal_end_time)] = proposal.choices
+                    output_data[ get_checkpoint_id(proposal.proposal_end_time)] = proposal.choices
         return output_data
 
 
@@ -339,7 +344,7 @@ class Proposal():
                 if self.fails_logged < 3:
                     print("== Failed")
                     print("\tproposal")
-                    print(self.proposal_title)
+                    print(self.cdproposal_title)
                     print(_choices)
                     print(type(_choices))
                     print("\tvote")
@@ -745,6 +750,9 @@ class Choice():
     #     return False
 
     def format_output(self):
+        checkpoint = get_checkpoint(self.proposal.proposal_end_time)
+        checkpoint_id = checkpoint.id
+        checkpoint_timestamp = checkpoint.checkpoint_timestamp
         return {
             'proposal_title': self.proposal.proposal_title,
             'voter': self.voter.address,
@@ -759,8 +767,8 @@ class Choice():
             'timestamp': self.ts,
             'proposal_start': self.proposal.proposal_start_time,
             'proposal_end': self.proposal.proposal_end_time,
-            'period_end_date':  get_period_end_date(self.proposal.proposal_end_time),
-            'period': get_period_direct(self.proposal.proposal_end_time),
+            'checkpoint_timestamp':  checkpoint_timestamp,
+            'checkpoint_id': checkpoint_id,
             'valid': self.vote.is_valid(),
             'vote_id': self.vote_id,
             'gauge_addr': self.gauge_addr

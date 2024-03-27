@@ -590,7 +590,6 @@ temp_core_pools = {
 
 "0x3175Df0976dFA876431C2E9eE6Bc45b65d3473CC" : "[fraxusdcCrv] fraxusdcCurve token address [0x3175Df…]",
 "0xCFc25170633581Bf896CB6CDeE170e3E3Aa59503" : "gauge address [0xCFc251…]",
-
 "0xDcEF968d416a41Cdac0ED8702fAC8128A64241A2" : "swap address [0xDcEF96…]",
 
 },

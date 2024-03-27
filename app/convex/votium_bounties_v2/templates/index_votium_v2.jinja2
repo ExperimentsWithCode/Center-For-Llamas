@@ -1,0 +1,267 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% set active_category = "vote_bounties" -%}
+  {% set active_page = "votium_v2" -%}
+  {% set sub_active_page = 'home' -%}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="row">
+
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Current Votium Round </div>
+        <div class="card-body">
+          <h4 class="card-title">{{ "{:,.0f}".format(df_current['votium_round'].max()) }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total Bounties Ever </div>
+        <div class="card-body">
+          <h4 class="card-title">{{ "{:,.2f}".format(df_votium_v2['bounty_value'].sum()) }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row">
+
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Curve Checkpoint Prior: {{ "{:,.0f}".format(df_prior['checkpoint_id'].max()) }} </div>
+        <div class="card-body">
+          <h4 class="card-title">{{ df_prior.iloc[0]['checkpoint_timestamp'] }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Curve Checkpoint Current: {{ "{:,.0f}".format(df_current['checkpoint_id'].max()) }}</div>
+        <div class="card-body">
+          <h4 class="card-title">{{ df_current.iloc[0]['checkpoint_timestamp'] }}</h4>
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+
+    </div>
+
+    {% set sum_current_votes = df_current['bounty_value'].sum() %}
+    {% set sum_prior_votes = df_prior['bounty_value'].sum() %}
+
+    {# {% include 'utility_vote_compare.jinja2' %} #}
+    <div class="row">
+      <div class="card border-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total Bounties (USD) Prior Round: {{ "{:,.0f}".format(df_prior['votium_round'].max()) }}</div>
+        <div class="card-body">
+          <h4 class="card-title">{{ "{:,.2f}".format(sum_prior_votes) }}</h4>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+      <div class="card border-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Total Bounties (USD) Current Round: {{ "{:,.0f}".format(df_current['votium_round'].max()) }}</div>
+        <div class="card-body">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+
+          <h4 class="card-title text-primary">{{ "{:,.2f}".format(sum_current_votes) }}</h4>
+          <h4>
+            {% if sum_current_votes > sum_prior_votes  %}
+              <span class="badge bg-primary rounded-pill">
+               + {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">
+               {{"{:,.2f}".format(((sum_current_votes / sum_prior_votes)-1)*100)}} %
+              </span>
+            {% endif %}
+          </h4>
+          </li>
+
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+      </div>
+     </div>
+
+
+
+    <div class="row">
+
+        <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Current Bounties</div>
+        <div class="card-body">
+            <div id="chart1" class="chart1"></div>
+
+        </div>
+        </div>
+
+        <div class="card text-white bg-primary mb-3" style="max-width: 50%;">
+        <div class="card-header">Prior Bounties</div>
+        <div class="card-body">
+            <div id="chart2" class="chart2"></div>
+
+        </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="card border-info mb-3" style="max-width: 50%;">
+        <div class="card-header">By Gauge</div>
+        <div class="card-body">
+            <div id="chart3" class="chart3"></div>
+
+        </div>
+        </div>
+
+        <div class="card border-info mb-3" style="max-width: 50%;">
+        <div class="card-header">By Bounty Token</div>
+        <div class="card-body">
+            <div id="chart4" class="chart4"></div>
+
+        </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="card border-info mb-3" style="max-width: 50%;">
+        <div class="card-header">Vote Power</div>
+        <div class="card-body">
+            <div id="chart5" class="chart5"></div>
+
+        </div>
+        </div>
+
+        <div class="card border-info mb-3" style="max-width: 50%;">
+        <div class="card-header">Bounty Value</div>
+        <div class="card-body">
+            <div id="chart6" class="chart6"></div>
+
+        </div>
+        </div>
+    </div>
+
+  <div class="row">
+
+    <div id="bounty_table"></div>
+
+  </div>
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'checkpoint_id', name: 'Checkpoint ID' },
+          { id: 'votium_round', name: 'Votium Round' ,
+            formatter: (_, row) =>  `${row.cells[1].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_int.jinja2' %} 
+          },
+          { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
+          { id: 'gauge_symbol', name: 'Gauge Symbol',
+
+          },
+          { id: 'token_symbol', name: 'Token Symbol',
+             formatter: (_, row) => gridjs.html(
+                `${row.cells[4].data.toString()}`
+            )
+          },
+          { id: 'token_amount', name: 'Token Amount' ,
+            formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
+          },
+
+          { id: 'bounty_value', name: 'Bounty USD Value',
+            formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
+          },
+
+          { id: 'relative_vote_power', name: 'Relative Vote Power',
+            formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %}
+          },
+
+          { id: 'total_vote_power', name: 'Total Vote Power',
+            formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %}
+          },
+
+          { id: 'bounty_per_vecrv', name: 'Bounty $ Per veCRV',
+          {% include 'utility_sort_float.jinja2' %} 
+
+          },
+
+          { id: 'vecrv_per_bounty', name: 'veCRV Per Bounty $',
+            formatter: (_, row) =>  `${row.cells[10].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %}
+          },
+
+          { id: 'gauge_addr', name: 'Gauge Addr',
+             formatter: (_, row) => gridjs.html(
+                `${row.cells[11].data.toString()}`
+            )
+           },
+
+
+        ],
+        data: [
+          {% for index, row in df_votium_v2.iterrows() %}
+            {
+              'checkpoint_id': '{{ row['checkpoint_id'] }}',
+              'votium_round': '{{ row['votium_round'] }}',
+
+              'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
+              
+              'gauge_symbol': '{{ row['gauge_symbol'] }}',
+
+              'token_symbol': `<a href={{ url_for('votium_bounties_v2_bp.show_token', token_addr = row['token']) }}>{%if row['token_symbol'] %}{{row['token_symbol']}}{% else %}_{% endif %}</a>`,
+
+              'token_amount': '{{ row['bounty_amount']|round(2) }}',
+
+              'bounty_value': '{{ row['bounty_value']|round(2) }}',
+
+              'relative_vote_power': '{{ row['relative_vote_power'] | round(2) }}',
+
+              'total_vote_power': '{{ row['total_vote_power'] | round(2) }}',
+
+              'bounty_per_vecrv': '{{ row['bounty_per_vecrv']| round(6) }}',
+              'vecrv_per_bounty': '{{ row['vecrv_per_bounty'] | round(2)}}',
+              
+              'gauge_addr': `<a href={{ url_for('votium_bounties_v2_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`,
+
+
+
+            },
+          {% endfor %}
+        ],
+
+      {%include 'table_format_helper.jinja2' %}
+
+      }).render(document.getElementById('bounty_table'));
+</script>
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+{% for graph_json in graph_list %}
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script type='text/javascript'>
+      var graphs = {{graph_json | safe}};
+      Plotly.plot("chart{{loop.index}}",graphs,{});
+    </script> 
+{% endfor %}
+
+{% endblock %}

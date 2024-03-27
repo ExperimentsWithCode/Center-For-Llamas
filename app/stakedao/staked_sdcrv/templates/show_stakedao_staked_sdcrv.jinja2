@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "stakedao" -%}
+  {% set active_page = "stakedao_staked_sdcrv" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -24,6 +27,38 @@
       {% endwith %}
     {% endwith %} #}
 
+    <div class="row">
+      <div class = "col-md">
+        <div class="card border-info mb-3" >
+          <div class="card-header">Staker</div>
+          <div class="card-body">
+              <h4 class="card-title">{{stakedao_sd_crv.iloc[0]['provider']}}</h4>
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              {# <div id="chart" class="chart"></div> #}
+
+          </div>
+        </div>
+      </div>
+
+      <div class = "col-md">
+        <div class="card border-warning mb-3" >
+          <div class="card-header">Known As</div>
+          <div class="card-body">
+            {% if stakedao_sd_crv.iloc[0]['known_as'] == '_' %}
+              <h4 class="card-title"> _ </h4>
+
+            {% else %}
+              <h4 class="card-title">{{ stakedao_sd_crv.iloc[0]['known_as'] }}</h4>
+
+            {% endif %}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              {# <div id="chart" class="chart"></div> #}
+
+          </div>
+        </div>
+      </div>
+
+    </div>
 
 
     <div class="row">

@@ -155,15 +155,26 @@ filename_curve_gauge_rounds_by_aggregate = 'curve_gauge_rounds_by_aggregate'
 filename_curve_liquidity = 'curve_liquidity_v2'
 filename_curve_liquidity_cutoff = 'curve_liquidity_cutoff_v2'
 filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate_v2'
+filename_curve_liquidity_swaps = 'curve_liquidity_swaps_v2'
+filename_curve_liquidity_oracle_aggregate = 'curve_liquidity_oracle_aggregate_v2'
 
 # Convex Data
 filename_convex_delegations = 'convex_delegations'
 filename_convex_locker = 'convex_locker'
+filename_convex_curve_snapshot = 'convex_snapshot_votes'
+filename_convex_curve_snapshot_origin = 'convex_snapshot_votes_origin'
+
 
 # StakeDao Data
 filename_stakedao_delegations = 'stakedao_delegations'
 filename_stakedao_staked_sdcrv = 'stakedao_staked_sdcrv'
 filename_stakedao_locker = 'stakedao_locker'
+filename_stakedao_curve_snapshot = 'stakedao_snapshot_votes'
+filename_stakedao_curve_snapshot_origin = 'stakedao_snapshot_votes_origin'
 
+# Votium
+filename_votium_v2 = 'votium_v2'
+filename_votium_v1 = 'votium_v1'
 
+# Warden
 filename_warden_vesdt_boost_delegation = 'warden_vesdt_boost_delegation'

@@ -1,5 +1,5 @@
 from flask import current_app as app
-from app.data.reference import filename_curve_liquidity, filename_curve_liquidity_aggregate
+from app.data.reference import filename_curve_liquidity, filename_curve_liquidity_aggregate, filename_curve_liquidity_swaps, filename_curve_liquidity_oracle_aggregate
 
 from datetime import datetime as dt
 from datetime import datetime, timedelta
@@ -16,7 +16,7 @@ from app.data.local_storage import (
     write_dfs_to_xlsx
     )
 from app.utilities.utility import (
-    get_checkpoint_id_from_date,
+    get_checkpoint_id,
     get_checkpoint_timestamp_from_date,
     df_default_checkpoints,
     concat_all,
@@ -277,13 +277,11 @@ class Liquidity():
 
     def estimate_checkpoint(self, min_checkpoint_timestamp, target_timestamp):
         diff = target_timestamp - min_checkpoint_timestamp
-        return round(diff.days/7) - 1
+        return round(diff.days/7)
 
     # Prep w/ gauge/checkpoint info
     @timed
     def prime_context(self):
-        min_checkpoint_timestamp = self.df_checkpoints_agg.checkpoint_timestamp.min().replace(tzinfo=utc)
-
         # resample
         df2 = self.df_liquidity.set_index(['block_timestamp'])
         df = df2.groupby(
@@ -296,7 +294,7 @@ class Liquidity():
         df = df[df['balance'] > 0]
         # additive
         df['checkpoint_id'] = df.apply(
-            lambda x: self.estimate_checkpoint(min_checkpoint_timestamp, x['block_timestamp']), 
+            lambda x: get_checkpoint_id(x['block_timestamp']) -1, 
             axis=1)
         
         df['gauge_addr'] = df.apply(
@@ -386,25 +384,32 @@ def process_checkpoint_aggs(df):
 def process_and_save():
     print("Processing... { curve.liquidity.models }")
     liquidity = Liquidity(get_df_gauge_votes(), df_checkpoints_agg, gauge_registry)
-    df_curve_liquidity = liquidity.df_processed_liquidity
-    # df_exchanges = liquidity.oracle.df_exchanges
-    # df_oracles_agg = liquidity.oracle.df_oracles_agg
 
+    df_curve_liquidity = liquidity.df_processed_liquidity
     df_curve_liquidity_aggregates = process_checkpoint_aggs(df_curve_liquidity)
+
+    df_curve_swaps = liquidity.oracle.df_exchanges
+    df_curve_oracles_agg = liquidity.oracle.df_oracles_agg
 
     write_dataframe_csv(filename_curve_liquidity, df_curve_liquidity, 'processed')
     write_dataframe_csv(filename_curve_liquidity_aggregate, df_curve_liquidity_aggregates, 'processed')
-
+    write_dataframe_csv(filename_curve_liquidity_swaps, df_curve_liquidity, 'processed')
+    write_dataframe_csv(filename_curve_liquidity_oracle_aggregate, df_curve_oracles_agg, 'processed')
     try:
         # app.config['df_active_votes'] = df_active_votes
         app.config['df_curve_liquidity'] = df_curve_liquidity
         app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
+        app.config['df_curve_swaps'] = df_curve_swaps
+        app.config['df_curve_oracles_agg'] = df_curve_oracles_agg
+
     except:
         print("could not register in app.config\n\tGauge Liquidity")
     return {
         # 'df_active_votes': df_active_votes,
         'df_curve_liquidity': df_curve_liquidity,
         'df_curve_liquidity_aggregates': df_curve_liquidity_aggregates,
+        'df_curve_swaps': df_curve_swaps,
+        'df_curve_oracles_agg': df_curve_oracles_agg,
     }
 
 

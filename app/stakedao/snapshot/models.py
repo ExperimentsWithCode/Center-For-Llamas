@@ -1,3 +1,6 @@
+from app.data.reference import filename_stakedao_curve_snapshot, filename_stakedao_curve_snapshot_origin
+
+
 try:
     from flask import current_app as app
 except:
@@ -7,6 +10,7 @@ from app.data.local_storage import (
     pd,
     read_json,
     read_csv,
+    csv_to_df,
     write_dataframe_csv,
     write_dfs_to_xlsx
     )
@@ -33,17 +37,21 @@ except:
 print("Loading... { stakedao.snapshot.models }")
 
 
+
 def get_df_snapshot():
+    filename = filename_stakedao_curve_snapshot # + current_file_title
     try:
-        filename = 'stakedao_snapshot' # + current_file_title
-        snapshot_dict = read_csv(filename, 'source')
-        df_snapshot = pd.json_normalize(snapshot_dict)
+        df_snapshot = csv_to_df(filename, 'raw_data')
         return df_snapshot.sort_values("vote_timestamp", axis = 0, ascending = True)
     except:
-        filename = 'stakedao_snapshot' #+ fallback_file_title
-        snapshot_dict = read_json(filename, 'source')
+        snapshot_dict = read_json(filename, 'raw_data')
         df_snapshot = pd.json_normalize(snapshot_dict)
         return df_snapshot.sort_values("VOTE_TIMESTAMP", axis = 0, ascending = True)
+    
+# def get_df_snapshot_from_snapshot():
+#     filename = filename_stakedao_curve_snapshot_origin
+#     return csv_to_df(filename)
+
 
 def get_snapshot_obj(df_snapshot):
     snapshot = Snapshot()
@@ -57,17 +65,8 @@ def get_df_vote_choice(snapshot):
 
 
 def get_aggregates(df_vote_choice):
-    # dfs = []
-    # titles = []
-    # for title in df_vote_choice.proposal_title.unique():
-    #     df_temp = df_vote_choice[
-    #         df_vote_choice.proposal_title.isin([title])
-    #     ]
-    #     dfs.append(df_temp)
-    #     titles.append(title)
-
     df_vote_aggregates = df_vote_choice.groupby(
-        ['period', 'period_end_date', 'proposal_start', 'proposal_end', 'proposal_title', 'choice', 'choice_index', 'gauge_addr']
+        ['checkpoint_id', 'checkpoint_timestamp', 'proposal_start', 'proposal_end', 'proposal_title', 'choice', 'choice_index', 'gauge_addr']
         )['choice_power'].agg(['sum','count']).reset_index()
 
     df_vote_aggregates = df_vote_aggregates.rename(columns={

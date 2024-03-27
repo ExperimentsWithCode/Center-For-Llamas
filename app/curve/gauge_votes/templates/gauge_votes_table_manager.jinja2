@@ -20,6 +20,10 @@
             <a class="nav-link" data-bs-toggle="tab" href="#allVotes" aria-selected="false" role="tab" tabindex="-1">All Votes</a>
         </li>
 
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" data-bs-toggle="tab" href="#checkpointVotes" aria-selected="false" role="tab" tabindex="-1">Votes By Checkpoint</a>
+        </li>
+
         </ul>
         <div id="myTabContent" class="tab-content">
         <div class="tab-pane fade active show" id="currentlyActive" role="tabpanel">
@@ -56,6 +60,17 @@
                     {% with id="vote_table_3" %}
                         {% include 'gauge_votes_table_helper.jinja2' %} 
                     {% endwith %}
+                {% endwith %}
+            {% endwith %}
+        </div>
+
+    </div>  
+
+    <div class="tab-pane fade" id="checkpointVotes" role="tabpanel">
+
+            {% with df_gauge_rounds=vote_checkpoints %}
+                {% with id="vote_table_4" %}
+                        {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
                 {% endwith %}
             {% endwith %}
         </div>

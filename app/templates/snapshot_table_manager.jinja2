@@ -13,7 +13,7 @@
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionTables">
                         <div class="accordion-body">
-                            {% with df_snapshot=df_snapshot[df_snapshot['period'] == df_snapshot.iloc[0]['period']] %}
+                            {% with df_snapshot=df_snapshot[df_snapshot['checkpoint_id'] == df_snapshot.iloc[0]['checkpoint_id']] %}
                               {% with snapshot_space=snapshot_space %}
                                   {% with id="vote_table_1" %}
                                     {% if table_type == 'show' %}
@@ -76,7 +76,7 @@
   <div id="myTabContent" class="tab-content">
     <div class="tab-pane fade active show" id="thisProposal" role="tabpanel">
 
-      {% with df_snapshot=df_snapshot[df_snapshot['period'] == df_snapshot.iloc[0]['period']] %}
+      {% with df_snapshot=df_snapshot[df_snapshot['checkpoint_id'] == df_snapshot.iloc[0]['checkpoint_id']] %}
         {% with snapshot_space=snapshot_space %}
             {% with id="vote_table_1" %}
               {% if table_type == 'show' %}

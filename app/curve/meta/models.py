@@ -15,7 +15,7 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_checkpoint_timestamp
+# from app.utilities.utility import get_period, get_checkpoint_timestamp
 from app.data.reference import (
     known_large_curve_holders,
     gauge_names,
@@ -44,64 +44,64 @@ def generate_round_differences(df, current_round = 0, compare_round=1):
 
     temp = df.sort_values(['checkpoint_timestamp'], axis = 0, ascending = False)
 
-    period_list = df_checkpoints_agg.this_period.unique()
-    period_list.sort()
+    checkpoint_id_list = df_checkpoints_agg.checkpoint_id.unique()
+    checkpoint_id_list.sort()
 
-    this_period = period_list[-1 - current_round]
-    last_period = period_list[-1 - (current_round + compare_round)]
+    checkpoint_id = checkpoint_id_list[-1 - current_round]
+    last_checkpoint_id = checkpoint_id_list[-1 - (current_round + compare_round)]
    
 
-    filter_this_period = temp[
-        temp.this_period == this_period
+    filter_checkpoint_id = temp[
+        temp.checkpoint_id == checkpoint_id
     ]
 
-    filter_last_period = temp[
-        temp.this_period == last_period
+    filter_last_checkpoint_id = temp[
+        temp.checkpoint_id == last_checkpoint_id
     ]
 
     checkpoint_timestamp_list = df.checkpoint_timestamp.unique()
 
-    for index, current_row in filter_this_period.iterrows():
+    for index, current_row in filter_checkpoint_id.iterrows():
         # This Period
         checkpoint_timestamp = current_row['checkpoint_timestamp']
 
         gauge_addr = current_row['gauge_addr']
-        name = current_row['name']
-        symbol = current_row['symbol']
+        name = current_row['gauge_name']
+        symbol = current_row['gauge_symbol']
 
         total_vote_power = current_row['total_vote_power']
-        vote_percent = current_row['vote_percent']
-        vecrv_voter_count = current_row['vecrv_voter_count']
+        vote_percent = current_row['total_vote_percent']
+        # vecrv_voter_count = current_row['vecrv_voter_count']
 
         try:
             # -Last Period
-            current_row_last_round = filter_last_period[
-                filter_last_period.gauge_addr == gauge_addr
+            current_row_last_round = filter_last_checkpoint_id[
+                filter_last_checkpoint_id.gauge_addr == gauge_addr
             ]
             total_vote_power_1 = current_row_last_round.iloc[0]['total_vote_power']
-            vote_percent_1 = current_row_last_round.iloc[0]['vote_percent']
-            vecrv_voter_count_1 = current_row_last_round.iloc[0]['vecrv_voter_count']
-            period_end_date_1 = current_row_last_round.iloc[0]['checkpoint_timestamp']
+            vote_percent_1 = current_row_last_round.iloc[0]['total_vote_percent']
+            # vecrv_voter_count_1 = current_row_last_round.iloc[0]['vecrv_voter_count']
+            checkpoint_timestamp_1 = current_row_last_round.iloc[0]['checkpoint_timestamp']
         except:
             total_vote_power_1 = 0
             vote_percent_1  = 0
             vecrv_voter_count_1 = 0
-            checkpoint_timestamp_1 = checkpoint_timestamp_list[current_round + compare_round]
+            checkpoint_timestamp_1 = checkpoint_timestamp_list[-1 - (current_round + compare_round)]
 
 
         output.append({
             'gauge_addr' : gauge_addr,
-            'name': name,
-            'symbol': symbol,
+            'gauge_name': name,
+            'gauge_symbol': symbol,
             'display_name': symbol +" ("+ gauge_addr[0:6] + ")",
 
-            'period': this_period,
+            'checkpoint_id': checkpoint_id,
             'checkpoint_timestamp': checkpoint_timestamp,
             'checkpoint_timestamp_compared': checkpoint_timestamp_1,
 
             'vote_delta':  (vote_percent - vote_percent_1) / vote_percent_1 if vote_percent_1 else 0,
-            'vote_percent':  vote_percent,
-            'last_vote_percent': vote_percent_1,
+            'total_vote_percent':  vote_percent,
+            'last_total_vote_percent': vote_percent_1,
 
             'power_delta': total_vote_power /  total_vote_power_1  if total_vote_power_1 else 0,
             'total_vote_power': total_vote_power,
@@ -128,16 +128,16 @@ def generate_head_and_tail(df, top_x = 20):
 def _format_df(df):
     return df[
         ['gauge_addr', 
-        'name', 
+        'gauge_name', 
         'checkpoint_timestamp', 
         'checkpoint_timestamp_compared', 
         'power_difference',
         'power_delta', 
         'total_vote_power',
         'last_total_vote_power', 
-        'vote_percent',
+        'total_vote_percent',
         'vote_delta', 
-        'symbol',
+        'gauge_symbol',
         'display_name'
 
         ]]

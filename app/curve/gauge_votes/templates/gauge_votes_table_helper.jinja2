@@ -7,7 +7,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'period', name: 'Period' },
+          { id: 'checkpoint_id', name: 'Checkpoint Id' },
           { id: 'known_as', name: 'Known As' },
           {# { id: 'user', name: 'User' }, #}
           { id: 'symbol', name: 'Symbol' },
@@ -25,7 +25,7 @@
         data: [
           {% for index, row in df.iterrows() %}
             {
-              'period': '{{ row['period'] }}',
+              'checkpoint_id': '{{ row['checkpoint_id'] }}',
               'known_as': '{{ row['known_as'] }}',
               {# 'user': '{{ row['user'] }}', #}
               'symbol': '{{ row['symbol'] }}',

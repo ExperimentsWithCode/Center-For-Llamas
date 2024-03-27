@@ -5,7 +5,13 @@ import numpy as np
 
 
 
-from app.utilities.utility import get_period, get_period_end_date, get_period_direct
+from app.utilities.utility import (
+    get_checkpoint_id, 
+    get_dt_from_timestamp,
+    get_checkpoint_timestamp_from_id,
+    get_checkpoint
+)
+
 from app.data.reference import known_large_cvx_holders_addresses
 from app.curve.gauges.models import gauge_registry
 
@@ -14,8 +20,13 @@ from app.data.snapshot_api import get_space, get_proposals, get_votes
 from app.data.local_storage import (
     read_json,
     read_csv,
-    csv_to_df
+    csv_to_df,
+    df_to_csv
 )
+
+from app.data.reference import filename_convex_curve_snapshot_origin, filename_stakedao_curve_snapshot_origin
+
+
 
 print("Loading... { snapshot.alt_models }")
 
@@ -33,14 +44,13 @@ class SnapshotAsSource():
         df_proposals = pd.json_normalize(proposals)
         # Filter for proposals that matter
         if self.space['id'] == 'sdcrv.eth':
-            # print('stakedao!')
+            # StakeDAO
             local_df_proposals = df_proposals[
                 df_proposals['title'].str.startswith('Gauge vote') &
                 df_proposals['title'].str.contains('CRV')
                 ]
         else:
-            # print('convex!')
-
+            # Convex
             local_df_proposals = df_proposals[df_proposals['title'].str.contains('Gauge Weight')]
         local_df_proposals = local_df_proposals[~local_df_proposals['title'].str.contains('TEST')]
         
@@ -80,11 +90,12 @@ class SnapshotAsSource():
 
     def generate_output(self, this_proposal, df_votes):
         output = []
-        start_time =  dt.fromtimestamp(this_proposal.start) #.strftime('%Y-%m-%d %H:%M:%S')
-        end_time =  dt.fromtimestamp(this_proposal.end) #.strftime('%Y-%m-%d %H:%M:%S')
-        period_end_date =  get_period_end_date(end_time)
-        period = get_period_direct(end_time)
-        self.proposal_choice_map[period] = this_proposal.choices
+        start_time =  get_dt_from_timestamp(this_proposal.start) #.strftime('%Y-%m-%d %H:%M:%S')
+        end_time =  get_dt_from_timestamp(this_proposal.end) #.strftime('%Y-%m-%d %H:%M:%S')
+        checkpoint = get_checkpoint(end_time)
+        checkpoint_id = checkpoint.id
+        checkpoint_timestamp =  checkpoint.checkpoint_timestamp
+        self.proposal_choice_map[checkpoint_id] = this_proposal.choices
         # Iterate through voters
         for index, row in df_votes.iterrows():
             total_weight = 0
@@ -122,8 +133,8 @@ class SnapshotAsSource():
                             'timestamp': timestamp,
                             'proposal_start': start_time,
                             'proposal_end': end_time,
-                            'period_end_date':  period_end_date,
-                            'period': period,
+                            'checkpoint_timestamp':  checkpoint_timestamp,
+                            'checkpoint_id': checkpoint_id,
                             'valid': start_time < end_time,
                             'vote_id': row['id'],
                             'gauge_addr': gauge_registry.get_gauge_address_from_snapshot(choice)
@@ -138,6 +149,19 @@ class SnapshotAsSource():
     def get_proposal_choice_map_df(self):
         return pd.json_normalize([self.proposal_choice_map])
     
+    def save_files(self, target):
+        if target == 'convex':
+            filename_1 = filename_convex_curve_snapshot_origin
+            # filename_2 = f"{target}_proposal_choice_map"
+        elif target == 'stakedao':
+            filename_1 = filename_stakedao_curve_snapshot_origin
+        else:
+            return
+        df_to_csv(self.get_vote_df(), filename_1, 'raw_data')
+        # df_to_csv(self.get_proposal_choice_map_df(), filename_2, "raw_data")
+        
+
+    
 
 def format_df_snapshot_from_snapshot(df):
     df['choice_index'] = df['choice_index'].astype(int)
@@ -147,20 +171,23 @@ def format_df_snapshot_from_snapshot(df):
     df['available_power'] = df['available_power'].astype(float)
     df['choice_power'] = df['choice_power'].astype(float)
     df['valid'] = df['valid'].astype(bool)
-    df['period_end_date'] = pd.to_datetime(df['period_end_date']).dt.date
+    df['checkpoint_timestamp'] = pd.to_datetime(df['checkpoint_timestamp'])
     return df
 
 
 def get_df_snapshot_from_snapshot(target):
+    if target == 'convex':
+        filename = filename_convex_curve_snapshot_origin
+    elif target == 'stakedao':
+        filename = filename_stakedao_curve_snapshot_origin
     try:
-        filename = (f"{target}_snapshot_from_snapshot")
-        temp = csv_to_df(filename)
+        temp = csv_to_df(filename, 'raw_data')
         temp = format_df_snapshot_from_snapshot(temp)
         return temp
     except:
         return []
 
-def def_get_proposal_choice_map(target):
+def get_proposal_choice_map(target):
     try:
         filename = (f"{target}_snapshot_proposal_choice_map")
         temp = csv_to_df(filename).to_dict()
@@ -181,7 +208,7 @@ def merge_target(df_snapshot, proposal_choice_map, target):
     if not len(local_df_snapshot) > 0:
         return df_snapshot, proposal_choice_map
     else:
-        local_proposal_choice_map = def_get_proposal_choice_map(target)
+        local_proposal_choice_map = get_proposal_choice_map(target)
     # clear out overlap
     for title in local_df_snapshot.proposal_title.unique():
         # print(f"Removing: {title}")

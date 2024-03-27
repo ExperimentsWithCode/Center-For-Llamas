@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "curve" -%}
+  {% set active_page = "curve_gauge_votes" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -94,39 +97,36 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'period', name: 'Period' },
-          { id: 'period_end_date', name: 'Period End' },
+          { id: 'checkpoint_id', name: 'Checkpoint ID' },
+          { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
           { id: 'known_as', name: 'Known As' },
           { id: 'user', name: 'User' ,
               formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[8].data}>${row.cells[3].data}</a>`
-              ) 
+                  `${row.cells[3].data.toString()}`
+              )
           },
           { id: 'symbol', name: 'Symbol' },
           { id: 'weight', name: 'Weight' },
           { id: 'gauge_addr', name: 'Gauge Address',
               formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[9].data}>${row.cells[6].data}</a>`
-              ) 
+                  `${row.cells[6].data.toString()}`
+              )
           },
           { id: 'time', name: 'Timestamp' },
-          { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
-          { id: '__', name: '__', formatter: (_, row) => gridjs.html(``) },
 
         ],
         data: [
           {% for index, row in votes.iterrows() %}
             {
-              'period': '{{ row['period'] }}',
-              'period_end_date': '{{ row['period_end_date'] }}',
+              'checkpoint_id': '{{ row['checkpoint_id'] }}',
+              'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
               'known_as': '{{ row['known_as'] }}',
-              'user': '{{ row['user'] }}',
+              'user': `<a href={{ url_for('gauge_votes_bp.show', user = row['user']) }}>{{row['user']}}</a>`,
               'symbol': '{{ row['symbol'] }}',
               'weight': '{{ row['weight'] }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
               'time': '{{ row['time'] }}',
-              '_': `{{ url_for('gauge_votes_bp.show', user = row['user']) }}`,
-              '__': `{{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}`
 
 
             },

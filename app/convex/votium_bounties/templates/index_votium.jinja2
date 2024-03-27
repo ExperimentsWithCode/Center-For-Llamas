@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "vote_bounties" -%}
+  {% set active_page = "votium_v1" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -131,43 +134,49 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'period_end_date', name: 'Round End Date' },
-          { id: 'gauge_ref', name: 'Gauge Ref' },
+          { id: 'checkpoint_id', name: 'Checkpoint ID' },
+          { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
+          { id: 'gauge_ref', name: 'Gauge Ref',
+             formatter: (_, row) => gridjs.html(
+                `${row.cells[2].data.toString()}`
+            )
+          },
           { id: 'token_symbol', name: 'Token Symbol' },
-
           { id: 'token_amount', name: 'Token Amount' ,
-            formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
           },
 
           { id: 'bounty_value', name: 'Bounty USD Value',
-            formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %} 
           },
 
-
           { id: 'price_per_vote', name: 'Price Per Vote',
+          {% include 'utility_sort_float.jinja2' %} 
+
           },
 
           { id: 'votes_per_dollar', name: 'Vote Per Dollar',
-            formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %}
           },
 
           { id: 'relative_vote_power', name: 'Relative Vote Power',
-            formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %}
           },
 
           { id: 'total_vote_power', name: 'Total Vote Power',
-            formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            formatter: (_, row) =>  `${row.cells[9].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {% include 'utility_sort_float.jinja2' %}
           },
 
           { id: 'voter_count', name: 'Voter Count',
-            formatter: (_, row) =>  `${row.cells[9].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            formatter: (_, row) =>  `${row.cells[9].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            {# {% include 'utility_sort_float.jinja2' %} #}
           },
 
-          { id: 'actions', 
-            name: 'Actions',
-            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
-          },
-          { id: 'period', name: 'Round' },
           { id: 'gauge_addr', name: 'Gauge Addr' },
 
 
@@ -175,8 +184,10 @@
         data: [
           {% for index, row in df_bounty_formatted.iterrows() %}
             {
-              'period_end_date': '{{ row['period_end_date'] }}',
-              'gauge_ref': '{{ row['gauge_ref'] }}',
+              'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
+              {# 'gauge_ref': '{{ row['gauge_ref'] }}', #}
+              'gauge_ref':  `<a href={{ url_for('votium_bounties_bp.show', gauge_ref = row['gauge_ref']) }}>{{row['gauge_ref']}}</a>`,
+
               'token_symbol': '{{ row['token_symbol'] }}',
               'token_amount': '{{ row['amount'] }}',
 
@@ -192,25 +203,16 @@
 
               'voter_count': '{{ row['total_vote_count'] }}',
               'actions': null,
-              'period': '{{ row['period'] }}',
+              'checkpoint_id': '{{ row['checkpoint_id'] }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
 
 
             },
           {% endfor %}
         ],
-        fixedHeader: true,
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
+
+      {%include 'table_format_helper.jinja2' %}
+
       }).render(document.getElementById('bounty_table'));
 </script>
 

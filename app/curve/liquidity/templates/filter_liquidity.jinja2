@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "curve" -%}
+  {% set active_page = "meta" -%}
+  {% set sub_active_page = 'filter_liquidity' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">

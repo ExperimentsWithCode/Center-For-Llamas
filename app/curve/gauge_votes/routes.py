@@ -108,6 +108,11 @@ def index():
 @gauge_votes_bp.route('/show/<string:user>', methods=['GET'])
 # @login_required
 def show(user):
+    try: 
+        df_checkpoints = app.config['df_checkpoints']
+    except:
+        from app.curve.gauge_rounds.models import df_checkpoints
+
     now = dt.utcnow()
     user = user.lower()
     # Filter Data
@@ -130,6 +135,10 @@ def show(user):
     local_df_gauge_votes_formatted = df_gauge_votes_formatted[df_gauge_votes_formatted['user'] == user]
     local_df_gauge_votes_formatted = local_df_gauge_votes_formatted.sort_values(["time", 'weight'], axis = 0, ascending = False)
 
+    # Get user votes by checkpoint
+    df_local_checkpoints = df_checkpoints[df_checkpoints['voter'] == user]
+
+
     # Get vote counts for charts
     local_df_gauge_votes_counts = local_df_gauge_votes[[
             'period_end_date','period', 'voter',
@@ -147,7 +156,7 @@ def show(user):
     # Current distribution
     fig = px.pie(local_df_gauge_votes, 
                 values=local_df_gauge_votes['weight'],
-                names=local_df_gauge_votes['gauge_addr'],
+                names=local_df_gauge_votes['symbol'],
                 title='Vote Distribution',
                 hover_data=['symbol'], labels={'symbol':'symbol'}
                 )
@@ -206,6 +215,20 @@ def show(user):
     # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+    # Build chart
+    fig = px.bar(df_local_checkpoints,
+                    x=df_local_checkpoints['checkpoint_timestamp'],
+                    y=df_local_checkpoints['vote_power'],
+                    color='gauge_symbol',
+                    title='Gauge Round Vote Weights',
+                    # facet_row=facet_row,
+                    # facet_col_wrap=facet_col_wrap
+                    )
+    # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template(
         'show_gauge_votes.jinja2',
@@ -215,10 +238,12 @@ def show(user):
         votes = local_df_gauge_votes,
         inactive_votes = local_df_gauge_votes_inactive,
         all_votes = local_df_gauge_votes_formatted,
+        vote_checkpoints = df_local_checkpoints,
         user = user,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,
+        graphJSON4 = graphJSON4
 
     )
 

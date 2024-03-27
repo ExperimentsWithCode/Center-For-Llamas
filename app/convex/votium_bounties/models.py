@@ -14,7 +14,7 @@ from app.data.local_storage import (
 
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period, get_period_end_date, get_period_direct, get_convex_period_direct
+from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id
 from app.data.reference import (
     known_large_curve_holders,
     current_file_title,
@@ -58,16 +58,16 @@ class VBRegistry():
                 print(row)
                 print(traceback.format_exc())
                 continue
-            if not b.period in self.bounty_map:
-                self.bounty_map[b.period] = {}
+            if not b.checkpoint_id in self.bounty_map:
+                self.bounty_map[b.checkpoint_id] = {}
             # Group Bounties
-            if not b.choice_index in self.bounty_map[b.period]:
-                self.bounty_map[b.period][b.choice_index] = []
-            self.bounty_map[b.period][b.choice_index].append(b)
+            if not b.choice_index in self.bounty_map[b.checkpoint_id]:
+                self.bounty_map[b.checkpoint_id][b.choice_index] = []
+            self.bounty_map[b.checkpoint_id][b.choice_index].append(b)
         # Process relative bounty influence on vote weight
-        for period in self.bounty_map:
-            for choice_index in self.bounty_map[period]:
-                like_bounty_list = self.bounty_map[period][int(choice_index)]
+        for checkpoint_id in self.bounty_map:
+            for choice_index in self.bounty_map[checkpoint_id]:
+                like_bounty_list = self.bounty_map[checkpoint_id][int(choice_index)]
                 total_bounty_value = 0
                 for bounty in like_bounty_list:
                     total_bounty_value += bounty.bounty_value
@@ -77,9 +77,9 @@ class VBRegistry():
                             relative_bounty_weight = bounty.bounty_value / total_bounty_value
                             bounty.update_derrived_stats(relative_bounty_weight)
 
-    def get_bounty_paid(self, period, choice_index, vote_power):
+    def get_bounty_paid(self, checkpoint_id, choice_index, vote_power):
         try:
-            bounties = self.bounty_map[period][int(choice_index)]
+            bounties = self.bounty_map[checkpoint_id][int(choice_index)]
             bounty_paid = 0
             for bounty in bounties:
                 bounty_paid += (vote_power / bounty.relative_vote_power) * bounty.bounty_value
@@ -89,13 +89,13 @@ class VBRegistry():
             # print("_"*50)
             # print(e)
             # print(traceback.format_exc())
-            # print(f"period {period}, type: {type(period)}")
-            # print(f"period {choice_index}, type: {type(choice_index)}")
+            # print(f"checkpoint_id {checkpoint_id}, type: {type(checkpoint_id)}")
+            # print(f"checkpoint_id {choice_index}, type: {type(choice_index)}")
             return 0
     
-    def get_bounty_currency(self, period, choice_index):
+    def get_bounty_currency(self, checkpoint_id, choice_index):
         try:
-            bounties = self.bounty_map[period][int(choice_index)]
+            bounties = self.bounty_map[checkpoint_id][int(choice_index)]
             bounty_symbols = []
             for bounty in bounties:
                 bounty_symbols.append(bounty.token_symbol)
@@ -104,9 +104,9 @@ class VBRegistry():
         except:
             return None
     
-    def get_bounty_aggregate(self, period, choice_index):
+    def get_bounty_aggregate(self, checkpoint_id, choice_index):
         try:
-            bounties = self.bounty_map[period][int(choice_index)]
+            bounties = self.bounty_map[checkpoint_id][int(choice_index)]
             total_value = 0
             for bounty in bounties:
                 total_value += bounty.bounty_value
@@ -115,8 +115,8 @@ class VBRegistry():
             # print("_"*50)
             # print(e)
             # print(traceback.format_exc())
-            # print(f"period {period}, type: {type(period)}")
-            # print(f"period {choice_index}, type: {type(choice_index)}")
+            # print(f"checkpoint_id {checkpoint_id}, type: {type(checkpoint_id)}")
+            # print(f"checkpoint_id {choice_index}, type: {type(choice_index)}")
             return 0
         
     def format_output(self):
@@ -141,8 +141,7 @@ class Bounty():
         # self.amount_adj = self.amount / 10**18
         self.bounty_token_address = row['bounty_token_address']
         self.origin_from_address = row['origin_from_address']
-        self.period = get_convex_period_direct(row['block_timestamp'])
-        self.period_end_date = get_period_end_date(row['block_timestamp'])
+        self.checkpoint_id = get_checkpoint_id(row['block_timestamp'])
 
         self.gauge_ref = self.get_gauge_ref()
         self.gauge_address = self.get_gauge_address()
@@ -165,14 +164,17 @@ class Bounty():
 
     def get_gauge_ref(self):
         # pdb.set_trace()
-        if self.period in convex_snapshot_proposal_choice_map:
-            if self.choice_index < len(convex_snapshot_proposal_choice_map[self.period]):
-                return convex_snapshot_proposal_choice_map[self.period][self.choice_index]
-            else:
-                pass
-                # print("_"*50)
-                # print (self.period)
-                # print (len(convex_snapshot_proposal_choice_map[self.period]))
+        if self.checkpoint_id in convex_snapshot_proposal_choice_map:
+            if self.choice_index < len(convex_snapshot_proposal_choice_map[self.checkpoint_id]):
+                return convex_snapshot_proposal_choice_map[self.checkpoint_id][self.choice_index]
+        else:
+            temp_id = self.checkpoint_id +1
+            if temp_id in convex_snapshot_proposal_choice_map:
+                if self.choice_index < len(convex_snapshot_proposal_choice_map[temp_id]):
+                    self.checkpoint_id += 1
+                    return convex_snapshot_proposal_choice_map[self.checkpoint_id][self.choice_index]                # print("_"*50)
+                # print (self.checkpoint_id)
+                # print (len(convex_snapshot_proposal_choice_map[self.checkpoint_id]))
         return "Not Found"
         
     def get_gauge_address(self):
@@ -184,20 +186,20 @@ class Bounty():
 
     def get_meta(self):
         try:
-            df_aggs = df_vote_aggregates[(df_vote_aggregates['period']== self.period) & 
+            df_aggs = df_vote_aggregates[(df_vote_aggregates['checkpoint_id']== self.checkpoint_id) & 
                                     (df_vote_aggregates['choice']== self.gauge_ref)]
             self.total_vote_power = df_aggs.iloc[0]['total_vote_power']
             self.voter_count = df_aggs.iloc[0]['cvx_voter_count']
-            # self.period = df_aggs.iloc[0]['period']
-            self.period_end_date = df_aggs.iloc[0]['period_end_date']
+            # self.checkpoint_id = df_aggs.iloc[0]['checkpoint_id']
+            self.checkpoint_timestamp = df_aggs.iloc[0]['checkpoint_timestamp']
         except Exception as e:
             try:
-                df_aggs = df_vote_aggregates[(df_vote_aggregates['period']== self.period) ]
-                # self.period = df_aggs.iloc[0]['period']
-                self.period_end_date = df_aggs.iloc[0]['period_end_date']
+                df_aggs = df_vote_aggregates[(df_vote_aggregates['checkpoint_id']== self.checkpoint_id) ]
+                # self.checkpoint_id = df_aggs.iloc[0]['checkpoint_id']
+                self.checkpoint_timestamp = df_aggs.iloc[0]['checkpoint_timestamp']
             except Exception as e:
                 pass
-                # print(self.period)
+                # print(self.checkpoint_id)
                 # print(self.gauge_ref)
                 # # print(df_vote_aggregates['choice'])
                 # print(e)
@@ -209,8 +211,8 @@ class Bounty():
             'block_timestamp': self.block_timestamp,
             'gauge_ref': self.gauge_ref,
             'gauge_addr': self.gauge_address,
-            'period': self.period,
-            'period_end_date': self.period_end_date,
+            'checkpoint_id': self.checkpoint_id,
+            'checkpoint_timestamp': get_checkpoint_timestamp_from_id(self.checkpoint_id),
             'token_address': self.bounty_token_address,
             'token_symbol': self.token_symbol,
             'amount': self.amount,
@@ -223,7 +225,7 @@ class Bounty():
         }
     # def fill_in(self, proposals):
     #     proposals.search
-    #     proposals = df_vote_aggregates[df_vote_aggregates['proposal_end'] == current_period]
+    #     proposals = df_vote_aggregates[df_vote_aggregates['proposal_end'] == current_checkpoint_id]
         
 
 
@@ -251,13 +253,13 @@ def update_snapshot_vote_choice(vbr, raw_df = None):
         df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
 
     df_convex_snapshot_vote_choice['bounties_eligible'] = vbr.get_bounty_paid(
-        df_convex_snapshot_vote_choice['period'], 
+        df_convex_snapshot_vote_choice['checkpoint_id'], 
         df_convex_snapshot_vote_choice['choice_index'],
         df_convex_snapshot_vote_choice['choice_power']
         )   
     
     df_convex_snapshot_vote_choice['bounty_currencies'] = vbr.get_bounty_currency(
-        df_convex_snapshot_vote_choice['period'], 
+        df_convex_snapshot_vote_choice['checkpoint_id'], 
         df_convex_snapshot_vote_choice['choice_index']
         )   
 
@@ -273,12 +275,12 @@ def update_snapshot_aggregates(vbr, raw_df=None):
         df_convex_snapshot_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
 
     df_convex_snapshot_vote_aggregates['bounties_total'] = vbr.get_bounty_aggregate(
-        df_convex_snapshot_vote_aggregates['period'], 
+        df_convex_snapshot_vote_aggregates['checkpoint_id'], 
         df_convex_snapshot_vote_aggregates['choice_index']
         )   
     
     df_convex_snapshot_vote_aggregates['bounty_currencies'] = vbr.get_bounty_currency(
-        df_convex_snapshot_vote_aggregates['period'], 
+        df_convex_snapshot_vote_aggregates['checkpoint_id'], 
         df_convex_snapshot_vote_aggregates['choice_index']
         )  
     if not isinstance(raw_df, type(None)):

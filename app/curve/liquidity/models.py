@@ -1,5 +1,10 @@
 from flask import current_app as app
-from app.data.reference import filename_curve_liquidity, filename_curve_liquidity_aggregate
+from app.data.reference import (
+    filename_curve_liquidity, 
+    filename_curve_liquidity_aggregate,
+    filename_curve_liquidity_swaps,
+    filename_curve_liquidity_oracle_aggregate
+)
 from app.utilities.utility import nullify_amount
 
 from app.data.local_storage import (
@@ -12,7 +17,14 @@ from app.data.local_storage import (
     )
 
 from app.utilities.utility import timed
+from app.curve.liquidity.process_based import ProcessBasedLiquidity
+try:
+    # df_curve_liquidity = app.config['df_curve_liquidity']
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
 
+except:
+    # from app.curve.liquidity.models import df_curve_liquidity
+    from app.curve.gauges.models import df_curve_gauge_registry
 
 print("Loading... { curve.liquidity.models }")
 
@@ -94,10 +106,19 @@ def get_df(filename):
 
 df_curve_liquidity = get_df(filename_curve_liquidity)
 df_curve_liquidity_aggregates = get_df(filename_curve_liquidity_aggregate) 
+df_curve_swaps = get_df(filename_curve_liquidity_swaps) 
+df_curve_oracles_agg = get_df(filename_curve_liquidity_oracle_aggregate) 
+
+pbl = ProcessBasedLiquidity(df_curve_gauge_registry, df_curve_liquidity)
+df_curve_rebased_liquidity = pbl.df_rebased_liquidity
 
 try:
     app.config['df_curve_liquidity'] = df_curve_liquidity
     app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
+    app.config['df_curve_rebased_liquidity'] = df_curve_rebased_liquidity
+    app.config['df_curve_swaps'] = df_curve_swaps
+    app.config['df_curve_oracles_agg'] = df_curve_oracles_agg
+
 except:
     print("could not register in app.config\n\tCurve Liquidity")
 

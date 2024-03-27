@@ -32,7 +32,7 @@ except:
 
 def process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv):
     dfs = []
-    aggregate_dfs = []
+    # aggregate_dfs = []
 
     for this_checkpoint in df_gauge_votes_formatted.checkpoint_id.unique():
         # get all votes prior to period

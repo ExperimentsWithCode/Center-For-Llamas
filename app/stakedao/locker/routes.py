@@ -41,26 +41,38 @@ stakedao_locked_vesdt_bp = Blueprint(
 # @login_required
 def index():
     df_stakedao_vesdt = app.config['df_stakedao_vesdt']
-    df_stakedao_vesdt_known = app.config['df_stakedao_vesdt_known']
+    # df_stakedao_vesdt_known = app.config['df_stakedao_vesdt_known']
     df_stakedao_vesdt_agg = app.config['df_stakedao_vesdt_agg']
     df_stakedao_vesdt_decay_agg = app.config['df_stakedao_vesdt_decay_agg']
+    df_stakedao_vesdt_decay = app.config['df_stakedao_vesdt_decay']
 
     # Filter Data
-    local_df_stakedao_vesdt = df_stakedao_vesdt.sort_values('date').groupby(['provider']).tail(2)
-    local_df_stakedao_vesdt = local_df_stakedao_vesdt.sort_values('date').groupby(['provider']).head(1)
+    local_df_stakedao_vesdt = df_stakedao_vesdt.sort_values('block_timestamp').groupby(['provider']).tail(1)
+    # local_df_stakedao_vesdt = local_df_stakedao_vesdt.sort_values('checkpoint_timestamp').groupby(['provider']).head(1)
     local_df_stakedao_vesdt = local_df_stakedao_vesdt.sort_values('locked_balance',  axis = 0, ascending = False)
+
+    # Fancy Decay
+    processed_known_decay = df_stakedao_vesdt_decay[
+        ['known_as', 'checkpoint_timestamp', 'total_locked_balance', 'total_effective_locked_balance']].groupby([
+            'checkpoint_timestamp', 'known_as',
+        ]).agg(
+        total_locked_balance=pd.NamedAgg(column='total_locked_balance', aggfunc=sum),
+        total_effective_locked_balance=pd.NamedAgg(column='total_effective_locked_balance', aggfunc=sum),
+
+        ).reset_index()
+
 
     # Build chart
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.update_layout(
         title=f"StakeDAO veSDT Lock Efficiency",
-        xaxis_title="Section Date",
+        xaxis_title="Checkpoint Date",
         yaxis_title="SDT Balance",
         yaxis2_title="Efficiency",
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = df_stakedao_vesdt_decay_agg.checkpoint_date,
+            x = df_stakedao_vesdt_decay_agg.checkpoint_timestamp,
             y = df_stakedao_vesdt_decay_agg.total_effective_locked_balance / df_stakedao_vesdt_decay_agg.total_locked_balance, 
             name = "Efficiency",
             # line_color='black',
@@ -73,7 +85,7 @@ def index():
 
     fig = fig.add_trace(
         go.Scatter(
-            x=df_stakedao_vesdt_decay_agg.checkpoint_date,
+            x=df_stakedao_vesdt_decay_agg.checkpoint_timestamp,
             y=df_stakedao_vesdt_decay_agg.total_locked_balance,
             name="Locked",
             fill='tozeroy',
@@ -85,7 +97,7 @@ def index():
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = df_stakedao_vesdt_decay_agg.checkpoint_date,
+            x = df_stakedao_vesdt_decay_agg.checkpoint_timestamp,
             y = df_stakedao_vesdt_decay_agg.total_effective_locked_balance, 
             name = "Effectively Locked",
             fill='tozeroy',
@@ -108,7 +120,7 @@ def index():
 
 
     fig = px.line(df_stakedao_vesdt_agg,
-                    x=df_stakedao_vesdt_agg['date'],
+                    x=df_stakedao_vesdt_agg['checkpoint_timestamp'],
                     y=df_stakedao_vesdt_agg['balance_delta'],
                     # color='known_as',
                     # line_shape='linear',
@@ -118,7 +130,7 @@ def index():
     # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Locked veSDT Total Balance Changes",
-            xaxis_title="Date",
+            xaxis_title="Checkpoint Timestamp",
             yaxis_title="Locked veSDT Balance Delta",
         #     legend_title="Legend Title",
         font=dict(
@@ -133,9 +145,9 @@ def index():
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     
-    fig = px.line(df_stakedao_vesdt_known,
-                    x=df_stakedao_vesdt_known['date'],
-                    y=df_stakedao_vesdt_known['locked_balance'],
+    fig = px.line(processed_known_decay,
+                    x=processed_known_decay['checkpoint_timestamp'],
+                    y=processed_known_decay['total_effective_locked_balance'],
                     color='known_as',
                     line_shape='hv',
                     # facet_row=facet_row,
@@ -144,7 +156,7 @@ def index():
     # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"StakeDAO Locked veSDT Balances",
-            xaxis_title="Date",
+            xaxis_title="Checkpoint Timestamp",
             yaxis_title="Locked veSDT Balance",
         #     legend_title="Legend Title",
         font=dict(        family="Courier New, monospace",
@@ -182,6 +194,8 @@ def index():
         # convex_agg_vote_locks = df_locker_agg_system,
         # convex_agg_epoch_vote_locks_current = df_locker_agg_current,
         stakedao_vesdt = local_df_stakedao_vesdt,
+        total_locked = df_stakedao_vesdt_decay_agg.iloc[-1]['total_locked_balance'],
+        effectively_locked = df_stakedao_vesdt_decay_agg.iloc[-1]['total_effective_locked_balance'],
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,
@@ -203,26 +217,23 @@ def show(user):
     
     # Filter Data
     local_df_stakedao_vesdt = df_stakedao_vesdt[df_stakedao_vesdt['provider'] == user]
-    # local_df_locker = df_locker[df_locker['user'] == user]
-
-    # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.utcnow()]
-
-    # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
+    local_df_stakedao_vesdt = local_df_stakedao_vesdt.sort_values(['block_timestamp', 'final_lock_time'],  axis = 0, ascending = False)
 
     local_df_stakedao_vesdt_decay = df_stakedao_vesdt_decay[df_stakedao_vesdt_decay['provider'] == user]
-    local_df_stakedao_vesdt_decay = local_df_stakedao_vesdt_decay.sort_values(['checkpoint', 'final_lock_time'],  axis = 0, ascending = False)
+    local_df_stakedao_vesdt_decay = local_df_stakedao_vesdt_decay.sort_values(['checkpoint_id', 'final_lock_time'],  axis = 0, ascending = False)
    
+
     # Build chart
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.update_layout(
         title=f"StakeDAO veSDT Lock Efficiency",
-        xaxis_title="Section Date",
+        xaxis_title="Checkpoint Date",
         yaxis_title="SDT Balance",
         yaxis2_title="Efficiency",
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = local_df_stakedao_vesdt_decay.checkpoint_date,
+            x = local_df_stakedao_vesdt_decay.checkpoint_timestamp,
             y = local_df_stakedao_vesdt_decay.total_effective_locked_balance / local_df_stakedao_vesdt_decay.total_locked_balance, 
             name = "Efficiency",
             # line_color='black',
@@ -235,7 +246,7 @@ def show(user):
 
     fig = fig.add_trace(
         go.Scatter(
-            x=local_df_stakedao_vesdt_decay.checkpoint_date,
+            x=local_df_stakedao_vesdt_decay.checkpoint_timestamp,
             y=local_df_stakedao_vesdt_decay.total_locked_balance,
             name="Locked",
             fill='tozeroy',
@@ -247,7 +258,7 @@ def show(user):
     )
     fig = fig.add_trace(
         go.Scatter(
-            x = local_df_stakedao_vesdt_decay.checkpoint_date,
+            x = local_df_stakedao_vesdt_decay.checkpoint_timestamp,
             y = local_df_stakedao_vesdt_decay.total_effective_locked_balance, 
             name = "Effectively Locked",
             fill='tozeroy',
@@ -270,7 +281,7 @@ def show(user):
 
 
     fig = px.bar(local_df_stakedao_vesdt,
-                    x=local_df_stakedao_vesdt['date'],
+                    x=local_df_stakedao_vesdt['checkpoint_timestamp'],
                     y=local_df_stakedao_vesdt['balance_delta'],
                     color='event_name',
                     # line_shape='linear',
@@ -280,7 +291,7 @@ def show(user):
     # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Locked veSDT Balance",
-            xaxis_title="Date",
+            xaxis_title="Checkpoint Timestamp",
             yaxis_title="Locked veSDT Balance Delta",
         #     legend_title="Legend Title",
         font=dict(
@@ -306,6 +317,8 @@ def show(user):
         # convex_agg_vote_locks = df_locker_agg_system,
         # convex_agg_epoch_vote_locks_current = df_locker_agg_current,
         stakedao_vesdt = local_df_stakedao_vesdt,
+        total_locked = local_df_stakedao_vesdt_decay.iloc[0]['total_locked_balance'],
+        effectively_locked = local_df_stakedao_vesdt_decay.iloc[0]['total_effective_locked_balance'],
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2
     )

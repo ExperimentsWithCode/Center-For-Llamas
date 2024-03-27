@@ -1,153 +1,212 @@
-
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<div class="col-md">
+
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('home_bp.home') }}">The Center For Llamas Who Want To Curve Good</a>
   </div>
-  <div class="d-flex">
-      <a class="nav-link active" href="https://register.app">
-        <span class="badge bg-danger"><3</span>Reserve
-      <span class="visually-hidden">(current)</span>
-    </a>
-  </div>
-</nav>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('curve_meta_bp.index') }}">Curve</a>
-      <div class="collapse navbar-collapse" id="navbarColor01">
-      <ul class="navbar-nav me-auto">
-        <li>
-        <a class="nav-link active" href="{{ url_for('gauges_bp.index') }}">Gauges
-          <span class="visually-hidden">(current)</span>
-        </a>
-        </li>
+</div>
 
-        <li>
-        <a class="nav-link active" href="{{ url_for('curve_locker_vecrv_bp.index') }}">Locker
-          <span class="visually-hidden">(current)</span>
-        </a>
-        </li>
+<div class="col-md">
 
-        <li>
-        <a class="nav-link active" href="{{ url_for('gauge_votes_bp.index') }}">Gauge Votes
-          <span class="visually-hidden">(current)</span>
-        </a>
-        </li>
+{% set active_category = active_category|default("home") -%}
+{% set active_page = active_page|default("home") -%}
+{% set sub_active_page = sub_active_page|default("home") -%}
 
-        <li>
-        <a class="nav-link active" href="{{ url_for('gauge_rounds_bp.index') }}">Gauge Rounds
-          <span class="visually-hidden">(current)</span>
-        </a>
-        </li>
+<div class ="tabbable parentTabs float-end">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a 
+          class="nav-link  {% if 'curve' == active_category %} active border-primary  {% endif%}"
+          data-bs-toggle="tab"
+          href="#curve"
+          aria-selected="false" 
+          tabindex="-1"
+          role="tab">Curve</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a 
+        class="nav-link  {% if 'convex' == active_category %} active border-primary  {% endif%}" 
+        data-bs-toggle="tab" 
+        href="#convex" 
+        aria-selected="false" 
+        tabindex="-1" 
+        role="tab">Convex</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link  {% if 'stakedao' == active_category %} active border-primary  {% endif%}" 
+        data-bs-toggle="tab" 
+        href="#stakedao" 
+        aria-selected="false" 
+        tabindex="-1" 
+        role="tab">StakeDAO</a>
+      </li>
 
-        <li>
-        <a class="nav-link active" href="{{ url_for('curve_liquidity_bp.index') }}">Liquidity
-          <span class="visually-hidden">(current)</span>
-        </a>
-        </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link  {% if 'vote_bounties' == active_category %} active border-primary  {% endif%}" 
+        data-bs-toggle="tab" 
+        href="#vote_bounties" 
+        aria-selected="false" 
+        tabindex="-1" 
+        role="tab">Vote Bounties</a>
+      </li>
+  
 
-        </ul>
-        <div class="d-flex">
-            <a class="nav-link active" href="">StakeDAO Bounties
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </div>
 
-        {# <!-- <a href="{{ url_for('home_bp.home') }}">
-          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/>
-        </a> -->
-
-          <!-- <a href="{{ url_for('transaction_bp.index') }}">Transactions</a>
-          <a href="{{ url_for('transfer_bp.index') }}">Transfers</a> --> #}
-
-        </div>
+    <div class="d-flex">
+        <a class="nav-link" href="https://register.app">
+          <span class="badge bg-danger"><3</span> &nbsp;Reserve
+        <span class="visually-hidden">(current)</span>
+      </a>
     </div>
-</nav>
+    </ul>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="">Convex</a>
-      <div class="collapse navbar-collapse" id="navbarColor01">
-      <ul class="navbar-nav me-auto">
-        {# <li>
-          <a class="nav-link active" href="{{ url_for('curve_locker_vecrv_bp.index') }}">Vote Locker
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li> #}
-        <li>
-          <a class="nav-link active" href="{{ url_for('convex_snapshot_bp.index') }}">Snapshot
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link active" href="{{ url_for('convex_vote_locker_bp.index') }}">Vote Locker
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
+    <div id="myTabContent parentTabs" class="tab-content">
+          <div class="tab-pane {% if 'curve' == active_category %} active in {% endif%}" 
+            id="curve" role="tabpanel">
 
-        {# <li>
-          <a class="nav-link active" href="">Delegations
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li> #}
-        </ul>
-        <div class="d-flex">
-            <a class="nav-link active" href="{{ url_for('votium_bounties_bp.index') }}">Votium Bounties
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </div>
 
-        {# <!-- <a href="{{ url_for('home_bp.home') }}">
-          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/>
-        </a> -->
+              <ul class="nav nav-tabs">
 
-          <!-- <a href="{{ url_for('transaction_bp.index') }}">Transactions</a>
-          <a href="{{ url_for('transfer_bp.index') }}">Transfers</a> --> #}
+                <li class="nav-item">
+                  <a class="nav-link {% if 'curve_gauges' == active_page %} active border-secondary   {% endif%}" 
+                    href="{{ url_for('gauges_bp.index') }}">Gauges</a>
+                </li>
 
-        </div>
+                <li class="nav-item">
+                  <a class="nav-link {% if 'curve_locker' == active_page %} active border-secondary   {% endif%}" 
+                    href="{{ url_for('curve_locker_vecrv_bp.index') }}">veCRV Locker</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link {% if 'curve_gauge_votes' == active_page %} active border-secondary   {% endif%}" 
+                    href="{{ url_for('gauge_votes_bp.index') }}">Gauge Votes</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link {% if 'curve_checkpoints' == active_page %} active border-secondary   {% endif%}" 
+                    href="{{ url_for('gauge_rounds_bp.index') }}">Checkpoints</a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link {% if 'curve_liquidity' == active_page %} active border-secondary   {% endif%}" 
+                    href="{{ url_for('curve_liquidity_bp.index') }}">Liquidity</a>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link  {% if 'curve_meta' == active_page %} active border-secondary   {% endif%}" 
+                  data-bs-toggle="tab" 
+                  href="#meta" 
+                  aria-selected="false" 
+                  tabindex="-1" 
+                  role="tab">Meta</a>
+                </li>
+
+                {# <li class="nav-item">
+                  <a class="nav-link" href="#">Link</a>
+                </li> #}
+              </ul>
+              <div id="myTabContent Grandchild" class="tab-content" role="tabpanel">
+                  <div class="tab-pane {% if 'curve_meta' == active_page %} active in {% endif%}"
+                     id="meta" role="tabpanel">
+
+
+                    <ul class="nav nav-tabs">
+
+                      <li class="nav-item">
+                        <a class="nav-link {% if 'curve_top_vote_changes' == sub_active_page %} active border-info  {% endif%}" 
+                          href="{{ url_for('curve_meta_bp.index') }}">Top Vote Changes</a>
+                      </li>
+                    
+                    </ul>
+
+
+                  </div>
+              </div>
+
+
+          </div>
+          <div class="tab-pane {% if 'convex' == active_category %} active in {% endif%}" 
+            id="convex" role="tabpanel">
+
+
+            <ul class="nav nav-tabs">
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'convex_curve_snapshot' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('convex_snapshot_bp.index') }}">Curve Snapshot</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'convex_locker' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('convex_vote_locker_bp.index') }}">vlCVX Locker</a>
+              </li>
+
+            </ul>
+
+
+          </div>
+          <div class="tab-pane {% if 'stakedao' == active_category %} active in {% endif%}" 
+            id="stakedao" role="tabpanel">
+
+
+            <ul class="nav nav-tabs">
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'stakedao_curve_snapshot' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('stakedao_snapshot_bp.index') }}">Curve Snapshot</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'stakedao_staked_sdcrv' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('stakedao_staked_sdcrv_bp.index') }}">Staked sdCRV</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'stakedao_locker' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('stakedao_locked_vesdt_bp.index') }}">veSDT Locker</a>
+              </li>
+
+
+            </ul>
+
+
+          </div>
+          <div class="tab-pane {% if 'vote_bounties' == active_category %} active in {% endif%}" 
+            id="vote_bounties" role="tabpanel">
+
+
+            <ul class="nav nav-tabs">
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'votium_v2' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('votium_bounties_v2_bp.index') }}">Votium v2</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'votium_v1' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('votium_bounties_bp.index') }}">Votium</a>
+              </li>
+
+
+            </ul>
+
+
+          </div>
+
+
     </div>
+
+
+</div>
+
+
+
+</div>
+
 </nav>
 
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-info">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="">StakeDAO</a>
-      <div class="collapse navbar-collapse" id="navbarColor01">
-      <ul class="navbar-nav me-auto">
-        {# <li>
-          <a class="nav-link active" href="{{ url_for('curve_locker_vecrv_bp.index') }}">Vote Locker
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li> #}
-        <li>
-          <a class="nav-link active" href="{{ url_for('stakedao_snapshot_bp.index') }}">Snapshot
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link active" href="{{ url_for('stakedao_locked_vesdt_bp.index') }}">veSDT Locker
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link active" href="{{ url_for('stakedao_staked_sdcrv_bp.index') }}">Staked sdCRV
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
-        {# <li>
-          <a class="nav-link active" href="">Delegations
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li> #}
-        </ul>
 
-        {# <!-- <a href="{{ url_for('home_bp.home') }}">
-          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo"/>
-        </a> -->
 
-          <!-- <a href="{{ url_for('transaction_bp.index') }}">Transactions</a>
-          <a href="{{ url_for('transfer_bp.index') }}">Transfers</a> --> #}
 
-        </div>
-    </div>
-</nav>

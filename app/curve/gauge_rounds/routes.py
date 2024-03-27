@@ -41,6 +41,19 @@ gauge_rounds_bp = Blueprint(
     static_folder='static'
 )
 
+def get_checkpoint_info(df):
+    return {
+        'current': {
+            'id': df.checkpoint_id.unique()[-1],
+            'timestamp': df.checkpoint_timestamp.unique()[-1]
+        },
+        'prior': {
+            'id': df.checkpoint_id.unique()[-2],
+            'timestamp': df.checkpoint_timestamp.unique()[-2]
+        },
+        }
+
+
 @gauge_rounds_bp.route('/', methods=['GET'])
 # @login_required
 def index():
@@ -51,6 +64,7 @@ def index():
     # local_df_gauge_votes = df_checkpoints_agg.groupby(['voter', 'gauge_addr'], as_index=False).last()
     checkpoint_timestamps = local_df_checkpoints_agg.checkpoint_timestamp.unique()
     checkpoint_timestamps = sorted(checkpoint_timestamps)
+
     current_checkpoint = local_df_checkpoints_agg.checkpoint_id.max()
     prior_checkpoint = current_checkpoint - 1
     df_current_votes = local_df_checkpoints_agg[local_df_checkpoints_agg['checkpoint_id'] == current_checkpoint]
@@ -110,6 +124,7 @@ def index():
         meta_gauge_aggregate_votes = local_df_checkpoints_agg,
         sum_current_votes = df_current_votes.total_vote_power.sum(),
         sum_prior_votes = df_prior_votes.total_vote_power.sum(),
+        checkpoint_info = get_checkpoint_info(df_checkpoints_agg),
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3
@@ -223,8 +238,9 @@ def show(gauge_addr):
         body="",
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         local_df_gauge_rounds = local_df_gauge_rounds,
-        sum_current_votes = df_current_votes.vote_power.sum(),
+        sum_current_votes = df_current_votes.vote_power.sum() if len(df_current_votes) > 0 else 0,
         sum_prior_votes = df_prior_votes.vote_power.sum() if len(df_prior_votes) > 0 else 0,
+        checkpoint_info = get_checkpoint_info(df_checkpoints_agg),
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
         graphJSON3 = graphJSON3,

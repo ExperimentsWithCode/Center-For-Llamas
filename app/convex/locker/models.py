@@ -16,6 +16,7 @@ from app.utilities.utility import (
     # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
+    nullify_amount
     # shift_time_days,
     # df_remove_nan
 )
@@ -30,8 +31,9 @@ def format_df(df):
         df['block_timestamp'] = df['block_timestamp'].apply(get_date_obj)
 
     if 'locked_amount' in key_list:
-        df['locked_amount'] = df['locked_amount'].astype(float)
-
+        df['locked_amount'] = df.apply(
+            lambda x: nullify_amount(x['locked_amount']), 
+            axis=1)
     if '_epoch' in key_list:
         df['epoch_start'] = df['_epoch'].apply(get_dt_from_timestamp)
     
@@ -50,7 +52,9 @@ def format_df(df):
         df['checkpoint'] = df['checkpoint'].apply(get_dt_from_timestamp)
 
     if 'current_locked' in key_list:
-        df['current_locked'] = df['current_locked'].astype(float)
+        df['current_locked'] = df.apply(
+            lambda x: nullify_amount(x['current_locked']), 
+            axis=1)
 
     if 'lock_count' in key_list:
         df['lock_count'] = df['lock_count'].astype(int)

@@ -122,7 +122,7 @@ class Voter():
                     name = ""
                 if 'symbol' in row:
                     symbol = row['symbol']
-                    if symbol == 'null':
+                    if symbol == 'null' or symbol == '':
                         if gauge_addr in gauge_symbols:
                             symbol = gauge_symbols[gauge_addr]
                         else:

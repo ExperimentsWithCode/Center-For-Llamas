@@ -9,12 +9,47 @@
 #}
 
 {% block content %}
+  {% set active_category = "stakedao" -%}
+  {% set active_page = "stakedao_locker" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
       <h1>{{ title }}</h1>
     </div>
+    <div class="row">
+      <div class = "col-sm">
+          <div class="card border-info mb-3" >
+            <div class="card-header">Total SDT Locked:  </div>
+            <div class="card-body">
+              <h4 class="card-title text-info">{{  "{:,.2f}".format(total_locked) }}</h4>
+              {# <h4 class="card-title">{{ "vesdt Balance: {:,.2f}".format(stakedao_vesdt['effectively_locked_balance'].sum()) }}</h4> #}
 
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            </div>
+          </div>
+      </div>
+        <div class = "col-sm">
+          <div class="card border-primary mb-3" >
+            <div class="card-header">Total veSDT Supply:  </div>
+            <div class="card-body">
+              <h4 class="card-title text-primary">{{ "{:,.2f}".format( effectively_locked) }} </h4>
+
+            </div>
+          </div>
+      </div>
+      <div class = "col-sm">
+
+          <div class="card border-info mb-3"  >
+            <div class="card-header">Current Lockers: </div>
+            <div class="card-body">
+              <h4 class="card-title">{{ "{:,.0f}".format(stakedao_vesdt.shape[0]) }}</h4>
+
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            </div>
+          </div>
+      </div>
+    </div>
     <div class="row">
 
         <div class="card text-white bg-info mb-3" style="max-width: 50%;" >

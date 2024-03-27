@@ -30,10 +30,7 @@ ___
 * Currently handles Vote_Option as dict.
 
 * Flipside will not be retroactively updating this so need to pull prior data from Snapshot via rate limited process.
-
-* Flipside will not be correct this
-    
-    [] Pursue data from snapshot graphql
+    * old data has older format. Need to make adapter for 2022 snapshot
 
 ### Views
 
@@ -41,7 +38,7 @@ ___
 
 [X] Build out Votium Bounty index/show
 
-[] Build out StakeDAO sdCRV index/show
+[X] Build out StakeDAO sdCRV index/show
 
 [] Build out StakeDAO Bounty index/show
 
@@ -50,9 +47,9 @@ ___
 
 ### Bug fixes
 
-[] Fix CRV Locked Chart bar chart to include withdraw and deposit info.
+[X] Fix CRV Locked Chart bar chart to include withdraw and deposit info.
 
-[] Fix Gauge Votes bar chart its not right for some reason.
+[X] Fix Gauge Votes bar chart its not right for some reason.
 
 
 
@@ -69,10 +66,10 @@ ___
         * queried all v2 deployed pools
     * I have matched 113 / 122 gauges to convex choices
         * 9 remaining. 
-        * several are cross chain, not ins cope. Many are USDC pairs and v2's.
-    * Some votes do not 
+        * several are cross chain, not in scope. Many are USDC pairs and v2's.
+    
 * Some curve tokens are just random contracts deployed by random EOAs like Frax USDC. 
-    * This
+    * This requires custom mapping pool contract
 ___
 # Architecture
 Flask based website powered by Pandas Dataframes following a Model View Controler structure. 
@@ -119,18 +116,45 @@ except:
     print(f"could not register in app.config\n\t{component}")
 ```
 ___
-# General Dev Flow
+## General Dev Flow
 1. create component folder
-2. create `models.py`
-3. create flipside query
-4. create local dataframe in `models.py` which generates all desired views
-5. create `routes.py`
-6. assemble out the info for each view
+2. create `fetch.py` for querying data and saving in 'app/data/raw_data/'
+3. create `process_flipside.py` for processing data and saving in 'app/data/processed/'
+4. create `models.py` for formating types and reading processed data, generating a few views
+5. create `routes.py` for composing web pages
+    * assemble out the info for each view
 7. create `templates` 
 8. create a jinja2 template for each view.
 9. update `__init__.py` 
-* to import blueprint from `routes.py`
-* to register the new blueprint  
+    * to import blueprint from `routes.py`
+    * to register the new blueprint  
+10. update `data_manager.py` to include component
+    * to import and execute `fetch` from `fetch.py`
+    * to import and execute `process_and_save` from `process_flipside`
+___
+## Pulling data
+1. Update api keys in config.py
+2. Run `data_manager.py`
+    * Settings are available in the file
+    * `load_initial` should be set as true if first time pulling data
+    * `should_fetch` should be set as true if you want to pull new data
+        * else will only process existing data
+        * `load_initial` will only work if `should_fetch` is set to true
+    * `manager_config` is a dict with keys representing each component set to a bool
+        * if `True`, will fetch and process according the above parameters
+
+This approach allows more nuanced control over what data is imported if so desired.
+* Direct results from API queries are stored in `app/data/raw_data/`
+* Processed results are what gets used on the site, and is a secondary process which enriches and merges the initial queried data.
+
+Everything is a dataframe so can open a jupyter notebook and import any data used in the site by importing its dtaframe and directly interacting with it.
+
+ex: 
+```python
+from app.curve.gauge_rounds.models import df_checkpoints_agg
+from app.curve.liquidity.models import df_curve_liquidity_aggregates, df_curve_liquidity
+from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates
+```
 ___
 # Reference Links
 * Currently using Boostrap Themes. 

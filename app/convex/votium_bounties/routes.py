@@ -29,7 +29,7 @@ def index():
     # local_df_gauge_votes = df_bounty_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # Build chart
     fig = px.bar(df_bounty_formatted,
-                    x=df_bounty_formatted['period_end_date'],
+                    x=df_bounty_formatted['checkpoint_timestamp'],
                     y=df_bounty_formatted['relative_vote_power'],
                     color='gauge_ref',
                     title='Vote Power Per Round',
@@ -44,14 +44,14 @@ def index():
 
     # periods = df_meta_gauge_aggregate.this_period.unique()
     # periods.sort()
-    # current_period = periods[-1]
-    # prior_period = periods[-2]
-    # df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == current_period]
-    # df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == prior_period]
+    # current_checkpoint = periods[-1]
+    # prior_checkpoint = periods[-2]
+    # df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == current_checkpoint]
+    # df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == prior_checkpoint]
 
     # # Build chart
     fig = px.bar(df_bounty_formatted,
-                    x=df_bounty_formatted['period_end_date'],
+                    x=df_bounty_formatted['checkpoint_timestamp'],
                     y=df_bounty_formatted['votes_per_dollar'],
                     color='gauge_ref',
                     title='Votes Per Dollar Bounties',
@@ -64,19 +64,19 @@ def index():
 
 
 
-    periods = df_bounty_formatted.period.unique()
-    periods.sort()
-    current_period = periods[-1]
-    prior_period = periods[-2]
-    df_current_bounties = df_bounty_formatted[df_bounty_formatted['period'] == current_period]
-    df_prior_bounties = df_bounty_formatted[df_bounty_formatted['period'] == prior_period]
+    checkpoint_ids = df_bounty_formatted.checkpoint_id.unique()
+    checkpoint_ids.sort()
+    current_checkpoint = checkpoint_ids[-1]
+    prior_checkpoint = checkpoint_ids[-3]
+    df_current_bounties = df_bounty_formatted[df_bounty_formatted['checkpoint_id'] == current_checkpoint]
+    df_prior_bounties = df_bounty_formatted[df_bounty_formatted['checkpoint_id'] == prior_checkpoint]
 
 
     # # Build chart
     fig = px.pie(df_current_bounties, 
                 values=df_current_bounties['votes_per_dollar'],
                 names=df_current_bounties['gauge_ref'],
-                title=f"Prior Round Vote Distribution {current_period}",
+                title=f"Prior Round Vote Distribution {current_checkpoint}",
                 hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
@@ -90,7 +90,7 @@ def index():
     fig = px.pie(df_prior_bounties, 
                 values=df_prior_bounties['votes_per_dollar'],
                 names=df_prior_bounties['gauge_ref'],
-                title=f"Prior Round Vote Distribution {prior_period}",
+                title=f"Prior Round Vote Distribution {prior_checkpoint}",
                 # hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
                 )
     fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
@@ -143,7 +143,7 @@ def index():
     fig = px.scatter(df_bounty_formatted, 
                 x="votes_per_dollar", 
                 y="relative_vote_power",
-                animation_frame="period_end_date", 
+                animation_frame="checkpoint_timestamp", 
                 animation_group="gauge_ref",
                 # size="bounty_value", 
                 color="gauge_ref", 
@@ -168,7 +168,7 @@ def index():
     fig = px.scatter(df_bounty_formatted, 
                 x="votes_per_dollar", 
                 y="relative_vote_power",
-                animation_frame="period_end_date", 
+                animation_frame="checkpoint_timestamp", 
                 animation_group="gauge_ref",
                 # size="bounty_value", 
                 color="token_symbol", 
@@ -215,14 +215,21 @@ def index():
 @votium_bounties_bp.route('/show/<string:gauge_ref>', methods=['GET'])
 # @login_required
 def show(gauge_ref):
+    try:
+        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+    except: 
+        from app.curve.gauges import df_curve_gauge_registry
     # Filter Data
-    df_bounty_formatted
+    # df_bounty_formatted
     local_df_bounty_formatetd = df_bounty_formatted[df_bounty_formatted['gauge_ref'] == gauge_ref]
+    local_df_curve_gauge_registry = df_curve_gauge_registry[
+        df_curve_gauge_registry['gauge_addr'] == local_df_bounty_formatetd.iloc[0]['gauge_addr']
+        ]
 
     # local_df_gauge_votes = df_bounty_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # Build chart
     fig = px.bar(local_df_bounty_formatetd,
-                    x=local_df_bounty_formatetd['period_end_date'],
+                    x=local_df_bounty_formatetd['checkpoint_timestamp'],
                     y=local_df_bounty_formatetd['relative_vote_power'],
                     color='token_symbol',
                     title='Vote Power Per Round',
@@ -237,14 +244,14 @@ def show(gauge_ref):
 
     # periods = df_meta_gauge_aggregate.this_period.unique()
     # periods.sort()
-    # current_period = periods[-1]
-    # prior_period = periods[-2]
-    # df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == current_period]
-    # df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == prior_period]
+    # current_checkpoint = periods[-1]
+    # prior_checkpoint = periods[-2]
+    # df_current_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == current_checkpoint]
+    # df_prior_votes = df_meta_gauge_aggregate[df_meta_gauge_aggregate['this_period'] == prior_checkpoint]
 
     # # Build chart
     fig = px.line(local_df_bounty_formatetd,
-                    x=local_df_bounty_formatetd['period_end_date'],
+                    x=local_df_bounty_formatetd['checkpoint_timestamp'],
                     y=local_df_bounty_formatetd['votes_per_dollar'],
                     # color='token_symbol',
                     line_shape='hv',
@@ -260,17 +267,17 @@ def show(gauge_ref):
 
     # periods = df_bounty_formatted.period.unique()
     # periods.sort()
-    # current_period = periods[-1]
-    # prior_period = periods[-2]
-    # df_current_bounties = local_df_bounty_formatetd[local_df_bounty_formatetd['period'] == current_period]
-    # df_prior_bounties = local_df_bounty_formatetd[local_df_bounty_formatetd['period'] == prior_period]
+    # current_checkpoint = periods[-1]
+    # prior_checkpoint = periods[-2]
+    # df_current_bounties = local_df_bounty_formatetd[local_df_bounty_formatetd['checkpoint_id'] == current_checkpoint]
+    # df_prior_bounties = local_df_bounty_formatetd[local_df_bounty_formatetd['checkpoint_id'] == prior_checkpoint]
 
 
     # # # Build chart
     # fig = px.pie(df_current_bounties, 
     #             values=df_current_bounties['votes_per_dollar'],
     #             names=df_current_bounties['gauge_ref'],
-    #             title=f"Prior Round Vote Distribution {current_period}",
+    #             title=f"Prior Round Vote Distribution {current_checkpoint}",
     #             hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
     #             )
     # fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
@@ -284,7 +291,7 @@ def show(gauge_ref):
     # fig = px.pie(df_prior_bounties, 
     #             values=df_prior_bounties['votes_per_dollar'],
     #             names=df_prior_bounties['gauge_ref'],
-    #             title=f"Prior Round Vote Distribution {prior_period}",
+    #             title=f"Prior Round Vote Distribution {prior_checkpoint}",
     #             # hover_data=['gauge_addr'], labels={'gauge_addr':'gauge_addr'}
     #             )
     # fig.update_traces(textposition='inside', textinfo='percent')  # percent+label
@@ -299,6 +306,7 @@ def show(gauge_ref):
         title='Votium Bounties',
         template='votium-show',
         body="",
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
         df_bounty_formatted = local_df_bounty_formatetd,
         # df_current = df_current_bounties,
         # df_prior = df_prior_bounties,

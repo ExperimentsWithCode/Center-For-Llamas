@@ -22,8 +22,11 @@ from app.utilities.utility import (
     get_dt_from_timestamp,
     shift_time_days,
     df_remove_nan,
-    get_now
+    get_now,
+    nullify_amount
+
 )
+
 # try:
 #     df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
 
@@ -50,7 +53,10 @@ class ProcessConvexLocker():
 
 
     def process(self):
-        self.df_locker['locked_amount'] = self.df_locker['locked_amount'].astype(float)
+        self.df_locker['locked_amount'] = self.df_locker.apply(
+            lambda x: nullify_amount(x['locked_amount']), 
+            axis=1)
+
         self.df_locker['epoch_start'] = self.df_locker.apply(
             lambda x: get_dt_from_timestamp(x['_epoch']), 
             axis=1)

@@ -23,6 +23,7 @@ from app.convex.locker.models import df_locker_agg_system, df_locker_agg_current
 
 from app.utilities.utility import (
     format_plotly_figure,
+    get_now
 
 )
 
@@ -52,7 +53,7 @@ def index():
 
     
     # Filter Data
-    df_locker_agg_user_epoch_current = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] >= dt.utcnow()]
+    df_locker_agg_user_epoch_current = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] >= get_now()]
     df_locker_agg_user_epoch_current = df_locker_agg_user_epoch_current[
         df_locker_agg_user_epoch_current['this_epoch'] == df_locker_agg_user_epoch_current.this_epoch.min()
         ]
@@ -242,7 +243,7 @@ def show(user):
     local_df_locker_agg_user_epoch = df_locker_agg_user_epoch[df_locker_agg_user_epoch['user'] == user]
     local_df_locker = df_locker[df_locker['user'] == user]
 
-    local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.utcnow()]
+    local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >=  get_now()]
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 

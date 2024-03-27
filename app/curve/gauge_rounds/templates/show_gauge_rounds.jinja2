@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "curve" -%}
+  {% set active_page = "curve_checkpoints" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -24,6 +27,7 @@
     {% endwith %}
 
 
+    {% include 'utility_checkpoints.jinja2' %} 
 
     {% with sum_current_votes=sum_current_votes %}
       {% with sum_prior_votes=sum_prior_votes %}

@@ -12,7 +12,7 @@
   <script type='text/javascript'>
         new gridjs.Grid({
           columns: [
-            { id: 'period_end_date', name: 'Round End Date' },
+            { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
             { id: 'proposal_title', name: 'Title' },
             { id: 'choice', name: 'Choice' ,
                 formatter: (_, row) => gridjs.html(
@@ -39,7 +39,7 @@
           data: [
             {% for index, row in df_snapshot.iterrows() %}
               {
-                    'period_end_date': '{{ row['period_end_date'] }}',
+                    'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
                     'proposal_title': '{{ row['proposal_title']  }}',
                     {% if snapshot_space == "stakedao"  %}
                     'choice':  `<a href={{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,

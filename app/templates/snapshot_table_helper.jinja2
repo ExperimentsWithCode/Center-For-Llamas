@@ -12,7 +12,7 @@
   <script type='text/javascript'>
         new gridjs.Grid({
           columns: [
-              { id: 'period_end_date', name: 'Round End Date' },
+              { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
               { id: 'proposal_title', name: 'Title' },
               { id: 'known_as', name: 'Known As' },
               { id: 'voter', name: 'voter',
@@ -44,7 +44,7 @@
           data: [
             {% for index, row in df_snapshot.iterrows() %}
               {
-                  'period_end_date': '{{ row['period_end_date'].strftime("%Y-%m-%d") }}',
+                  'checkpoint_timestamp': '{{ row['checkpoint_timestamp'].strftime("%Y-%m-%d") }}',
                   'proposal_title': '{{ row['proposal_title']  }}',
                   'known_as': '{{ row['known_as'] }}',
                   {% if snapshot_space == "stakedao"  %}

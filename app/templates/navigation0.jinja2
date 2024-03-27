@@ -1,3 +1,4 @@
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('home_bp.home') }}">The Center For Llamas Who Want To Curve Good</a>
@@ -21,17 +22,18 @@
         </a>
         </li>
 
-
         <li>
         <a class="nav-link active" href="{{ url_for('curve_locker_vecrv_bp.index') }}">Locker
           <span class="visually-hidden">(current)</span>
         </a>
         </li>
+
         <li>
         <a class="nav-link active" href="{{ url_for('gauge_votes_bp.index') }}">Gauge Votes
           <span class="visually-hidden">(current)</span>
         </a>
         </li>
+
         <li>
         <a class="nav-link active" href="{{ url_for('gauge_rounds_bp.index') }}">Gauge Rounds
           <span class="visually-hidden">(current)</span>
@@ -39,12 +41,12 @@
         </li>
 
         <li>
-          <a class="nav-link active" href="{{ url_for('curve_liquidity_bp.index') }}">Liquidity
+        <a class="nav-link active" href="{{ url_for('curve_liquidity_bp.index') }}">Liquidity
           <span class="visually-hidden">(current)</span>
         </a>
         </li>
+
         </ul>
-        </div>
         <div class="d-flex">
             <a class="nav-link active" href="">StakeDAO Bounties
             <span class="visually-hidden">(current)</span>
@@ -74,6 +76,11 @@
         </li> #}
         <li>
           <a class="nav-link active" href="{{ url_for('convex_snapshot_bp.index') }}">Snapshot
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link active" href="{{ url_for('convex_vote_locker_bp.index') }}">Vote Locker
             <span class="visually-hidden">(current)</span>
           </a>
         </li>
@@ -117,7 +124,16 @@
             <span class="visually-hidden">(current)</span>
           </a>
         </li>
-
+        <li>
+          <a class="nav-link active" href="{{ url_for('stakedao_locked_vesdt_bp.index') }}">veSDT Locker
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link active" href="{{ url_for('stakedao_staked_sdcrv_bp.index') }}">Staked sdCRV
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li>
         {# <li>
           <a class="nav-link active" href="">Delegations
             <span class="visually-hidden">(current)</span>
@@ -135,3 +151,4 @@
         </div>
     </div>
 </nav>
+

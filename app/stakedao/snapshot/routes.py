@@ -59,7 +59,7 @@ def index():
 
     # Build chart
     fig = px.bar(df_vote_aggregates,
-                    x=df_vote_aggregates['period_end_date'],
+                    x=df_vote_aggregates['checkpoint_timestamp'],
                     y=df_vote_aggregates['total_vote_power'],
                     color='choice',
                     title='Gauge Weight Round Vote Weights',
@@ -175,7 +175,7 @@ def show(choice):
 
         # # Build chart
     fig = px.bar(local_df_vote_choice,
-                    x=local_df_vote_choice['period_end_date'],
+                    x=local_df_vote_choice['checkpoint_timestamp'],
                     y=local_df_vote_choice['choice_power'],
                     color='voter',
                     title='Votes Per Round',
@@ -190,7 +190,7 @@ def show(choice):
 
         # # Build chart
     fig = px.bar(local_df_vote_choice,
-                    x=local_df_vote_choice['period_end_date'],
+                    x=local_df_vote_choice['checkpoint_timestamp'],
                     y=local_df_vote_choice['choice_power'],
                     color='known_as',
                     title='Votes Per Round',
@@ -301,7 +301,7 @@ def voter(voter):
 
     # # Build chart
     fig = px.line(local_df_vote_choice,
-                    x=local_df_vote_choice['period_end_date'],
+                    x=local_df_vote_choice['checkpoint_timestamp'],
                     y=local_df_vote_choice['available_power'],
                     # color='choice',
                     title='sdCRV Held',

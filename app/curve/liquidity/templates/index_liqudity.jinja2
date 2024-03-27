@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "curve" -%}
+  {% set active_page = "curve_liquidity" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -17,28 +20,60 @@
     <div class="row">
  
       <div class="card border-info mb-3" style="max-width: 50%;" >
-      <div class="card-header">Pool Liquidity</div>
-      <div class="card-body"> 
-          <h4 class="card-title">{{ df_curve_liquidity_aggregates.index | length }} Liquidity Pools Tracked</h4>
-          <p class="card-text">This measures liquidity vs votes</p>
+        <div class="card-header">Liquidity Pools Tracked</div>
+        <div class="card-body"> 
+            <h4 class="card-title">{{ df_curve_liquidity_aggregates.index | length }} </h4>
 
+        </div>
       </div>
-    </div>
+      <div class="card border-info mb-3" style="max-width: 50%;" >
+        <div class="card-header">Info</div>
+          <div class="card-body"> 
+            <p class="card-text">Only covers Ethereum L1 pools atm</p>
+            <p class="card-text">This measures liquidity vs votes</p>
+
+        </div>
+      </div>
 
 
     </div>
 
-    {# <div class="row">
+    <div class="row">
 
-        <div class="card text-white bg-secondary mb-3" >
-        <div class="card-header">Current Votes</div>
+        <div class="card text-white bg-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Top 5 Gauges by Vote Power</div>
+        <div class="card-body">
+            <div id="chart1" class="chart1"></div>
+
+        </div>
+        </div>
+
+        <div class="card border-primary mb-3" style="max-width: 50%;">
+        <div class="card-header">Top 5-10 Gauges by Vote Power</div>
         <div class="card-body">
             <div id="chart2" class="chart2"></div>
 
         </div>
         </div>
-    </div> #}
+    </div>
+    <div class="row">
 
+        <div class="card border-secondary mb-3" style="max-width: 50%;">
+        <div class="card-header">Top 10-15 Gauges by Vote Power</div>
+        <div class="card-body">
+            <div id="chart3" class="chart3"></div>
+
+        </div>
+        </div>
+
+        <div class="card text-white bg-secondary mb-3" style="max-width: 50%;">
+        <div class="card-header">Top 15-20 Gauges by Vote Power</div>
+        <div class="card-body">
+            <div id="chart4" class="chart4"></div>
+
+        </div>
+        </div>
+    </div>
 
 
         <div id="liquidity_table"></div>
@@ -47,15 +82,14 @@
 
 
 
-    </div>
 
-  
-
-{# <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script type='text/javascript'>
-  var graphs = {{graphJSON | safe}};
-  Plotly.plot('chart',graphs,{});
-</script> #}
+{% for graph_json in graph_list %}
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script type='text/javascript'>
+      var graphs = {{graph_json | safe}};
+      Plotly.plot("chart{{loop.index}}",graphs,{});
+    </script> 
+{% endfor %}
 
 <script type='text/javascript'>
       new gridjs.Grid({
@@ -75,11 +109,13 @@
 
             },
             { id: 'total_vote_power', name: 'Vote Power',
+                  formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
             { id: 'liquidity_over_votes', name: 'Liquidity/Votes',
-                {# formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, #}
+                formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
 
             },
@@ -88,11 +124,11 @@
 
             { id: 'pool_addr', name: 'Pool Address',
                 formatter: (_, row) => gridjs.html(
-                `<a href=${row.cells[10].data}>${row.cells[9].data}</a>`
+                `${row.cells[9].data.toString()}`
               )
             },
 
-            { id: '_', name: '_', formatter: (_, row) => gridjs.html(``) },
+            {# { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' }, #}
 
         ],
         data: [
@@ -104,30 +140,23 @@
 
                 'total_balance': '{{ row['total_balance'] | round(2) }}',
                 'total_balance_usd': '{{ row['total_balance_usd']| round(2) }}',
-                'total_vote_power': '{{ row['total_vote_power'] |  replace("'", "")  }}',
-                'liquidity_over_votes': '{{ row['liquidity_over_votes']  }}',
+                'total_vote_power': '{{ row['total_vote_power'] |  round(2)  }}',
+                'liquidity_over_votes': '{{ row['liquidity_over_votes'] | round(3) }}',
 
                 'tradable_assets': "{{ row['tradable_assets'] }}",
 
                 'gauge_addr': '{{ row['gauge_addr'] }}',
-                'pool_addr': '{{ row['pool_addr'] }}',
+                {# 'pool_addr': '{{ row['pool_addr'] }}', #}
+                'pool_addr':  `<a href={{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['pool_addr']}}</a>`,
 
-                '_': `{{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_addr']) }}`
+                {# 'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}', #}
+
 
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
+      {%include 'table_format_helper.jinja2' %}
+      
       }).render(document.getElementById('liquidity_table'));
 </script>
 

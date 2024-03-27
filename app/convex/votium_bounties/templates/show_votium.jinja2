@@ -9,8 +9,21 @@
 #}
 
 {% block content %}
+  {% set active_category = "vote_bounties" -%}
+  {% set active_page = "votium_v1" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+    
+    {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
+      {% with page_type='curve' %}
+        {% include 'gauge_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
+  <div class=
     <div class="row">
       <h1>{{ title }}</h1>
     </div>
@@ -66,7 +79,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-          { id: 'period_end_date', name: 'Round End Date' },
+          { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
           { id: 'gauge_ref', name: 'Gauge Ref' },
           { id: 'token_symbol', name: 'Token Symbol' },
 
@@ -94,17 +107,13 @@
             formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
           },
 
-          { id: 'actions', 
-            name: 'Actions',
-            formatter: (_, row) => gridjs.html(`<a href='show/${row.cells[1].data}'>More</a>`)
-          },
-          { id: 'period', name: 'Round' },
+          { id: 'checkpoint_id', name: 'Checkpoint ID' },
 
         ],
         data: [
           {% for index, row in df_bounty_formatted.iterrows() %}
             {
-              'period_end_date': '{{ row['period_end_date'] }}',
+              'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
               'gauge_ref': '{{ row['gauge_ref'] }}',
               'token_symbol': '{{ row['token_symbol'] }}',
               'token_amount': '{{ row['amount'] }}',
@@ -118,8 +127,7 @@
               'total_vote_power': '{{ row['relative_vote_power'] | round(2) }}',
 
               'voter_count': '{{ row['total_vote_count'] }}',
-              'actions': null,
-              'period': '{{ row['period'] }}',
+              'checkpoint_id': '{{ row['checkpoint_id'] }}',
 
 
             },

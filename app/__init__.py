@@ -46,6 +46,7 @@ def init_app():
         from .convex.locker.routes import convex_vote_locker_bp
 
         from .convex.votium_bounties.routes import votium_bounties_bp
+        from .convex.votium_bounties_v2.routes import votium_bounties_v2_bp
 
         from .stakedao.snapshot.routes import stakedao_snapshot_bp
         from .stakedao.staked_sdcrv.routes import stakedao_staked_sdcrv_bp
@@ -90,6 +91,7 @@ def init_app():
         app.register_blueprint(convex_vote_locker_bp, url_prefix='/convex/vote_locker')
 
         app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
+        app.register_blueprint(votium_bounties_v2_bp, url_prefix='/convex/votium_v2')
 
         app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
         app.register_blueprint(stakedao_staked_sdcrv_bp, url_prefix='/stakedao/staked_sdcrv')

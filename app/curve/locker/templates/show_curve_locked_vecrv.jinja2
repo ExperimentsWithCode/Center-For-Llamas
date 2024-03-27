@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "curve" -%}
+  {% set active_page = "curve_locker" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -68,10 +71,10 @@
     <div class="row">
 
       <div class = "col-sm">
-          <div class="card border-secondary mb-3" >
+          <div class="card border-info mb-3" >
             <div class="card-header">Total CRV Locked:  </div>
             <div class="card-body">
-              <h4 class="card-title text-secondary">{{  "{:,.2f}".format(total_locked) }}</h4>
+              <h4 class="card-title text-info">{{  "{:,.2f}".format(total_locked) }}</h4>
               {# <h4 class="card-title">{{ "veCRV Balance: {:,.2f}".format(curve_vecrv['effectively_locked_balance'].sum()) }}</h4> #}
 
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}

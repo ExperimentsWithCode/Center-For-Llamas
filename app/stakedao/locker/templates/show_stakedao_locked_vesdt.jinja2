@@ -9,6 +9,9 @@
 #}
 
 {% block content %}
+  {% set active_category = "stakedao" -%}
+  {% set active_page = "stakedao_locker" -%}
+  {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
     <div class="row">
@@ -16,6 +19,104 @@
     </div>
 
     <div class="row">
+      <div class = "col-md">
+        <div class="card border-info mb-3" >
+          <div class="card-header">Voter</div>
+          <div class="card-body">
+              <h4 class="card-title">{{stakedao_vesdt.iloc[0]['provider']}}</h4>
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              {# <div id="chart" class="chart"></div> #}
+
+          </div>
+        </div>
+      </div>
+
+      <div class = "col-md">
+        <div class="card border-warning mb-3" >
+          <div class="card-header">Known As</div>
+          <div class="card-body">
+            {% if stakedao_vesdt.iloc[0]['known_as'] == '_' %}
+              <h4 class="card-title"> _ </h4>
+
+            {% else %}
+              <h4 class="card-title">{{ stakedao_vesdt.iloc[0]['known_as'] }}</h4>
+
+            {% endif %}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              {# <div id="chart" class="chart"></div> #}
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {# <div class ="row">
+        <div class = "col-lg">
+
+          <div class="card border-info mb-3"  >
+              <div class="card-body">
+                <a href="{{ url_for('stakedao_snapshot_bp.voter', voter=stakedao_vesdt.iloc[0]['provider']) }}">
+                  <button type="button" class="btn btn-primary">View Votes</button>
+                </a>  
+              </div>
+          </div>
+        </div>
+    </div> #}
+    <div class="row">
+
+      <div class = "col-sm">
+          <div class="card border-info mb-3" >
+            <div class="card-header">Total SDT Locked:  </div>
+            <div class="card-body">
+              <h4 class="card-title text-info">{{  "{:,.2f}".format(total_locked) }}</h4>
+              {# <h4 class="card-title">{{ "vesdt Balance: {:,.2f}".format(stakedao_vesdt['effectively_locked_balance'].sum()) }}</h4> #}
+
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            </div>
+          </div>
+      </div>
+        <div class = "col-sm">
+          <div class="card border-primary mb-3" >
+            <div class="card-header">Total veSDT Balance:  </div>
+            <div class="card-body">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                <h4 class="card-title text-primary">{{ "{:,.2f}".format( effectively_locked) }} </h4>
+                
+                <h4>
+                  {% if effectively_locked / total_locked > 1  %}
+                    <span class="badge bg-primary rounded-pill">
+                    + {{"{:,.2f}".format(((1)))}} %
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary rounded-pill">
+                    {{"{:,.2f}".format(((effectively_locked / total_locked)-1)*100)}} %
+                    </span>
+                  {% endif %}
+                </h4>
+              </li>
+
+            </div>
+          </div>
+      </div>
+      <div class = "col-sm">
+
+          <div class="card border-secondary mb-3" >
+            <div class="card-header">Info</div>
+            <div class="card-body">
+                {# <h4 class="card-title"> {{ "{:,.2f}".format(lockers['balance_adj'].head(1).sum()) }}</h4> #}
+
+                <p class="card-text">Final Lock Time : {{ stakedao_vesdt.iloc[0]['final_lock_time'] }} </p>
+                <p class="card-text">Locking Events : {{ stakedao_vesdt.shape[0] }} </p>
+                {# <div id="chart" class="chart"></div> #}
+
+            </div>
+          </div>
+
+      </div>
+    </div>
+
 
 
     {# {% with sum_current_votes=sum_current_votes %}

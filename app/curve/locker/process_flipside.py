@@ -78,7 +78,7 @@ class ProcessCurveLocker():
         processed_df['final_lock_time'] = processed_df['locktime'].apply(get_dt_from_timestamp)
         processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
         # processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
-        print(processed_df.head())
+        # print(processed_df.head())
         processed_df['checkpoint_timestamp'] = processed_df['block_timestamp'].apply(get_checkpoint_timestamp)
         processed_df['checkpoint_id'] = processed_df['block_timestamp'].apply(get_checkpoint_id)
 

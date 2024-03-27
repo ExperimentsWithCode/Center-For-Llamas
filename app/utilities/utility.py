@@ -70,10 +70,11 @@ def get_date_obj(time):
     # return time
 
 def get_dt_from_timestamp(timestamp):
-    if len(timestamp) == 0:
-        return None
-    if '.' in timestamp:
-        timestamp = timestamp[:timestamp.find('.')]
+    if type(timestamp) == str:
+        if len(timestamp) == 0:
+            return None
+        if '.' in timestamp:
+            timestamp = timestamp[:timestamp.find('.')]
     return dt.fromtimestamp(int(timestamp)).replace(tzinfo=utc)
 
 # Attempts to be timezone aware
@@ -228,24 +229,45 @@ def concat_all(df_list, sort_list = ["this_period"]):
 
 
 def format_plotly_figure(fig, _height=None):
-    if _height:
-        fig.update_layout(
-            font=dict(
-                family="Courier New, monospace",
-                size=14,
-                color="RebeccaPurple"
+    fig.update_layout(
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+            color="RebeccaPurple"
+        ),
+        height= _height,
+    )
+    return fig
+
+def format_plotly_animation(fig):
+    fig.update_layout(
+    updatemenus=[dict(buttons = [
+        dict(
+            args = [None, {"frame": {"duration": 2000, 
+                                    "redraw": True},
+                            "fromcurrent": False, 
+                            "transition": {"duration": 500, "easing": "quadratic-in-out"}}],
+            label = "Play",
+            method = "animate"
             ),
-            # height= 1000,
-        )
-    else:
-        fig.update_layout(
-            font=dict(
-                family="Courier New, monospace",
-                size=14,
-                color="RebeccaPurple"
+        dict(
+            args = [[None], {"frame": {"duration": 0, 
+                                    "redraw": False},
+                            "mode": "immediate",
+                            "transition": {"duration": 0}}],
+            label = "Stop",
+            method = "animate"
             ),
-            height= _height,
-        )
+        ],
+        type='buttons',
+        showactive=True,
+        y=1,
+        x=1.12,
+        xanchor='left',
+        yanchor='bottom',
+
+        )]
+    )
     return fig
 
 def convert_animation_to_gif(fig, fig_name, path='app/generated_images/'):
@@ -295,7 +317,7 @@ def calc_lock_efficiency(action_time, final_lock_time):
     max_weeks = int(diff_max_lock / pd.Timedelta(seconds= 7 * 86400))
 
     if lock_weeks / max_weeks > 1:
-        print(action_time, final_lock_time)
+        print(f"Lock Efficiency: {action_time}, {final_lock_time}")
     return lock_weeks / max_weeks if lock_weeks / max_weeks <= 1 else 1
 
 def get_lock_diffs(final_lock_time):
@@ -339,60 +361,88 @@ def generate_checkpoints(start_time = '2020-08-20 00:06:58.919591+00:00'):
     #
     i = 0
     checkpoints = []
+    checkpoint_date = start_date
     # 181 is weak input. Fix.
     while i < (181 + 52*8):
-        checkpoint_date = start_date + timedelta(seconds = week*i)
         # print(checkpoint_date)
         checkpoints.append({
             'id': i, 
             'checkpoint_timestamp': checkpoint_date
             })
+        checkpoint_date = start_date + timedelta(seconds = week*i)
         i += 1
     return checkpoints
 
 df_default_checkpoints = pd.json_normalize(generate_checkpoints())
 
+# def get_checkpoint(timestamp, df_checkpoints = df_default_checkpoints):
+#     time_obj = get_datetime_obj(timestamp)
+#     date_diff = time_obj - df_checkpoints.checkpoint_timestamp.min() 
+#     try:
+#         this_id = round(date_diff.days / 7)
+#     except:
+#         print(timestamp)
+#         print(time_obj)
+#         print(df_checkpoints.checkpoint_timestamp.min())
+#         print(date_diff)
+#         this_id = 0
+#     if this_id < 1:
+#         this_id = 0
+#     # print(f"id: {this_id}")
+#     this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+#     # print(this_checkpoint)
+#     try:
+#         while this_checkpoint.iloc[0].checkpoint_timestamp < time_obj:
+#             this_id += 1
+#             this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+#         while this_checkpoint.iloc[0].checkpoint_timestamp > time_obj:
+#             this_id -= 1
+#             temp_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+#             if len(temp_checkpoint) > 0:
+#                 if temp_checkpoint.iloc[0].checkpoint_timestamp < time_obj:
+#                     break
+#                 else:
+#                     this_checkpoint.iloc[0].checkpoint_timestamp = temp_checkpoint
+#             else:
+#                 break
+#         return this_checkpoint.iloc[0]
+#     except Exception as e:
+#         print(e)
+#         print(timestamp)
+#         print(f"ID: {this_id}")
+#         return None
+
+# def get_checkpoint_id(timestamp):
+#     this_checkpoint = get_checkpoint(timestamp)
+#     return this_checkpoint.id
+
+
 def get_checkpoint(timestamp, df_checkpoints = df_default_checkpoints):
+    this_id = get_checkpoint_id(timestamp, df_checkpoints)
+    # print(f"id: {this_id}")
+    this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
+    # print(this_checkpoint)
+   
+    return this_checkpoint.iloc[0]
+
+
+
+def get_checkpoint_id(timestamp, df_checkpoints = df_default_checkpoints):
     time_obj = get_datetime_obj(timestamp)
     date_diff = time_obj - df_checkpoints.checkpoint_timestamp.min() 
     try:
         this_id = round(date_diff.days / 7)
-    except:
+    except Exception as e:
+        print(e)
         print(timestamp)
         print(time_obj)
         print(df_checkpoints.checkpoint_timestamp.min())
         print(date_diff)
+        this_id = 0
     if this_id < 1:
         this_id = 0
-    # print(f"id: {this_id}")
-    this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
-    # print(this_checkpoint)
-    try:
-        while this_checkpoint.iloc[0].checkpoint_timestamp < time_obj:
-            this_id += 1
-            this_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
-        while this_checkpoint.iloc[0].checkpoint_timestamp > time_obj:
-            this_id -= 1
-            temp_checkpoint = df_checkpoints[df_checkpoints['id'] == this_id]
-            if len(temp_checkpoint) > 0:
-                if temp_checkpoint.iloc[0].checkpoint_timestamp < time_obj:
-                    break
-                else:
-                    this_checkpoint.iloc[0].checkpoint_timestamp = temp_checkpoint
-            else:
-                break
-        return this_checkpoint.iloc[0]
-    except Exception as e:
-        print(e)
-        print(timestamp)
-        print(f"ID: {this_id}")
-        return None
-
-
-
-def get_checkpoint_id(timestamp):
-    this_checkpoint = get_checkpoint(timestamp)
-    return this_checkpoint.id
+    this_id+=1
+    return this_id
 
 def get_checkpoint_timestamp(timestamp):
     this_checkpoint = get_checkpoint(timestamp)
@@ -426,7 +476,7 @@ def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint)
     # max_weeks = int(diff_max_lock / pd.Timedelta(seconds= 7 * 86400))
 
     if checkpoint_diff / max_lock_diff > 1:
-        print(action_checkpoint, final_lock_checkpoint)
+        print(f"Checkpoint Diff {action_checkpoint}, {final_lock_checkpoint}")
         efficiency = 1
     else:
         efficiency = checkpoint_diff / max_lock_diff

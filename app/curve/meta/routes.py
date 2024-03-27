@@ -38,7 +38,7 @@ def index():
                         x=df_head.display_name,
                         y=df_head.power_difference,
                         # color=df_formated_shorts['name'],
-                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_head.iloc[0]['period_end_date']}",
+                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_head.iloc[0]['checkpoint_timestamp']}",
                     # line_shape='hvh'
                     height=600
                     )
@@ -53,7 +53,7 @@ def index():
                         x=df_tail.display_name,
                         y=df_tail.power_difference,
                         # color=df_formated_shorts['name'],
-                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_tail.iloc[0]['period_end_date']}",
+                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_tail.iloc[0]['checkpoint_timestamp']}",
                     # line_shape='hvh'
                     height=600
                     )
@@ -101,7 +101,7 @@ def custom_index():
                         x=df_head.display_name,
                         y=df_head.power_difference,
                         # color=df_formated_shorts['name'],
-                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_head.iloc[0]['period_end_date']}",
+                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_head.iloc[0]['checkpoint_timestamp']}",
                     # line_shape='hvh'
                     height=600
                     )
@@ -116,7 +116,7 @@ def custom_index():
                         x=df_tail.display_name,
                         y=df_tail.power_difference,
                         # color=df_formated_shorts['name'],
-                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_tail.iloc[0]['period_end_date']}",
+                    title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_tail.iloc[0]['checkpoint_timestamp']}",
                     # line_shape='hvh'
                     height=600
                     )

@@ -4,6 +4,7 @@ to_do =markdown.markdown(
 '''
 # To Do
 
+# General
 ## Core Mappings
 * [] Struggle to connect all gauges to their pools. 
     * Currently pulling from deployer contracts but need better way to identify all deployer contracts
@@ -12,6 +13,7 @@ to_do =markdown.markdown(
 * [] Need to add ability to recognize if snapshot votes exist for a given pool to disable navigation if there is no option.
     * [] likewise liquidity where pool exists but flipside hasn't indexed it yet.
 
+# Data Structuring 
 ## Storage
 * At present Data is read from raw queries and proccessed each time the server starts up. 
     * Long downtimes cause this to sometimes be the expirience of page visitors.
@@ -19,7 +21,9 @@ to_do =markdown.markdown(
 
 * Separate Model logic to have an interim post processed Clean Data that can greatly reduce loading speed.
     * [X] Curve Tables (vast majority of processing time)
-    * [] Snapshot Tables
+    * [X] Snapshot Tables
+    * [X] Convex Lock
+    * [X] StakeDAO Lock/Stake
     * [] Votium Tables
     
 <img src="static/images/data_flow.png"
@@ -34,10 +38,11 @@ to_do =markdown.markdown(
     * Currently only shows last closed round and compares to prior closed round. 
     * [] Create current round page
     * [] Create vote volume graph of vote change velocity each round
-    * Current no handling of 50% type gauges.
+    * Currently no handling of 50% type gauges.
         * [] Determine best way to present this info and its impact on the inflation recieved by other gauges. 
   
 
+# Views
 ## Establish first Experiments Component
 * Locally select many filters to compare data. 
 * [] launch experimental pages which allow these sorts of filtered comparisons to be viewed. 
@@ -48,13 +53,6 @@ to_do =markdown.markdown(
         * [] Add to Navigation
 * [] harden standardized components for easier plug and play. 
 
-## Gauge Votes
-* Edit table to display as tabs (currently all votes are not displayed): 
-    * [X] Active Votes to tab format
-    * [X] Inactive Votes to tab format
-    * [X] All Votes include
-* [x] Add charts for All Votes not just active
-
 
 ## Add Description of metholodgy to each page
     * [] Pages w/ direct queries
@@ -62,21 +60,16 @@ to_do =markdown.markdown(
 
 ## Processing liquidity
     * Takes like 10 minutes where significant time is taken to filter out shitcoins.
-    * [] Revise process for less heavy burden on filtering.
+    * [X] Revise process for less heavy burden on filtering.
     * [] Need to solve hacked assets which have no balance changes but price prior to hack since no trades/moves after drained.
+    * [] Address stETH rebase (and other rebasing coins)
+        * This is gonna be hard for pre -cutoff pools. Might just need to go all the way back to curve start
+            [] Assess how much more expensive it is to go back further
+                - this shouldn't impact staying up to date once initially loaded.
+    * [] Address WETH Mint/Burn as currently double counts ETH/WETH when the pool handles that mint/burn
+    * [] Have iew which split up basepool assets
 
-## Investigate Oddities:
-0x50161102a240b1456d770dbb55c76d8dc2d160aa: 'ETHwBETHCRV-gauge'
-    Pool: 0xbfab6fa95e0091ed66058ad493189d2cb29385e6
-        But can't link pool.
-        
-
- 0x2932a86df44fe8d2a706d8e9c5d51c24883423f5: 'FrxETH'
-    Pool: 0xa1f8a6807c402e4a15ef4eba36528a3fed24e577
-    But thinks pool is 
-        0xbfab6fa95e0091ed66058ad493189d2cb29385e6: ETHwBETHCRV-gauge'
-
-# Reorganize
+## Reorganize
 * New Categorization
     * [] History
         * Current views of historic data
@@ -86,7 +79,7 @@ to_do =markdown.markdown(
     * [] Science
         * Current and new experiments
 
-# New Views
+## New Views
 * Convex
     * [X] Locked
     * [] Delegate Snapshot
@@ -107,6 +100,35 @@ to_do =markdown.markdown(
     
 ## Meta Governance Ranking
     * [] Merge governance power between entities to rank combined influence
+
+## Warden veSDT Boost Delegation
+    * [X] fetch
+    * [] process
+    * [] model
+    * [] route
+
+ ## Warden veSDT Vote Bounty Market
+    * [X] fetch
+    * [] process
+    * [] model
+    * [] route
+
+    
+# Investigate Oddities:
+## Mystery misatribution
+* BETH Frax mismatch?
+    0x50161102a240b1456d770dbb55c76d8dc2d160aa: 'ETHwBETHCRV-gauge'
+        Pool: 0xbfab6fa95e0091ed66058ad493189d2cb29385e6
+            But can't link pool.
+            
+
+    0x2932a86df44fe8d2a706d8e9c5d51c24883423f5: 'FrxETH'
+        Pool: 0xa1f8a6807c402e4a15ef4eba36528a3fed24e577
+        But thinks pool is 
+        0xbfab6fa95e0091ed66058ad493189d2cb29385e6: ETHwBETHCRV-gauge'
+
+
+
 ''',
 extensions=["fenced_code"]
 )

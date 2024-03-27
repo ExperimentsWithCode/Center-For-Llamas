@@ -1,0 +1,28 @@
+{% block content %}
+
+    search: true,
+    sort: true,
+    pagination: {
+    limit: 20,
+    summary: true
+    },
+    autoWidth: true,
+    resizable: true,
+    className: {
+    td: '{{ id }}',
+    th: 'table-primary',
+    table: 'table table-hover' 
+    },
+    style: {
+
+    td: {
+        'max-width': '120px',
+        'overflow': 'hidden',
+        'text-overflow': 'ellipsis',
+        'white-space': 'nowrap',
+    }
+    }
+
+{% endblock %}
+
+{# {%include 'table_format_helper.jinja2' %} #}
