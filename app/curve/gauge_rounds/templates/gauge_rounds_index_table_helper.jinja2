@@ -40,33 +40,12 @@
                 
                 'symbol': '{{ row['gauge_symbol'] }}',
                 'total_vote_power': '{{ row['total_vote_power']|round(2) }}',
-                'vote_percent': '{{ (row['total_vote_percent']*100)|round(3) }}' ,
+                'vote_percent': '{{ (row['total_vote_percent']*100)|round(3) }}' 
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        autoWidth: true,
+        {% include 'table_format_helper.jinja2' %}
 
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        },
-          style: {
-
-            td: {
-              'max-width': '120px',
-              'overflow': 'hidden',
-              'text-overflow': 'ellipsis',
-              'white-space': 'nowrap',
-            }
-
-          }   
 
       }).render(document.getElementById( '{{ id }}' ));
 </script>

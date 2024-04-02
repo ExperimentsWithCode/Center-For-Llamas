@@ -18,6 +18,9 @@ from app.data.local_storage import (
 
 from app.utilities.utility import timed
 from app.curve.liquidity.process_based import ProcessBasedLiquidity
+
+from app.curve.liquidity.process_flipside import process_checkpoint_aggs
+
 try:
     # df_curve_liquidity = app.config['df_curve_liquidity']
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']

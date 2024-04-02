@@ -132,17 +132,8 @@
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
+        {% include 'table_format_helper.jinja2' %}
+
       }).render(document.getElementById('vote_table'));
 </script>
 

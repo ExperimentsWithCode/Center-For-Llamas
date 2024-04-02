@@ -139,7 +139,7 @@ gauge_symbols = {
 
 }
 
-# Curve Data
+# Filenames
 filename_curve_gauges = 'gauge_to_lp_map'
 
 filename_curve_locker = 'curve_locker'
@@ -157,6 +157,8 @@ filename_curve_liquidity_cutoff = 'curve_liquidity_cutoff_v2'
 filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate_v2'
 filename_curve_liquidity_swaps = 'curve_liquidity_swaps_v2'
 filename_curve_liquidity_oracle_aggregate = 'curve_liquidity_oracle_aggregate_v2'
+
+filename_curve_crv_pricing = 'curve_crv_pricing'
 
 # Convex Data
 filename_convex_delegations = 'convex_delegations'

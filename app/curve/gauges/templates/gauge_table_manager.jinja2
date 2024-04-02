@@ -1,0 +1,44 @@
+ {% block content %}
+
+
+<div class ="row">
+
+        <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" data-bs-toggle="tab" href="#approvedGauges" aria-selected="true" role="tab">Approved</a>
+        </li>
+
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" data-bs-toggle="tab" href="#deployedGauges" aria-selected="false" role="tab" tabindex="-1">Deployed</a>
+        </li>
+
+
+        </ul>
+        <div id="myTabContent" class="tab-content">
+        <div class="tab-pane fade active show" id="approvedGauges" role="tabpanel">
+
+            {% with table_type = 'primary'  %}
+                {% with id="table_1" %}
+                    {% include 'gauge_approved_table_helper.jinja2' %} 
+                {% endwith %}
+            {% endwith %}
+        
+        </div>
+
+
+        <div class="tab-pane fade" id="deployedGauges" role="tabpanel">
+
+            {% with table_type = 'info'  %}
+                {% with id="table_2" %}
+                    {% include 'gauge_deployed_table_helper.jinja2' %} 
+                {% endwith %}
+            {% endwith %}
+        </div>
+
+    </div>  
+
+
+</div>
+
+{% endblock %}
+

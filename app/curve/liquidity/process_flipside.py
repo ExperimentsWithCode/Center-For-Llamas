@@ -275,9 +275,9 @@ class Liquidity():
         return df
 
 
-    def estimate_checkpoint(self, min_checkpoint_timestamp, target_timestamp):
-        diff = target_timestamp - min_checkpoint_timestamp
-        return round(diff.days/7)
+    # def estimate_checkpoint(self, min_checkpoint_timestamp, target_timestamp):
+    #     diff = target_timestamp - min_checkpoint_timestamp
+    #     return round(diff.days/7)
 
     # Prep w/ gauge/checkpoint info
     @timed
@@ -294,7 +294,7 @@ class Liquidity():
         df = df[df['balance'] > 0]
         # additive
         df['checkpoint_id'] = df.apply(
-            lambda x: get_checkpoint_id(x['block_timestamp']) -1, 
+            lambda x: get_checkpoint_id(x['block_timestamp']), 
             axis=1)
         
         df['gauge_addr'] = df.apply(
@@ -348,15 +348,15 @@ class Liquidity():
         return df
      
 
-def get_df_gauge_votes():
+def get_curve_liquidity_df():
     filename = filename_curve_liquidity    #+ fallback_file_title
-    resp_dict = read_csv(filename, 'source')
-    df_gauge_votes = pd.json_normalize(resp_dict)
+    resp_dict = read_csv(filename, 'source') # joined with 
+    df_liquidity_source = pd.json_normalize(resp_dict)
     try:
-        df_gauge_votes = df_gauge_votes.sort_values("block_timestamp", axis = 0, ascending = True)
+        df_liquidity_source = df_liquidity_source.sort_values("block_timestamp", axis = 0, ascending = True)
     except:
-        df_gauge_votes = df_gauge_votes.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
-    return df_gauge_votes
+        df_liquidity_source = df_liquidity_source.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
+    return df_liquidity_source
 
 def process_checkpoint_aggs(df):
     df = df[df['balance']> 0]
@@ -383,7 +383,7 @@ def process_checkpoint_aggs(df):
 
 def process_and_save():
     print("Processing... { curve.liquidity.models }")
-    liquidity = Liquidity(get_df_gauge_votes(), df_checkpoints_agg, gauge_registry)
+    liquidity = Liquidity(get_curve_liquidity_df(), df_checkpoints_agg, gauge_registry)
 
     df_curve_liquidity = liquidity.df_processed_liquidity
     df_curve_liquidity_aggregates = process_checkpoint_aggs(df_curve_liquidity)

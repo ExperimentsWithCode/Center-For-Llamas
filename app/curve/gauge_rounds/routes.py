@@ -10,7 +10,7 @@ import json
 import plotly
 import plotly.express as px
 
-
+from app.utilities.utility import timed
 
 
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -53,14 +53,15 @@ def get_checkpoint_info(df):
         },
         }
 
-
 @gauge_rounds_bp.route('/', methods=['GET'])
 # @login_required
 def index():
     now = datetime.now()
 
     # Filter Data
-    local_df_checkpoints_agg = df_checkpoints_agg.sort_values(['checkpoint_id', 'total_vote_power'], ascending=False)
+    local_df_checkpoints_agg = df_checkpoints_agg[df_checkpoints_agg['weight'] > 0]
+    local_df_checkpoints_agg = local_df_checkpoints_agg.sort_values(['checkpoint_id', 'total_vote_power'], ascending=False)
+
     # local_df_gauge_votes = df_checkpoints_agg.groupby(['voter', 'gauge_addr'], as_index=False).last()
     checkpoint_timestamps = local_df_checkpoints_agg.checkpoint_timestamp.unique()
     checkpoint_timestamps = sorted(checkpoint_timestamps)
@@ -115,7 +116,7 @@ def index():
 
     # # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
+    
     return render_template(
         'index_meta_aggregate_votes.jinja2',
         title='Curve Gauge Rounds',
@@ -230,6 +231,7 @@ def show(gauge_addr):
     # # Build Plotly object
     graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+    local_df_gauge_rounds = local_df_gauge_rounds[local_df_gauge_rounds['weight'] > 0]
 
     return render_template(
         'show_gauge_rounds.jinja2',

@@ -25,7 +25,7 @@ from app.utilities.utility import (
     df_remove_nan,
     format_plotly_figure,
     convert_animation_to_gif,
-    calc_lock_efficiency,
+    timed
     # nullify_amount,
 )
 print("Loading... { curve.locker.models }")
@@ -116,6 +116,13 @@ def get_df(filename):
     df = csv_to_df(filename, 'processed')
     df = format_df(df)
     return df
+
+
+# df_curve_vecrv = get_df(filename_curve_locker)
+# df_curve_vecrv_known = process_agg_known_as(df_curve_vecrv) 
+# df_curve_vecrv_agg = process_agg(df_curve_vecrv)
+# df_curve_vecrv_decay = get_df(filename_curve_locker + '_decay')
+# df_curve_vecrv_decay_agg = process_decay_agg(df_curve_vecrv_decay)
 
 df_curve_vecrv = get_df(filename_curve_locker)
 df_curve_vecrv_known = get_df(filename_curve_locker + '_known') 

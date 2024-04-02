@@ -23,7 +23,8 @@ manager_config = {
     'curve_gauge_rounds': default_bool,
 
     'curve_liquidity': default_bool, ## New Source Now
-
+    'curve_crv_price': default_bool,
+    
     # Convex
     'convex_locker': default_bool,
     'convex_delegations': default_bool,
@@ -70,6 +71,7 @@ class Manager():
         self.curve_gauge_votes()
         self.curve_gauge_rounds()
         self.curve_liquidity()
+
         # Convex
         self.convex_locker()
         self.convex_snapshot_curve()
@@ -124,15 +126,16 @@ class Manager():
         if self.config['curve_liquidity']:   
             from app.curve.liquidity.liquidity_data_manager import LiquidityManager
             from app.curve.liquidity.process_flipside import process_and_save 
-            LiquidityManager(
+            liquidity_manager = LiquidityManager(
                 self.should_fetch, 
                 self.load_initial, 
                 self.load_liquidity_cutoff,
                 self.liquidity_cutoff_value,
                 self.human_management)
+            liquidity_manager.manage()
             return self._helper(None, process_and_save)
-    
-    ## NEED LIQUIDITY
+        
+
     
     """
     Convex

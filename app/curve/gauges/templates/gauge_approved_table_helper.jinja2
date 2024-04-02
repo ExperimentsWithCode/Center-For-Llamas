@@ -1,0 +1,62 @@
+
+
+
+
+
+ <div class="row">
+    <p></p>
+    <h4 class="text-{{table_type}} ">Gauges Approved</h4>
+    <p class="text-{{table_type}}">Not all gauge factories are currently covered, so some source tags are incomplete</p></div>
+
+
+    <div id='{{ id }}' ></div>
+</div>
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'vote_timestamp', name: 'Vote Timestamp' },
+          { id: 'first_period', name: 'Checkpoint ID' },
+
+          { id: 'source', name: 'Source' },
+
+          { id: 'gauge_name', name: 'Gauge Name' },
+          { id: 'gauge_addr', name: 'Gauge Address',
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[4].data.toString()}`
+            )
+          },
+          { id: 'type_id', name: 'Type ID' },
+          { id: 'type_name', name: 'Type Name' },
+          { id: 'type_weight_adj', name: 'Type Weight',
+          {% include 'utility_sort_float.jinja2'%}
+          },
+          { id: 'type_total_weight_adj', name: 'Type Weight',
+          {% include 'utility_sort_float.jinja2'%}
+          }
+
+        ],
+        data: [
+          {% for index, row in df_approved.iterrows() %}
+            {
+              'vote_timestamp': '{{ row['vote_timestamp'] }}',
+              'first_period': '{{ row['first_period'] }}',
+
+              'source': '{{ row['source'] }}',
+              'gauge_name': '{{ row['gauge_name'] }}',
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+             
+              'type_id': '{{ row['type_id'] }}',
+              'type_name': '{{ row['type_name'] }}',
+              'type_weight_adj': '{{ row['type_weight_adj'] }}',
+              'type_total_weight_adj': '{{ row['type_total_weight_adj'] }}'
+
+            },
+          {% endfor %}
+        ],
+        {% include 'table_format_helper.jinja2' %}
+
+      }).render(document.getElementById( '{{ id }}' ));
+</script>
+

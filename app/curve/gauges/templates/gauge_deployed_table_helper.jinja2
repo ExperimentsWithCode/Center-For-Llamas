@@ -1,0 +1,54 @@
+
+
+
+ <div class="row">
+    <p></p>
+    <h4 class="text-{{table_type}}">Gauges Deployed</h4>
+    <p class="text-{{table_type}}">Not all gauge factories are currently covered, so this data is incomplete</p>
+
+    <div id='{{ id }}' ></div>
+</div>
+
+
+  
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'deployed_timestamp', name: 'Deployed Timestamp' },
+          { id: 'deployed_period', name: 'Checkpoint ID' },
+
+          { id: 'source', name: 'Source' },
+
+          { id: 'gauge_name', name: 'Gauge Name' },
+          { id: 'gauge_addr', name: 'Gauge Address',
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[4].data.toString()}`
+            )
+          },
+          { id: 'pool_addr', name: 'Pool Address' },
+          { id: 'chain_id', name: 'Chain ID' },
+          { id: 'chain_name', name: 'Chain Name' }
+
+
+
+        ],
+        data: [
+          {% for index, row in df_deployed.iterrows() %}
+            {
+              'deployed_timestamp': '{{ row['deployed_timestamp'] }}',
+              'deployed_period': '{{ row['deployed_period'] }}',
+              'source': '{{ row['source'] }}',
+              'gauge_name': '{{ row['gauge_name'] }}',
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+              'pool_addr': '{{ row['pool_addr'] }}',
+              'chain_id': '{{ row['chain_id'] }}',
+              'chain_name': '{{ row['chain_name'] }}'
+
+            },
+          {% endfor %}
+        ],
+        {% include 'table_format_helper.jinja2' %}
+      }).render(document.getElementById( '{{ id }}' ));
+</script>
+

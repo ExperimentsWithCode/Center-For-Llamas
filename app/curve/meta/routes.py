@@ -10,7 +10,7 @@ import json
 import plotly
 import plotly.express as px
 
-from .forms import MetaForm
+from .forms.power_diff_form import PowerDiffForm
 
 from .models import get_meta
 
@@ -25,7 +25,7 @@ curve_meta_bp = Blueprint(
 
 @curve_meta_bp.route('/', methods=['GET'])
 def index():
-    form = MetaForm()
+    form = PowerDiffForm()
 
     this_round=0
     top_x = 20 
@@ -84,7 +84,7 @@ def index():
 
 @curve_meta_bp.route('/', methods=['POST'])
 def custom_index():
-    form = MetaForm()
+    form = PowerDiffForm()
     if form.validate_on_submit():
         this_round= form.main_round.data if form.main_round.data else 0
         top_x = form.top_results.data
@@ -143,3 +143,65 @@ def custom_index():
         top_x = top_x, 
         compare_round = compare_round
     )
+
+
+# @curve_meta_bp.route('/projections/', methods=['POST'])
+# def projections():
+#     form = PowerDiffForm()
+#     if form.validate_on_submit():
+#         this_round= form.main_round.data if form.main_round.data else 0
+#         top_x = form.top_results.data
+#         compare_round= form.compare_round.data
+#     else:
+#         this_round=0
+#         top_x = 20 
+#         compare_round=1
+#     df_head, df_tail = get_meta(this_round, top_x, compare_round)
+
+#     # Build chart
+#     fig = px.bar(df_head,
+#                         x=df_head.display_name,
+#                         y=df_head.power_difference,
+#                         # color=df_formated_shorts['name'],
+#                     title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_head.iloc[0]['checkpoint_timestamp']}",
+#                     # line_shape='hvh'
+#                     height=600
+#                     )
+#     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+#     fig.update_layout(autotypenumbers='convert types')
+
+#     # Build Plotly object
+#     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+#     # Build chart
+#     fig = px.bar(df_tail,
+#                         x=df_tail.display_name,
+#                         y=df_tail.power_difference,
+#                         # color=df_formated_shorts['name'],
+#                     title=f"Power Difference: Leader Board, Round: -{this_round}, Date: {df_tail.iloc[0]['checkpoint_timestamp']}",
+#                     # line_shape='hvh'
+#                     height=600
+#                     )
+#     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+#     fig.update_layout(autotypenumbers='convert types')
+
+#     # Build Plotly object
+#     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+#     return render_template(
+#         'projections.jinja2',
+#         title='Curve Gauge Projections',
+#         template='curve-meta-show',
+#         body="",
+
+#         form=form,
+        
+#         df_head = df_head,
+#         df_tail = df_tail,
+#         graphJSON = graphJSON,
+#         graphJSON2 = graphJSON2,
+#         this_round = this_round,
+#         top_x = top_x, 
+#         compare_round = compare_round
+#     )

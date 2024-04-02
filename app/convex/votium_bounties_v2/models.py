@@ -52,6 +52,10 @@ def format_df(df):
         df['bounty_amount']= df.apply(
             lambda x: nullify_amount(x['bounty_amount']), 
             axis=1)
+    if 'total_bounty_value' in key_list:
+        df['total_bounty_value']= df.apply(
+            lambda x: nullify_amount(x['total_bounty_value']), 
+            axis=1)
     if 'total_vote_power' in key_list:
         df['total_vote_power']= df.apply(
             lambda x: nullify_amount(x['total_vote_power']), 

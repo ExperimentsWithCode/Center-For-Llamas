@@ -11,6 +11,8 @@ from app.data.local_storage import (
     )
 from app.curve.gauges.process_flipside import process_and_get
 
+from app.utilities.utility import nullify_amount
+
 print("Loading... { curve.gauges.models }")
 
 
@@ -26,21 +28,31 @@ def format_df(df):
     # df['token_name']            = df['token_name'].astype(str)
     # df['token_symbol']          = df['token_symbol'].astype(str)
     # df['source']                = df['source'].astype(str)
-    # df['deployed_timestamp']    = df['deployed_timestamp'].astype(str)
-    # df['first_period']          = df['first_period'].astype(str)
+    df['deployed_timestamp']    = pd.to_datetime(df['deployed_timestamp'])
+    # if 'first_period' in df.keys():
+    #     df['first_period']          = df['first_period'].astype(int)
+    #     df['deployed_period']          = df['deployed_period'].astype(int)
 
     df['first_period_end_date'] = pd.to_datetime(df['first_period_end_date']).dt.date
+    df['deployed_period_end_date'] = pd.to_datetime(df['deployed_period_end_date']).dt.date
 
-    # df['type_id']               = df['type_id'].astype(int)
+    if 'type_id' in df.keys():
+        df['type_id'] = df.apply(
+            lambda x: nullify_amount(x['type_id']), 
+            axis=1)
+        
     # df['type_name']             = df['type_name'].astype(str)
     # df['name']                  = df['name'].astype(str)
     # df['symbol']                = df['symbol'].astype(str)
-    # df['weight']                = df['weight'].astype(int)
+    if 'weight' in df.keys():
+        df['weight'] = df.apply(
+            lambda x: nullify_amount(x['weight']), 
+            axis=1)
     # df['type_weight']           = df['type_weight'].astype(float)
     # df['type_total_weight']     = df['type_total_weight'].astype(int)
     # df['type_weight_time']      = df['type_weight_time'].astype(int)
     # df['tx_hash']               = df['tx_hash'].astype(str)
-    df['vote_timestamp'] = pd.to_datetime(df['vote_timestamp']).dt.date
+    df['vote_timestamp'] = pd.to_datetime(df['vote_timestamp'])
     # df['chain_id']              = df['chain_id'].astype(int)
     # df['chain_name']            = df['chain_name'].astype(str)
     return df

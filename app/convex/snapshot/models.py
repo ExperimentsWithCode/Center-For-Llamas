@@ -27,16 +27,14 @@ def get_df_snapshot():
     filename = filename_convex_curve_snapshot # + current_file_title
     try:
         df_snapshot = csv_to_df(filename, 'raw_data')
+        df_snapshot = df_snapshot[~df_snapshot['proposal_title'].str.contains('FXN')]
         return df_snapshot.sort_values("vote_timestamp", axis = 0, ascending = True)
     except:
         snapshot_dict = read_json(filename, 'raw_data')
         df_snapshot = pd.json_normalize(snapshot_dict)
+        df_snapshot = df_snapshot[~df_snapshot['PROPOSAL_TITLE'].str.contains('FXN')]
         return df_snapshot.sort_values("VOTE_TIMESTAMP", axis = 0, ascending = True)
     
-# def get_df_snapshot_from_snapshot():
-#     filename = filename_convex_curve_snapshot_origin
-#     return csv_to_df(filename)
-
 
 def get_snapshot_obj(df_snapshot):
     snapshot = Snapshot()

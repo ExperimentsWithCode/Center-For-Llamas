@@ -10,7 +10,7 @@ from wtforms.validators import (
 )
 
 
-class MetaForm(FlaskForm):
+class PowerDiffForm(FlaskForm):
     """User Sign-up Form."""
     main_round = IntegerField(
         'Main Round',

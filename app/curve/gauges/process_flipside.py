@@ -15,7 +15,7 @@ from app.data.local_storage import (
 
 from datetime import datetime as dt
 
-from app.utilities.utility import get_period_direct, get_period_end_date
+from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id, convert_units
 from app.data.reference import (
     known_large_curve_holders,
     current_file_title,
@@ -215,23 +215,20 @@ class Gauge_Set():
             self.source = row['source']
 
             self.deployed_timestamp = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
+
         try:
-            self.first_period = get_period_direct(row['vote_timestamp'])
-            # self.first_period_end_date_deployed = get_period_end_date(row['deployed_timestamp'])
-            if row['vote_timestamp']:
-                self.first_period_end_date = get_period_end_date(row['vote_timestamp'])
-
-
+            self.deployed_period = get_checkpoint_id(row['deployed_timestamp'])
+            self.deployed_period_end_date = get_checkpoint_timestamp_from_id(self.deployed_period)
         except Exception as e:
-            # print (e)
-            # try:
-            #     print(row['vote_timestamp'])
-            #     print(row['deployed_timestamp'])
-            # except:
-            #     pass
+            self.deployed_period = None   
+            self.deployed_period_end_date = None
+
+        try:
+            self.first_period = get_checkpoint_id(row['vote_timestamp'])
+            self.first_period_end_date = get_checkpoint_timestamp_from_id(self.first_period)
+        except Exception as e:
             self.first_period = None   
             self.first_period_end_date = None
-            # self.first_period_end_date_deployed = "N/A"
 
         try:
             self.type_id                = row['type_id']
@@ -261,6 +258,8 @@ class Gauge_Set():
             self.chain_id               = None
             self.chain_name             = None
 
+        self.type_weight_adj = convert_units(self.type_weight)
+        self.type_total_weight_adj = convert_units(self.type_total_weight, 18+26)
 
         if self.chain_id:
             try:
@@ -315,6 +314,8 @@ class Gauge_Set():
             'deployed_timestamp' : self.deployed_timestamp,
             'first_period': self.first_period,
             'first_period_end_date': self.first_period_end_date,
+            'deployed_period' : self.deployed_period,
+            'deployed_period_end_date' : self.deployed_period_end_date,
 
             'type_id'           : self.type_id,
             'type_name'         : self.type_name,
@@ -322,7 +323,10 @@ class Gauge_Set():
             'symbol'            : self.symbol,
             'weight'            : self.weight,
             'type_weight'       : self.type_weight,
+            'type_weight_adj'   : self.type_weight_adj,
             'type_total_weight' : self.type_total_weight,
+            'type_total_weight_adj' : self.type_total_weight_adj,
+
             'type_weight_time'  : self.type_weight_time,
             'tx_hash'           : self.tx_hash,
             'vote_timestamp'    : self.vote_timestamp,
@@ -356,7 +360,6 @@ def process_and_get():
     print("Processing... { curve.gauges.models }")
     gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
     return gauge_registry
-
 
 
 # ,type_id,

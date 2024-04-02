@@ -51,7 +51,9 @@ class ProcessVotiumV2():
         # df['votium_round'] = df.apply(
         #     lambda x: nullify_amount(x['votium_round']), 
         #     axis=1)
-        df['votium_round']  = df['votium_round'].astype(int)
+        df = df[df['votium_round'] != ''].copy()
+
+        df['votium_round'] = df['votium_round'].astype(int)
 
         return df
     

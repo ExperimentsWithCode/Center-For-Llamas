@@ -25,7 +25,6 @@ from app.utilities.utility import (
     # df_remove_nan,
     # format_plotly_figure,
     # convert_animation_to_gif,
-    calc_lock_efficiency,
     calc_lock_efficiency_by_checkpoint,
     nullify_amount,
 )
@@ -79,11 +78,11 @@ class ProcessCurveLocker():
         processed_df['known_as'] = processed_df['provider'].apply(lambda x: self.known_as(x))
         # processed_df['date'] = processed_df['block_timestamp'].apply(get_date_obj).dt.date
         # print(processed_df.head())
-        processed_df['checkpoint_timestamp'] = processed_df['block_timestamp'].apply(get_checkpoint_timestamp)
         processed_df['checkpoint_id'] = processed_df['block_timestamp'].apply(get_checkpoint_id)
+        processed_df['checkpoint_timestamp'] = processed_df['checkpoint_id'].apply(get_checkpoint_timestamp_from_id)
 
         processed_df['final_checkpoint_id'] = processed_df['final_lock_time'].apply(get_checkpoint_id)
-        processed_df['final_checkpoint_timestamp'] = processed_df['final_lock_time'].apply(get_checkpoint_timestamp)
+        processed_df['final_checkpoint_timestamp'] = processed_df['final_checkpoint_id'].apply(get_checkpoint_timestamp_from_id)
  
         # Apply direction of vector
         processed_df['balance_delta'] = processed_df.apply(lambda x: self.adjust_withdraws(x), axis=1)

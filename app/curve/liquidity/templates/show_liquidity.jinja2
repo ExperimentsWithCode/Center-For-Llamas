@@ -176,6 +176,7 @@
                 {% include 'utility_sort_float.jinja2' %} 
             },
             {# { id: 'has_price', name: 'Has Price' }, #}
+            { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
 
 
         ],
@@ -194,6 +195,7 @@
                 'liquidity_usd_over_votes': '{{ row['liquidity_usd_over_votes'] |round(3) }}',
 
                 {# 'has_price': '{{ row['has_price']  }}', #}
+                'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
 
             },
           {% endfor %}

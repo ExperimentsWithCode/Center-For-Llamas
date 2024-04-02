@@ -52,6 +52,8 @@ class SnapshotAsSource():
         else:
             # Convex
             local_df_proposals = df_proposals[df_proposals['title'].str.contains('Gauge Weight')]
+            local_df_proposals = local_df_proposals[~local_df_proposals['title'].str.contains('FXN')]
+
         local_df_proposals = local_df_proposals[~local_df_proposals['title'].str.contains('TEST')]
         
         local_df_proposals = local_df_proposals.sort_values('start')

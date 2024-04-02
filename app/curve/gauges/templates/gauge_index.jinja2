@@ -57,70 +57,65 @@
       </div>
     </div>
 
+    <div class="row">
 
-
-  <div class="row">
-      <h4 class="text-primary">Gauge Index</h4>
-      <div id="gauge_table"></div>
+    <div class="card text-white bg-info mb-3" >
+      <div class="card-header">Gauge's Deployed Per Round</div>
+      <div class="card-body">
+          {# <h4 class="card-title">??}}</h4> #}
+          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+          <div id="chart2" class="chart2"></div>
+      </div>
+    </div>
   </div>
 
+  <div class="row">
 
-  
+    <div class="card text-white bg-primary mb-3" style="max-width: 50%;" >
+        <div class="card-header">Approved Counts </div>
+        <div class="card-body">
+            {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart3" class="chart3"></div>
+
+        </div>
+    </div>
+
+    <div class="card text-white bg-info mb-3" style="max-width: 50%;"  >
+        <div class="card-header">Deployed Counts </div>
+        <div class="card-body">
+            {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart4" class="chart4"></div>
+
+        </div>
+    </div>
+
+</div>
 
 
-<script type='text/javascript'>
-      new gridjs.Grid({
-        columns: [
-          { id: 'deployed_timestamp', name: 'Deployed Timestamp' },
-          { id: 'vote_timestamp', name: 'Vote Timestamp' },
-          { id: 'first_period', name: 'Gauge Round Created' },
-
-          { id: 'type_name', name: 'Type' },
-          { id: 'source', name: 'Source' },
-
-          { id: 'gauge_name', name: 'Gauge Name' },
-          { id: 'gauge_addr', name: 'Gauge Address',
-            formatter: (_, row) => gridjs.html(
-                `${row.cells[6].data.toString()}`
-            )
-          },
-          { id: 'pool_addr', name: 'Pool Address' },
-        ],
-        data: [
-          {% for index, row in df_curve_gauge_registry.iterrows() %}
-            {
-              'deployed_timestamp': '{{ row['deployed_timestamp'][:10] }}',
-              'vote_timestamp': '{{ row['vote_timestamp'] }}',
-              'first_period': '{{ row['first_period'] }}',
-              'type_name': '{{ row['type_name'] }}',
-              'source': '{{ row['source'] }}',
-              'gauge_name': '{{ row['gauge_name'] }}',
-              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
-              'pool_addr': '{{ row['pool_addr'] }}',
-
-            },
-          {% endfor %}
-        ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
-      }).render(document.getElementById('gauge_table'));
-</script>
-
+ {% include 'gauge_table_manager.jinja2' %} 
 
 
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script type='text/javascript'>
   var graphs = {{graphJSON | safe}};
   Plotly.plot('chart',graphs,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs2 = {{graphJSON2 | safe}};
+  Plotly.plot('chart2',graphs2,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs3 = {{graphJSON3 | safe}};
+  Plotly.plot('chart3',graphs3,{});
+</script>
+
+<script type='text/javascript'>
+  var graphs4 = {{graphJSON4 | safe}};
+  Plotly.plot('chart4',graphs4,{});
 </script>
 
 

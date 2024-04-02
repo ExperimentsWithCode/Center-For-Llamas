@@ -67,14 +67,13 @@ class LiquidityManager():
                 else:
                     df_cutoff = fetch_cutoff()
                 df_to_csv(df_cutoff, filename_curve_liquidity_cutoff, 'raw_data') 
-        df_cutoff = get_df_from_file(filename_curve_liquidity_cutoff)
+        return get_df_from_file(filename_curve_liquidity_cutoff)
 
     def backfill(self, df_cutoff):
         if self.load_initial:
             self.backfill_helper(
                 generate_query, 
                 filename_curve_liquidity, 
-                'block_timestamp', 
                 df_cutoff.cutoff.min()
                 )
 
@@ -105,7 +104,10 @@ class LiquidityManager():
     def backfill_helper(self, generate_query, filename, cutoff_time = None, page_size=10000):
         # Loop Basics
         should_continue = True
-        df = get_df_from_file(filename)
+        try:
+            df = get_df_from_file(filename)
+        except:
+            df = []
         # Controls ending at a fixed cutoff
         if cutoff_time:
             cutoff_time = get_datetime_obj(cutoff_time)
@@ -115,10 +117,10 @@ class LiquidityManager():
                 print("no starting position")
                 time =  '2023-08-01 00:00:01'
                 start_time = get_datetime_obj(time)
-                end_time = start_time + timedelta(days=26*7)
+                end_time = start_time + timedelta(days=8*7)
             else:
                 end_time = get_datetime_obj(df['block_timestamp'].min())
-                start_time = end_time - timedelta(days=26*7)
+                start_time = end_time - timedelta(days=8*7)
                 if cutoff_time and start_time < cutoff_time:
                     start_time = cutoff_time
                     print("Last Run!")

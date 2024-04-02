@@ -1,3 +1,6 @@
+
+{% set table_type = table_type|default("primary") -%}
+
 {% block content %}
 
     search: true,
@@ -10,7 +13,7 @@
     resizable: true,
     className: {
     td: '{{ id }}',
-    th: 'table-primary',
+    th: 'table-{{table_type}}',
     table: 'table table-hover' 
     },
     style: {

@@ -17,7 +17,7 @@ import pandas as pd
 import numpy as np
 from app.utilities.utility import get_now, format_plotly_figure
 
-from app.curve.liquidity.models import df_curve_liquidity, df_curve_liquidity_aggregates, df_curve_rebased_liquidity
+from app.curve.liquidity.models import df_curve_liquidity, df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
 from .forms import FilterLiquidityForm
 
 try:

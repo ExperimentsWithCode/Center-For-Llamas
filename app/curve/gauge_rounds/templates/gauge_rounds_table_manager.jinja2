@@ -8,7 +8,7 @@
         <li class="nav-item" role="presentation">
             <a class="nav-link active" data-bs-toggle="tab" href="#thisRound" aria-selected="true" role="tab">This Round</a>
         </li>
-        {% if table_type == "show" %}
+        {% if table_tag == "show" %}
             {% if unique_end_dates|length > 1 %}
 
                 <li class="nav-item" role="presentation">
@@ -31,34 +31,39 @@
         </ul>
         <div id="myTabContent" class="tab-content">
         <div class="tab-pane fade active show" id="thisRound" role="tabpanel">
+            {% with table_type = 'primary'  %}
 
-            {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.iloc[0]['checkpoint_timestamp']] %}
-                {% with id="vote_table_1" %}
-                    {% if table_type == 'show' %}
-                        {% include 'gauge_rounds_show_table_helper.jinja2' %} 
-                    {% elif table_type == 'agg' %}
-                        {% include 'gauge_rounds_index_table_helper.jinja2' %} 
-                    {% elif table_type == 'voter' %}
-                        {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
-                    {% endif %}
+                {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.iloc[0]['checkpoint_timestamp']] %}
+                    {% with id="vote_table_1" %}
+                        {% if table_tag == 'show' %}
+                            {% include 'gauge_rounds_show_table_helper.jinja2' %} 
+                        {% elif table_tag == 'agg' %}
+                            {% include 'gauge_rounds_index_table_helper.jinja2' %} 
+                        {% elif table_tag == 'voter' %}
+                            {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
+                        {% endif %}
+                    {% endwith %}
                 {% endwith %}
             {% endwith %}
+
         
         </div>
-        {% if table_type == "show" %}
+        {% if table_tag == "show" %}
 
             <div class="tab-pane fade" id="priorRound" role="tabpanel">
             {% if unique_end_dates|length > 1 %}
+                {% with table_type = 'secondary'  %}
 
-                {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.checkpoint_timestamp.unique()[1] ] %}
-                    {% with id="vote_table_2" %}
-                        {% if table_type == 'show' %}
-                            {% include 'gauge_rounds_show_table_helper.jinja2' %} 
-                        {% elif table_type == 'agg' %}
-                            {% include 'gauge_rounds_index_table_helper.jinja2' %} 
-                        {% elif table_type == 'voter' %}
-                            {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
-                        {% endif %}
+                    {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.checkpoint_timestamp.unique()[1] ] %}
+                        {% with id="vote_table_2" %}
+                            {% if table_tag == 'show' %}
+                                {% include 'gauge_rounds_show_table_helper.jinja2' %} 
+                            {% elif table_tag == 'agg' %}
+                                {% include 'gauge_rounds_index_table_helper.jinja2' %} 
+                            {% elif table_tag == 'voter' %}
+                                {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
+                            {% endif %}
+                        {% endwith %}
                     {% endwith %}
                 {% endwith %}
             </div>
@@ -66,16 +71,18 @@
 
             {% if unique_end_dates|length > 2 %}
                 <div class="tab-pane fade" id="twoPriorRound" role="tabpanel">
+                    {% with table_type = 'warning'  %}
 
-                    {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.checkpoint_timestamp.unique()[2] ] %}
-                        {% with id="vote_table_3" %}
-                            {% if table_type == 'show' %}
-                                {% include 'gauge_rounds_show_table_helper.jinja2' %} 
-                            {% elif table_type == 'agg' %}
-                                {% include 'gauge_rounds_index_table_helper.jinja2' %} 
-                            {% elif table_type == 'voter' %}
-                                {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
-                            {% endif %}
+                        {% with df_gauge_rounds=df_gauge_rounds[df_gauge_rounds['checkpoint_timestamp'] == df_gauge_rounds.checkpoint_timestamp.unique()[2] ] %}
+                            {% with id="vote_table_3" %}
+                                {% if table_tag == 'show' %}
+                                    {% include 'gauge_rounds_show_table_helper.jinja2' %} 
+                                {% elif table_tag == 'agg' %}
+                                    {% include 'gauge_rounds_index_table_helper.jinja2' %} 
+                                {% elif table_tag == 'voter' %}
+                                    {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
+                                {% endif %}
+                            {% endwith %}
                         {% endwith %}
                     {% endwith %}
                 </div>
@@ -84,16 +91,18 @@
 
             
             <div class="tab-pane fade" id="allRounds" role="tabpanel">
+                {% with table_type = 'info'  %}
 
-                {% with df_gauge_rounds=df_gauge_rounds %}
-                    {% with id="vote_table_4" %}
-                        {% if table_type == 'show' %}
-                            {% include 'gauge_rounds_show_table_helper.jinja2' %} 
-                        {% elif table_type == 'agg' %}
-                            {% include 'gauge_rounds_index_table_helper.jinja2' %} 
-                        {% elif table_type == 'voter' %}
-                            {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
-                        {% endif %}
+                    {% with df_gauge_rounds=df_gauge_rounds %}
+                        {% with id="vote_table_4" %}
+                            {% if table_tag == 'show' %}
+                                {% include 'gauge_rounds_show_table_helper.jinja2' %} 
+                            {% elif table_tag == 'agg' %}
+                                {% include 'gauge_rounds_index_table_helper.jinja2' %} 
+                            {% elif table_tag == 'voter' %}
+                                {% include 'gauge_rounds_voter_table_helper.jinja2' %} 
+                            {% endif %}
+                        {% endwith %}
                     {% endwith %}
                 {% endwith %}
             </div>

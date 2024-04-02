@@ -216,6 +216,8 @@ class Space():
     def process_row(self, row):
         # update space primatives
         p = self.new_proposal(row)
+        if not p:
+            return None
         v = self.new_voter(row)
         # set vote
         self.process_vote(p, v, row)
@@ -227,9 +229,11 @@ class Space():
                 p = Proposal(self, row)
                 self.proposals[p.proposal_id] = p
                 self.proposal_list.append(p)
-                if 'Gauge Weight' in p.proposal_title and not 'TEST' in p.proposal_title:
+                if 'Gauge Weight' in p.proposal_title and not 'TEST' in p.proposal_title and not 'FXN' in p.proposal_title:
                     self.gauge_list.append(p)
                     self.gauge_map[p.proposal_id] = p
+                else:
+                    return None
 
             else:
                 p = self.proposals[row['PROPOSAL_ID']]
@@ -240,9 +244,11 @@ class Space():
                 p = Proposal(self, row)
                 self.proposals[p.proposal_id] = p
                 self.proposal_list.append(p)
-                if 'Gauge Weight' in p.proposal_title and not 'TEST' in p.proposal_title:
+                if 'Gauge Weight' in p.proposal_title and not 'TEST' in p.proposal_title and not 'FXN' in p.proposal_title:
                     self.gauge_list.append(p)
                     self.gauge_map[p.proposal_id] = p
+                else:
+                    return None
 
             else:
                 p = self.proposals[row['proposal_id']]
@@ -344,7 +350,7 @@ class Proposal():
                 if self.fails_logged < 3:
                     print("== Failed")
                     print("\tproposal")
-                    print(self.cdproposal_title)
+                    print(self.proposal_title)
                     print(_choices)
                     print(type(_choices))
                     print("\tvote")

@@ -42,27 +42,27 @@ def index():
     df_current_gauge_votes
     # Filter Data
     local_df_gauge_votes = df_current_gauge_votes[[
-            'period_end_date','period', 'voter',
+            'checkpoint_timestamp','checkpoint_id', 'voter',
             ]].groupby([
-                'period_end_date', 'period', 
+                'checkpoint_timestamp', 'checkpoint_id', 
             ])['voter'].agg(['count']).reset_index()
 
     local_df_gauge_votes_formatted = df_gauge_votes_formatted[[
-            'period_end_date','period', 'voter',
+            'checkpoint_timestamp','checkpoint_id', 'voter',
             ]].groupby([
-                'period_end_date', 'period', 
+                'checkpoint_timestamp', 'checkpoint_id', 
             ])['voter'].agg(['count']).reset_index()
     
     # Build chart
     fig = px.bar(local_df_gauge_votes,
-                    x=local_df_gauge_votes['period_end_date'],
+                    x=local_df_gauge_votes['checkpoint_timestamp'],
                     y=local_df_gauge_votes['count'],
                     # color='known_as',
                     title='Currently Active Vote Count Per Round',
                     # line_shape='hv',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
-                    hover_data=['period'], labels={'period':'period'}
+                    hover_data=['checkpoint_id'], labels={'checkpoint_id':'checkpoint_id'}
 
                     )
     
@@ -76,14 +76,14 @@ def index():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     fig = px.bar(local_df_gauge_votes_formatted,
-                    x=local_df_gauge_votes_formatted['period_end_date'],
+                    x=local_df_gauge_votes_formatted['checkpoint_timestamp'],
                     y=local_df_gauge_votes_formatted['count'],
                     # color='known_as',
                     title='Placed Vote Count Per Round',
                     # line_shape='hv',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
-                    hover_data=['period'], labels={'period':'period'}
+                    hover_data=['checkpoint_id'], labels={'checkpoint_id':'checkpoint_id'}
 
                     )
     
@@ -137,19 +137,21 @@ def show(user):
 
     # Get user votes by checkpoint
     df_local_checkpoints = df_checkpoints[df_checkpoints['voter'] == user]
+    df_local_checkpoints = df_local_checkpoints[df_local_checkpoints['weight'] > 0]
+
 
 
     # Get vote counts for charts
     local_df_gauge_votes_counts = local_df_gauge_votes[[
-            'period_end_date','period', 'voter',
+            'checkpoint_timestamp','checkpoint_id', 'voter',
             ]].groupby([
-                'period_end_date', 'period', 
+                'checkpoint_timestamp', 'checkpoint_id', 
             ])['voter'].agg(['count']).reset_index()
 
     local_df_gauge_votes_formatted_counts = local_df_gauge_votes_formatted[[
-            'period_end_date','period', 'voter',
+            'checkpoint_timestamp','checkpoint_id', 'voter',
             ]].groupby([
-                'period_end_date', 'period', 
+                'checkpoint_timestamp', 'checkpoint_id', 
             ])['voter'].agg(['count']).reset_index()
     
     # # Build chart
@@ -172,14 +174,14 @@ def show(user):
     # Build chart
     # Round Active Votes Places
     fig = px.bar(local_df_gauge_votes_counts,
-                    x=local_df_gauge_votes_counts['period_end_date'],
+                    x=local_df_gauge_votes_counts['checkpoint_timestamp'],
                     y=local_df_gauge_votes_counts['count'],
                     # color='known_as',
                     title='Currently Active Vote Count Per Round',
                     # line_shape='hv',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
-                    hover_data=['period'], labels={'period':'period'}
+                    hover_data=['checkpoint_id'], labels={'checkpoint_id':'checkpoint_id'}
 
                     )
 
@@ -195,14 +197,14 @@ def show(user):
     # Build Chart
     # Round all votes placed
     fig = px.bar(local_df_gauge_votes_formatted_counts,
-                    x=local_df_gauge_votes_formatted_counts['period_end_date'],
+                    x=local_df_gauge_votes_formatted_counts['checkpoint_timestamp'],
                     y=local_df_gauge_votes_formatted_counts['count'],
                     # color='known_as',
                     title='Placed Vote Count Per Round',
                     # line_shape='hv',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
-                    hover_data=['period'], labels={'period':'period'}
+                    hover_data=['checkpoint_id'], labels={'checkpoint_id':'checkpoint_id'}
 
                     )
     
@@ -259,8 +261,8 @@ def show(user):
 #     local_df_gauge_votes = df_gauge_votes_formatted[df_gauge_votes_formatted['weight'] > 0]    # Filter Data
 
 #     local_df_gauge_votes_count = local_df_gauge_votes[[
-#         'period_end_date','period', 'voter',
-#             'period_end_date', 'period', 'voter', 
+#         'checkpoint_timestamp','checkpoint_id', 'voter',
+#             'checkpoint_timestamp', 'checkpoint_id', 'voter', 
 #         ])['time'].agg(['count']).reset_index()
     
 #     local_df_gauge_votes.value_counts()
@@ -319,26 +321,26 @@ def show(user):
 
 
 #     # local_df_gauge_voters = df_all_votes[[
-#     #         'period_end_date','period', 'voter', 'time'
+#     #         'checkpoint_timestamp','checkpoint_id', 'voter', 'time'
 #     #         ]].groupby([
-#     #             'period_end_date', 'period', 'voter', 
+#     #             'checkpoint_timestamp', 'checkpoint_id', 'voter', 
 #     #         ])['time'].agg(['count']).reset_index()
 
 #     # local_df_gauge_votes = df_current_gauge_votes[[
-#     #         'period_end_date','period', 'time',
+#     #         'checkpoint_timestamp','checkpoint_id', 'time',
 #     #         ]].groupby([
-#     #             'period_end_date', 'period', 
+#     #             'checkpoint_timestamp', 'checkpoint_id', 
 #     #         ])['time'].agg(['count']).reset_index()
 #     # Build chart
 #     fig = px.line(local_df_gauge_voters,
-#                     x=local_df_gauge_voters['period_end_date'],
+#                     x=local_df_gauge_voters['checkpoint_timestamp'],
 #                     y=local_df_gauge_voters['count'],
 #                     # color='known_as',
 #                     title='# of Voters per round',
 #                     line_shape='hv',
 #                     # facet_row=facet_row,
 #                     # facet_col_wrap=facet_col_wrap
-#                     hover_data=['period'], labels={'period':'period'}
+#                     hover_data=['checkpoint_id'], labels={'checkpoint_id':'checkpoint_id'}
 
 #                     )
 
@@ -350,14 +352,14 @@ def show(user):
 
 #     # Build chart
 #     fig = px.bar(local_df_gauge_votes,
-#                     x=local_df_gauge_votes['period_end_date'],
+#                     x=local_df_gauge_votes['checkpoint_timestamp'],
 #                     y=local_df_gauge_votes['count'],
 #                     # color='known_as',
 #                     title='# of Votes per round',
 #                     line_shape='hv',
 #                     # facet_row=facet_row,
 #                     # facet_col_wrap=facet_col_wrap
-#                     hover_data=['period'], labels={'period':'period'}
+#                     hover_data=['checkpoint_id'], labels={'checkpoint_id':'checkpoint_id'}
 
 #                     )
 

@@ -150,7 +150,7 @@
                 formatter: (_, row) => gridjs.html(
                     `${row.cells[6].data.toString()}`
                 )
-             },
+             }
 
 
 
@@ -165,24 +165,14 @@
               'total_vote_percent': '{{ row['total_vote_percent']| round(4) }}',
               'total_vote_power': '{{ row['total_vote_power']|round(2)  }}',
               'last_total_vote_power': '{{ row['last_total_vote_power']|round(2) }}',
-              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`,
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`
 
 
             },
           {% endfor %}
         ],
-        fixedHeader: true,
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
+        {% include 'table_format_helper.jinja2' %}
+
       }).render(document.getElementById('head_table'));
 </script>
 
@@ -213,7 +203,7 @@
                 formatter: (_, row) => gridjs.html(
                     `${row.cells[6].data.toString()}`
                 )
-             },
+             }
 
 
 
@@ -230,24 +220,16 @@
               'total_vote_power': '{{ row['total_vote_power']|round(2)  }}',
               'last_total_vote_power': '{{ row['last_total_vote_power']|round(2) }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
-              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`,
+              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`
 
 
             },
           {% endfor %}
         ],
-        fixedHeader: true,
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-secondary',
-          table: 'table table-hover' 
-        }
+        {% with table_type = 'secondary'  %}
+          {% include 'table_format_helper.jinja2' %}
+        {% endwith %}
+
       }).render(document.getElementById('tail_table'));
 </script>
 

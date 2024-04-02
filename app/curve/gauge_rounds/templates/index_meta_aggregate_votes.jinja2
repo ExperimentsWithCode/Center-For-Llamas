@@ -59,10 +59,11 @@
             </div>
         </div>
 
+    </div>
     <h4 class="text-primary">veCRV Gauges Vote Aggregates</h4>
 
     {% with df_gauge_rounds=meta_gauge_aggregate_votes %}
-        {% with table_type='agg' %}
+        {% with table_tag='agg' %}
           {% include 'gauge_rounds_table_manager.jinja2' %} 
         {% endwith %}
     {% endwith %}

@@ -18,6 +18,8 @@ def get_cwd():
             cwd += "/"+x    
     if temp_split[-1] == 'Musings':
         cwd += '/center-for-llamas'   
+    if temp_split[-1] == 'analysis':
+        cwd = cwd[: - len('/analysis')]   
     return cwd
 
 
