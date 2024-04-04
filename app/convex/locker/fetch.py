@@ -1,5 +1,5 @@
 from app.data.flipside_api_helper import fetch_and_save_data
-from app.data.reference import filename_votium_v2 
+from app.data.reference import filename_convex_locker 
 
 
 def generate_query(min_block_timestamp=None):
@@ -76,7 +76,7 @@ def generate_query(min_block_timestamp=None):
 def fetch(fetch_initial = False):
     print("Fetching... { convex.locker.models }")
 
-    filename = filename_votium_v2
+    filename = filename_convex_locker
     df = fetch_and_save_data(filename, generate_query, fetch_initial)
     return df
 
