@@ -1,0 +1,138 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md">
+
+            <div class="card border-info mb-3" >
+                <div class="card-header">Configure Data Update</div>
+                    <form method="POST" action="{{ url_for('home_bp.male_models') }}">
+                        {{ form.csrf_token }}
+
+                    <div class="card-body"> 
+                        <h3 class="card-title">How To Run: </h3>
+                        <table class="table table-hover">
+                        <tbody>
+                                <tr >
+                                <th scope="row">Setting</th>
+                                <th scope="row">Run</th>
+                                </tr>
+
+                        {# form #}
+                            <fieldset class="load_initial">
+                                <tr >
+                                <td>{{ form.load_initial.label }}</td>
+                                <td>{{ form.load_initial() }}</td>
+                                </tr>
+                            </fieldset>
+
+                            <fieldset class="should_fetch">
+                                <tr >
+                                <td>{{ form.should_fetch.label }}</td>
+                                <td>{{ form.should_fetch() }}</td>
+                                </tr>
+                            </fieldset>
+
+                            <fieldset class="load_cutoff">
+                                <tr >
+                                <td>{{ form.load_cutoff.label }}</td>
+                                <td>{{ form.load_cutoff() }}</td>
+                                </tr>
+                            </fieldset>
+
+                        </tbody>
+                        </table>
+
+                    </div>            
+                    <div class="card-body"> 
+                        <h3 class="card-title">What To Run: </h3>
+                        <table class="table table-hover">
+                        <tbody>
+                                <tr >
+                                <th scope="row">Component</th>
+                                <th scope="row">Run</th>
+                                </tr>
+
+                        {% for entry in form.manager_config %}
+
+                            <fieldset class='{{ entry.component_name.data }}'>
+                                <tr >
+                                <td>{{ entry.component_name() }}</td>
+                                <td>{{ entry.run_component() }}</td>
+                                </tr>
+                            </fieldset>
+
+                        {% endfor %}
+
+
+                        </tbody>
+                        </table>
+                            <div class="form-group row">
+                            <div class="submit-button">
+                                {{ form.submit }}
+                            </div>
+                            </div>
+                        </div>  
+                        </form>
+
+                </div>
+            </div> 
+        <div class="col-md">
+        <div class="card bg-outline-warning mb-3" >
+            <div class="card-header">Reference Table</div>
+                
+                    <div class="card-body"> 
+                        <h3 class="card-title">File Info: </h3>
+                        <table class="table table-hover">
+                        <tbody>
+                                <tr >
+                                <th scope="row">File Name</th>
+                                <th scope="row">Modified Date</th>
+                                <th scope="row">Days</th>
+                                </tr>
+
+                                {% for item in file_info.keys() %}
+                                {% if file_info[item]['days'] < 0  %}
+                                <tr class="bg-danger text-white" >
+                                {% elif file_info[item]['days'] < 2 %}
+                                <tr class="bg-primary text-white" >
+                                {% elif file_info[item]['days'] > 7 %}
+                                <tr class="bg-warning" >
+
+                                {% else %}
+                                <tr >
+                                {% endif %}
+                                <td>{{ item }}</td>
+                                <td>{{ file_info[item]['last_modified'] }}</td>
+                                <td>{{ file_info[item]['days'] }}</td>
+                                </tr>
+
+                                {% endfor%}
+
+                        </tbody>
+                        </table>
+
+                    </div>
+                <div id="reference_table" class="reference_table"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock %}

@@ -30,85 +30,58 @@ def init_app():
 
     with app.app_context():
         # Include local applications routing
-        from .home.routes import home_bp
-        from .curve.gauges.routes import gauges_bp
+        try:
+            from .home.routes import home_bp
+            from .curve.gauges.routes import gauges_bp
 
-        from .curve.locker.routes import curve_locker_vecrv_bp
-        from .curve.gauge_votes.routes import gauge_votes_bp
-        from .curve.gauge_rounds.routes import gauge_rounds_bp
+            from .curve.locker.routes import curve_locker_vecrv_bp
+            from .curve.gauge_votes.routes import gauge_votes_bp
+            from .curve.gauge_rounds.routes import gauge_rounds_bp
 
-        from .curve.liquidity.routes import curve_liquidity_bp
+            from .curve.liquidity.routes import curve_liquidity_bp
 
-        from .curve.meta.routes import curve_meta_bp
+            from .curve.meta.routes import curve_meta_bp
 
 
-        from .convex.snapshot.routes import convex_snapshot_bp
-        from .convex.locker.routes import convex_vote_locker_bp
+            from .convex.snapshot.routes import convex_snapshot_bp
+            from .convex.locker.routes import convex_vote_locker_bp
 
-        from .convex.votium_bounties.routes import votium_bounties_bp
-        from .convex.votium_bounties_v2.routes import votium_bounties_v2_bp
+            from .convex.votium_bounties.routes import votium_bounties_bp
+            from .convex.votium_bounties_v2.routes import votium_bounties_v2_bp
 
-        from .stakedao.snapshot.routes import stakedao_snapshot_bp
-        from .stakedao.staked_sdcrv.routes import stakedao_staked_sdcrv_bp
-        from .stakedao.locker.routes import stakedao_locked_vesdt_bp
+            from .stakedao.snapshot.routes import stakedao_snapshot_bp
+            from .stakedao.staked_sdcrv.routes import stakedao_staked_sdcrv_bp
+            from .stakedao.locker.routes import stakedao_locked_vesdt_bp
 
         
 
-    
-        # from .authentication.auth.routes import auth_bp
-        # from .authentication.user.routes import user_bp
-
-        # from .snapshot.space.routes import space_bp
-        # from .snapshot.proposal.routes import proposal_bp
-        # from .snapshot.address.routes import address_bp
-        # from .snapshot.vote.routes import vote_bp
-        # from .snapshot.choice.routes import choice_bp
-
-        # from .environment.simulator.routes import simulator_bp
-        #
-        # from .mechanisms.amm.routes import amm_bp
-        #
-        # from .interpreters.plotter.routes import plotter_bp
-        #
-        # from .oracles.liquidityfolio.routes import liquidityfolio_bp
-        ## Including satic asset handling
-            ### ???
-        # from .api import routes
-        # from .assets import compile_static_assets
-
         # Register Blueprints
-        app.register_blueprint(home_bp)
-        app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
+            app.register_blueprint(home_bp)
+            app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
 
-        app.register_blueprint(gauges_bp, url_prefix='/curve/gauges')
-        app.register_blueprint(curve_locker_vecrv_bp, url_prefix='/curve/locker')
-        app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
-        app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
+            app.register_blueprint(gauges_bp, url_prefix='/curve/gauges')
+            app.register_blueprint(curve_locker_vecrv_bp, url_prefix='/curve/locker')
+            app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
+            app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
 
-        app.register_blueprint(curve_liquidity_bp, url_prefix='/curve/liquidity')
+            app.register_blueprint(curve_liquidity_bp, url_prefix='/curve/liquidity')
 
-        app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
-        app.register_blueprint(convex_vote_locker_bp, url_prefix='/convex/vote_locker')
+            app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
+            app.register_blueprint(convex_vote_locker_bp, url_prefix='/convex/vote_locker')
 
-        app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
-        app.register_blueprint(votium_bounties_v2_bp, url_prefix='/convex/votium_v2')
+            app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
+            app.register_blueprint(votium_bounties_v2_bp, url_prefix='/convex/votium_v2')
 
-        app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
-        app.register_blueprint(stakedao_staked_sdcrv_bp, url_prefix='/stakedao/staked_sdcrv')
-        app.register_blueprint(stakedao_locked_vesdt_bp, url_prefix='/stakedao/locker')
+            app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
+            app.register_blueprint(stakedao_staked_sdcrv_bp, url_prefix='/stakedao/staked_sdcrv')
+            app.register_blueprint(stakedao_locked_vesdt_bp, url_prefix='/stakedao/locker')
+
+        except:
+            # this allows us to load data from the website directly
+            from .home.routes import home_bp
+            app.register_blueprint(home_bp)
 
 
-        # app.register_blueprint(user_bp, url_prefix='/user')
-        # app.register_blueprint(space_bp, url_prefix='/space')
-        # app.register_blueprint(proposal_bp, url_prefix='/proposal')
-        # app.register_blueprint(address_bp, url_prefix='/address')
-        # app.register_blueprint(vote_bp, url_prefix='/vote')
-        # app.register_blueprint(choice_bp, url_prefix='/choice')
-
-        # app.register_blueprint(simulator_bp, url_prefix='/simulator')
-        # app.register_blueprint(amm_bp, url_prefix='/amm')
-        # app.register_blueprint(plotter_bp, url_prefix='/plotter')
-        # app.register_blueprint(liquidityfolio_bp, url_prefix='/o/lf')
 
         # # Create Database Models
         # db.create_all()

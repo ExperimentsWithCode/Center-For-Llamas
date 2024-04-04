@@ -22,7 +22,7 @@ from app.utilities.utility import (
 )
 
 try:
-    df_curve_locker_history = app.config['df_curve_vecrv_decay']
+    df_curve_vecrv = app.config['df_curve_vecrv']
     df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
 
 except:

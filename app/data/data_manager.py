@@ -1,5 +1,4 @@
 from app.utilities.utility import timed
-from app.snapshot.alt_models import SnapshotAsSource
 
 from app.data.local_storage import (
     read_json,
@@ -13,11 +12,11 @@ from app.data.local_storage import (
 load_initial = False
 should_fetch = True
 
-default_bool = True
+default_bool = False
 
 manager_config = {
     # Curve
-    'gauge_to_map': default_bool,
+    'gauge_to_lp_map': default_bool,
     'curve_locker': default_bool,
     'curve_gauge_votes': default_bool,
     'curve_gauge_rounds': default_bool,
@@ -57,12 +56,21 @@ class Manager():
                 cutoff_value = None,
                 human_management = False,
                 ):
+        # print(manager_config)
         self.config = manager_config
         self.should_fetch = should_fetch
         self.load_initial = load_initial
         self.load_liquidity_cutoff = load_cutoff
         self.liquidity_cutoff_value = cutoff_value
         self.human_management = human_management
+
+    def update_settings(self, new_settings):
+        self.config = new_settings['manager_config'] if 'manager_config' in new_settings else None
+        self.should_fetch = new_settings['should_fetch'] if 'should_fetch' in new_settings else False
+        self.load_initial = new_settings['load_initial'] if 'load_initial' in new_settings else False
+        self.load_liquidity_cutoff = new_settings['load_cutoff'] if 'load_cutoff' in new_settings else False
+        self.liquidity_cutoff_value = new_settings['cutoff_value'] if 'cutoff_value' in new_settings else None
+        self.human_management = new_settings['human_management'] if 'human_management' in new_settings else False
 
     def manage(self):
         # Curve
@@ -91,7 +99,7 @@ class Manager():
     """
     @timed
     def gauge_to_lp_map(self):
-        if self.config['gauge_to_map']:   
+        if 'gauge_to_lp_map' in self.config and self.config['gauge_to_lp_map']:   
             from app.curve.gauges.fetch import fetch 
             from app.curve.gauges.process_flipside import process_and_save 
             # from app.curve.gauges.process_flipside import process_and_get 
@@ -100,7 +108,7 @@ class Manager():
     
     @timed
     def curve_locker(self):
-        if self.config['curve_locker']:   
+        if 'curve_locker' in self.config and self.config['curve_locker']:   
             from app.curve.locker.fetch import fetch 
             from app.curve.locker.process_flipside import process_and_save 
 
@@ -108,7 +116,7 @@ class Manager():
     
     @timed
     def curve_gauge_votes(self):
-        if self.config['curve_gauge_votes']:   
+        if 'curve_gauge_votes' in self.config and self.config['curve_gauge_votes']:   
             from app.curve.gauge_votes.fetch import fetch 
             from app.curve.gauge_votes.process_flipside import process_and_save 
 
@@ -116,14 +124,14 @@ class Manager():
     
     @timed
     def curve_gauge_rounds(self):
-        if self.config['curve_gauge_rounds']:   
+        if 'curve_gauge_rounds' in self.config and self.config['curve_gauge_rounds']:   
             from app.curve.gauge_rounds.process_flipside import process_and_save 
 
             return self._helper(None, process_and_save)
         
     @timed
     def curve_liquidity(self):
-        if self.config['curve_liquidity']:   
+        if 'curve_liquidity' in self.config and self.config['curve_liquidity']:   
             from app.curve.liquidity.liquidity_data_manager import LiquidityManager
             from app.curve.liquidity.process_flipside import process_and_save 
             liquidity_manager = LiquidityManager(
@@ -143,7 +151,7 @@ class Manager():
     
     @timed
     def convex_locker(self):
-        if self.config['convex_locker']:   
+        if 'convex_locker' in self.config and self.config['convex_locker']:   
             from app.convex.locker.fetch import fetch 
             from app.convex.locker.process_flipside import process_and_save
 
@@ -151,7 +159,7 @@ class Manager():
 
     @timed
     def convex_snapshot_curve(self):
-        if self.config['convex_snapshot_curve']:   
+        if 'convex_snapshot_curve' in self.config and self.config['convex_snapshot_curve']:   
             from app.convex.snapshot.fetch import fetch 
             # from app.convex.locker.process_flipside import process_and_save
 
@@ -159,7 +167,9 @@ class Manager():
         
     @timed
     def convex_snapshot_curve_from_snapshot(self):
-        if self.config['convex_snapshot_curve']: 
+        if 'convex_snapshot_curve' in self.config and self.config['convex_snapshot_curve']: 
+            from app.snapshot.alt_models import SnapshotAsSource
+
             if self.should_fetch:
                 space_address = 'cvx.eth'
                 first = 200
@@ -174,7 +184,7 @@ class Manager():
             # return self._helper(fetch, None)
     # @timed
     # def convex_delegations(self):
-    #     if self.config['convex_delegations']:   
+    #     if 'convex_delegations' in self.config and self.config['convex_delegations']:   
     #         from app.convex.delegations.fetch import fetch 
     #         # from app.convex.locker.process_flipside import process_and_save
 
@@ -188,7 +198,7 @@ class Manager():
     
     # @timed
     # def stakedao_delegations(self):
-    #     if self.config['stakedao_delegations']:   
+    #     if 'stakedao_delegations' in self.config and self.config['stakedao_delegations']:   
     #         from app.stakedao.delegations.fetch import fetch
     #         # from app.convex.locker.process_flipside import process_and_save
 
@@ -196,7 +206,7 @@ class Manager():
       
     @timed
     def stakedao_staked_sdcrv(self):
-        if self.config['stakedao_staked_sdcrv']:   
+        if 'stakedao_staked_sdcrv' in self.config and self.config['stakedao_staked_sdcrv']:   
             from app.stakedao.staked_sdcrv.fetch import fetch 
             from app.stakedao.staked_sdcrv.process_flipside import process_and_save
 
@@ -204,7 +214,7 @@ class Manager():
 
     @timed
     def stakedao_locker(self):
-        if self.config['stakedao_locker']:   
+        if 'stakedao_locker' in self.config and self.config['stakedao_locker']:   
             from app.stakedao.locker.fetch import fetch 
             from app.stakedao.locker.process_flipside import process_and_save
 
@@ -212,7 +222,7 @@ class Manager():
 
     @timed
     def stakedao_snapshot_curve(self):
-        if self.config['stakedao_snapshot_curve']:   
+        if 'stakedao_snapshot_curve' in self.config and self.config['stakedao_snapshot_curve']:   
             from app.stakedao.snapshot.fetch import fetch 
             # from app.convex.locker.process_flipside import process_and_save
 
@@ -220,7 +230,9 @@ class Manager():
 
     @timed
     def stakedao_snapshot_curve_from_snapshot(self):
-        if self.config['stakedao_snapshot_curve']:   
+        if 'stakedao_snapshot_curve' in self.config and self.config['stakedao_snapshot_curve']:  
+            from app.snapshot.alt_models import SnapshotAsSource
+ 
             if self.should_fetch:
                 space_address = 'sdcrv.eth'
                 first = 1000
@@ -234,14 +246,14 @@ class Manager():
     """
     # @timed
     # def votium_bounties(self):
-    #     if self.config['votium_bounties_v1']:   
+    #     if 'votium_bounties_v1' in self.config and self.config['votium_bounties_v1']:   
     #         from app.convex.votium_bounties_v2.fetch import fetch 
     #         # from app.convex.locker.process_flipside import process_and_save
     #         return self._helper(fetch, None)
         
     @timed
     def votium_bounties_v2(self):
-        if self.config['votium_bounties_v2']:   
+        if 'votium_bounties_v2' in self.config and self.config['votium_bounties_v2']:   
             from app.convex.votium_bounties_v2.fetch import fetch 
             from app.convex.votium_bounties_v2.process_flipside import process_and_save
 
@@ -254,7 +266,7 @@ class Manager():
     
     # @timed
     # def warden_vesdt_boost_delegation(self):
-    #     if self.config['warden_vesdt_boost_delegation']:   
+    #     if 'warden_vesdt_boost_delegation' in self.config and self.config['warden_vesdt_boost_delegation']:   
     #         from app.warden.vesdt_boost_delegation.fetch import fetch 
     #         # from app.warden.vesdt_boost_delegation.process_flipside import process_and_save
 

@@ -9,7 +9,7 @@ from app.data.local_storage import (
     write_dfs_to_xlsx,
     csv_to_df
     )
-from app.curve.gauges.process_flipside import process_and_get
+from app.curve.gauges.process_flipside import process_and_get, process_and_save
 
 from app.utilities.utility import nullify_amount
 
@@ -58,17 +58,20 @@ def format_df(df):
     return df
 
 
-def get_gauge_registry():
+def get_gauge_registry(is_already_borked=False):
     try:
         filename = filename_curve_gauges    # _'+ current_file_title
         df = csv_to_df(filename, 'processed')
         df = format_df(df)
-
     except:
-        filename = filename_curve_gauges    # '+ fallback_file_title
-        gauge_pool_map = read_json(filename, 'processed')
-        df = pd.json_normalize(gauge_pool_map)
-        df = format_df(df)
+        try:
+            filename = filename_curve_gauges    # '+ fallback_file_title
+            gauge_pool_map = read_json(filename, 'processed')
+            df = pd.json_normalize(gauge_pool_map)
+            df = format_df(df)
+        except:
+            return process_and_save()
+
 
     # df_gauge_pool_map = df_gauge_pool_map.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df
