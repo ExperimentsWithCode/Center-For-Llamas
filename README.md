@@ -121,7 +121,7 @@ Everything is a dataframe so can open a jupyter notebook and import any data use
 
 ex: 
 ```python
-from app.curve.gauge_rounds.models import df_checkpoints_agg
+from app.curve.gauge_checkpoints.models import df_checkpoints_agg
 from app.curve.liquidity.models import df_curve_liquidity_aggregates, df_curve_liquidity
 from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates
 ```
@@ -170,7 +170,7 @@ ___
         * Particularly for large Tables this should help cut down loading time.
         * Ability to overwrite ensures that data is still visible by the UI, but need to standardize. 
 
-### Curve Gauge Rounds
+### Curve Gauge Checkpoints
 
 * Currently only shows last closed round and compares to prior closed round. 
     * [] Create current round page
