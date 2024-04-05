@@ -41,7 +41,7 @@
             {
                 'checkpoint_id': '{{ row['checkpoint_id']  }}',
                 'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
-                'gauge_addr':  `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+                'gauge_addr':  `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
                 'gauge_symbol': '{{ row['gauge_symbol'] }}',
                 'weight': '{{ row['weight'] }}',
                 'vote_power': '{{ row['vote_power']|round(2) }}',

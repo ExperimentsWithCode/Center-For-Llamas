@@ -34,9 +34,9 @@ except:
 
 
 # Blueprint Configuration
-gauge_rounds_bp = Blueprint(
-    'gauge_rounds_bp', __name__,
-    url_prefix='/curve/gauge_rounds',
+gauge_checkpoints_bp = Blueprint(
+    'gauge_checkpoints_bp', __name__,
+    url_prefix='/curve/checkpoints',
     template_folder='templates',
     static_folder='static'
 )
@@ -53,13 +53,13 @@ def get_checkpoint_info(df):
         },
         }
 
-@gauge_rounds_bp.route('/', methods=['GET'])
+@gauge_checkpoints_bp.route('/', methods=['GET'])
 # @login_required
 def index():
     now = datetime.now()
 
     # Filter Data
-    local_df_checkpoints_agg = df_checkpoints_agg[df_checkpoints_agg['weight'] > 0]
+    local_df_checkpoints_agg = df_checkpoints_agg[df_checkpoints_agg['total_vote_power'] > 0]
     local_df_checkpoints_agg = local_df_checkpoints_agg.sort_values(['checkpoint_id', 'total_vote_power'], ascending=False)
 
     # local_df_gauge_votes = df_checkpoints_agg.groupby(['voter', 'gauge_addr'], as_index=False).last()
@@ -119,7 +119,7 @@ def index():
     
     return render_template(
         'index_meta_aggregate_votes.jinja2',
-        title='Curve Gauge Rounds',
+        title='Curve Gauge Checkpoints',
         template='gauge-round-index',
         body="",
         meta_gauge_aggregate_votes = local_df_checkpoints_agg,
@@ -133,7 +133,7 @@ def index():
     )
 
 
-@gauge_rounds_bp.route('/show/<string:gauge_addr>', methods=['GET'])
+@gauge_checkpoints_bp.route('/show/<string:gauge_addr>', methods=['GET'])
 # @login_required
 def show(gauge_addr):
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
@@ -235,7 +235,7 @@ def show(gauge_addr):
 
     return render_template(
         'show_gauge_rounds.jinja2',
-        title='Curve Gauge Rounds',
+        title='Curve Gauge Checkpoints',
         template='gauge-votes-show',
         body="",
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,

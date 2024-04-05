@@ -34,7 +34,7 @@ to_do =markdown.markdown(
         * Particularly for large Tables this should help cut down loading time.
         * Ability to overwrite ensures that data is still visible by the UI, but need to standardize. 
 
-## Curve Gauge Rounds
+## Curve Gauge Checkpoints
     * Currently only shows last closed round and compares to prior closed round. 
     * [] Create current round page
     * [] Create vote volume graph of vote change velocity each round

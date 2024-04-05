@@ -160,7 +160,7 @@ def generate_file_info(is_alt_path=False):
                 file_info[file]['last_modified'] = date
                 file_info[file]['days'] = (now_time - date).days
 
-                print(f"{date}\t\t{file}")
+                found_count+=1
             except:
                 print(f"\t\tno file found for {file}")
     if found_count == 0 and not is_alt_path:

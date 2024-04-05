@@ -117,12 +117,12 @@
             <div class="card-body">
 
                 {%if not page_type == 'curve' %}
-                <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
-                    <button type="button" class="btn btn-primary">Gauge Rounds</button>
+                <a href="{{ url_for('gauge_checkpoints_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
+                    <button type="button" class="btn btn-primary">Gauge Checkpoints</button>
                 </a>
                 {% else %}
                 <a href="#">
-                    <button type="button" class="btn btn-primary disabled">Gauge Rounds</button>
+                    <button type="button" class="btn btn-primary disabled">Gauge Checkpoints</button>
                 </a>
                 {% endif %}
 
@@ -182,7 +182,7 @@
                 </h4>
 
                 <p class="card-text">Its likely that the data is present but the link could not be made.
-                You can search on the gauge rounds page and likely find the votes.</p>
+                You can search on the gauge checkpoints page and likely find the votes.</p>
                 <p>This is largely because I have not link all gauge generating contracts to map pool address to gauge address</p>
             </div>
         </div>   

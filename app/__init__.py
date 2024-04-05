@@ -3,6 +3,7 @@ from flask import Flask
 # from flask_migrate import Migrate
 # from flask_login import LoginManager
 from flask_redis import FlaskRedis
+import traceback
 
 # from config import ADDRESS, API_ETHERSCAN, ALCHEMY, API_COINGECKO, API_LIQUIDITYFOLIO
 
@@ -36,7 +37,7 @@ def init_app():
 
             from .curve.locker.routes import curve_locker_vecrv_bp
             from .curve.gauge_votes.routes import gauge_votes_bp
-            from .curve.gauge_rounds.routes import gauge_rounds_bp
+            from .curve.gauge_checkpoints.routes import gauge_checkpoints_bp
 
             from .curve.liquidity.routes import curve_liquidity_bp
 
@@ -62,7 +63,7 @@ def init_app():
             app.register_blueprint(gauges_bp, url_prefix='/curve/gauges')
             app.register_blueprint(curve_locker_vecrv_bp, url_prefix='/curve/locker')
             app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
-            app.register_blueprint(gauge_rounds_bp, url_prefix='/curve/gauge_rounds')
+            app.register_blueprint(gauge_checkpoints_bp, url_prefix='/curve/checkpoints')
 
             app.register_blueprint(curve_liquidity_bp, url_prefix='/curve/liquidity')
 
@@ -76,7 +77,9 @@ def init_app():
             app.register_blueprint(stakedao_staked_sdcrv_bp, url_prefix='/stakedao/staked_sdcrv')
             app.register_blueprint(stakedao_locked_vesdt_bp, url_prefix='/stakedao/locker')
 
-        except:
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
             # this allows us to load data from the website directly
             from .home.routes import home_bp
             app.register_blueprint(home_bp)

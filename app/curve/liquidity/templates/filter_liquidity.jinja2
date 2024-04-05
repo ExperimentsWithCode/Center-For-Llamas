@@ -274,7 +274,7 @@
                 'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
                 'has_price': '{{ row['has_price'] }}',
                 'source': '{{ gauge_registry.get_gauge(row['gauge_addr']).source }}',
-                'gauge_addr':  `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+                'gauge_addr':  `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
 
 
             },

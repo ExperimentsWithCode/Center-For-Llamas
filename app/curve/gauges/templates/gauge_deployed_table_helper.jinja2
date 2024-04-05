@@ -40,7 +40,7 @@
               'deployed_period': '{{ row['deployed_period'] }}',
               'source': '{{ row['source'] }}',
               'gauge_name': '{{ row['gauge_name'] }}',
-              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+              'gauge_addr': `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
               'pool_addr': '{{ row['pool_addr'] }}',
               'chain_id': '{{ row['chain_id'] }}',
               'chain_name': '{{ row['chain_name'] }}'

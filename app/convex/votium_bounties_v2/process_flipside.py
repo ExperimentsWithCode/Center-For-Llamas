@@ -24,7 +24,7 @@ try:
     # df_convex_snapshot_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
 
 except:
-    from app.curve.gauge_rounds.models import df_checkpoints_agg
+    from app.curve.gauge_checkpoints.models import df_checkpoints_agg
     # from app.curve.liquidity.models import df_curve_liquidity_aggregates, df_curve_liquidity
     # from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates
 

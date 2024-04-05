@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_curve_locker
-
+from app.utilities.utility import shift_time_days
 
 def generate_query(min_block_timestamp=None):
     curve_locker_address = '0x5f3b5DfEb7B28CDbD7FAba78963EE202a494e2A2'
@@ -9,6 +9,7 @@ def generate_query(min_block_timestamp=None):
         filter_line = f"AND BLOCK_TIMESTAMP >= '{min_block_timestamp}'"
     else:
         filter_line = ""
+        filter_secondary_line = ""
 
     query = f""" 
     with deposits as (

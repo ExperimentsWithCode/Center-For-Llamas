@@ -32,7 +32,7 @@ try:
 except:
     # from app.curve.gauge_votes.models import df_gauge_votes_formatted
     # from app.curve.locker.models import df_curve_locker_history
-    from app.curve.gauge_rounds.models import df_checkpoints_agg
+    from app.curve.gauge_checkpoints.models import df_checkpoints_agg
 
 
 

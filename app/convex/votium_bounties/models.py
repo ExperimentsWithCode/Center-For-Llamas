@@ -18,7 +18,9 @@ from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_fr
 from app.data.reference import (
     known_large_curve_holders,
     current_file_title,
-    fallback_file_title
+    fallback_file_title,
+    filename_votium_v1
+
 )
 
 from app.data.source.harvested_core_pools import core_pools
@@ -230,8 +232,8 @@ class Bounty():
 
 
 def get_df_bounty_for_round():
-    filename = 'votium_bounty_for_round' #+ current_file_title
-    resp_dict = read_csv(filename, 'source')
+    filename = filename_votium_v1  #+ current_file_title
+    resp_dict = read_csv(filename, 'raw_data')
     df_stakedao_events_created = pd.json_normalize(resp_dict)
     return df_stakedao_events_created.sort_values("block_timestamp", axis = 0, ascending = True)
 

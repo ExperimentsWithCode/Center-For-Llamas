@@ -22,12 +22,12 @@
         <div class="card-body">
           <h4 class="card-title"></h4>
           {% if gauge_addr == "0xNotFound" %}
-            <button type="button" class="btn btn-primary" disable>View Gauge Rounds</button>
+            <button type="button" class="btn btn-primary" disable>View Gauge Checkpoints</button>
             <p class="card-text">Unable to match with a gauge</p>
 
           {% else %}
-            <a href="{{ url_for('gauge_rounds_bp.show', gauge_addr= gauge_addr) }}">
-              <button type="button" class="btn btn-primary">View Gauge Rounds</button>
+            <a href="{{ url_for('gauge_checkpoints_bp.show', gauge_addr= gauge_addr) }}">
+              <button type="button" class="btn btn-primary">View Gauge Checkpoints</button>
             </a>
           {% endif %}
         </div>

@@ -14,7 +14,7 @@ from app.data.local_storage import (
     )
 
 
-print("Loading... { curve.gauge_rounds.models }")
+print("Loading... { curve.gauge_checkpoints.models }")
 
 def format_df(df):
     key_list = df.keys()

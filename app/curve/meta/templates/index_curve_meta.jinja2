@@ -165,7 +165,7 @@
               'total_vote_percent': '{{ row['total_vote_percent']| round(4) }}',
               'total_vote_power': '{{ row['total_vote_power']|round(2)  }}',
               'last_total_vote_power': '{{ row['last_total_vote_power']|round(2) }}',
-              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`
+              'gauge_addr': `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`
 
 
             },
@@ -220,7 +220,7 @@
               'total_vote_power': '{{ row['total_vote_power']|round(2)  }}',
               'last_total_vote_power': '{{ row['last_total_vote_power']|round(2) }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
-              'gauge_addr': `<a href={{ url_for('gauge_rounds_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`
+              'gauge_addr': `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{%if row['gauge_addr'] %}{{row['gauge_addr']}}{% else %}_{% endif %}</a>`
 
 
             },

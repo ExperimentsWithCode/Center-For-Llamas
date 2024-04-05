@@ -111,7 +111,7 @@ def show(user):
     try: 
         df_checkpoints = app.config['df_checkpoints']
     except:
-        from app.curve.gauge_rounds.models import df_checkpoints
+        from app.curve.gauge_checkpoints.models import df_checkpoints
 
     now = dt.utcnow()
     user = user.lower()

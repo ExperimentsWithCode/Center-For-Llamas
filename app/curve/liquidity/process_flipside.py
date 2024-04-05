@@ -30,7 +30,7 @@ try:
 
 except:
     from app.curve.gauges.models import gauge_registry
-    from app.curve.gauge_rounds.models import df_checkpoints_agg
+    from app.curve.gauge_checkpoints.models import df_checkpoints_agg
 
 class Oracle():
     def __init__(self, df_liquidity):

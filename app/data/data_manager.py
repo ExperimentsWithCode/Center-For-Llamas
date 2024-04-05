@@ -125,7 +125,7 @@ class Manager():
     @timed
     def curve_gauge_rounds(self):
         if 'curve_gauge_rounds' in self.config and self.config['curve_gauge_rounds']:   
-            from app.curve.gauge_rounds.process_flipside import process_and_save 
+            from app.curve.gauge_checkpoints.process_flipside import process_and_save 
 
             return self._helper(None, process_and_save)
         

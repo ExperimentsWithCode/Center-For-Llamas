@@ -175,7 +175,7 @@ def process_checkpoint_aggs(df):
 
 
 def process_and_save():
-    print("Processing... { curve.gauge_rounds.models }")
+    print("Processing... { curve.gauge_checkpoints.models }")
 
     df_checkpoints = process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv)
     df_checkpoints_aggs = process_checkpoint_aggs(df_checkpoints)
