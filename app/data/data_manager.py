@@ -91,7 +91,7 @@ class Manager():
         self.stakedao_snapshot_curve_from_snapshot()
         # Votium
         self.votium_bounties_v2()
-
+        self.votium_bounties_v1()
         # Warden
 
     """
@@ -244,12 +244,12 @@ class Manager():
     """
     Votium
     """
-    # @timed
-    # def votium_bounties(self):
-    #     if 'votium_bounties_v1' in self.config and self.config['votium_bounties_v1']:   
-    #         from app.convex.votium_bounties_v2.fetch import fetch 
-    #         # from app.convex.locker.process_flipside import process_and_save
-    #         return self._helper(fetch, None)
+    @timed
+    def votium_bounties_v1(self):
+        if 'votium_bounties_v1' in self.config and self.config['votium_bounties_v1']:   
+            from app.convex.votium_bounties.fetch import fetch 
+            # from app.convex.locker.process_flipside import process_and_save
+            return self._helper(fetch, None)
         
     @timed
     def votium_bounties_v2(self):

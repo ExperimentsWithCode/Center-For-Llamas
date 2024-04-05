@@ -65,6 +65,8 @@ def male_models():
 
         #Votium
         'votium_bounties_v2': False,
+        'votium_bounties_v1': False,
+
         # Warden
         'warden_vesdt_boost_delegation': False,
     }
@@ -149,12 +151,9 @@ def generate_file_info():
         file_info[file] = {'last_modified': None, 'days': -1}
         for path in ['raw_data']:
             try:
-                # print(os.path.getatime(f"app/data/raw_data/{file}.csv"))
                 date = dt.fromtimestamp(os.path.getmtime(f"app/data/{path}/{file}.csv"))
                 file_info[file]['last_modified'] = date
                 file_info[file]['days'] = (now_time - date).days
-
-                print(f"{date}\t\t{file}")
             except:
                 print(f"\t\tno file found for {file}")
     return file_info
