@@ -121,7 +121,7 @@ def male_models():
 
 
 
-def generate_file_info(is_alt_path):
+def generate_file_info(is_alt_path=False):
     filename_list = [
         'gauge_to_lp_map',
         'curve_locker',
