@@ -121,7 +121,7 @@ def male_models():
 
 
 
-def generate_file_info():
+def generate_file_info(is_alt_path):
     filename_list = [
         'gauge_to_lp_map',
         'curve_locker',
@@ -147,13 +147,22 @@ def generate_file_info():
         ]
     file_info = {}
     now_time = dt.now()
+    found_count = 0
     for file in filename_list:
         file_info[file] = {'last_modified': None, 'days': -1}
         for path in ['raw_data']:
             try:
-                date = dt.fromtimestamp(os.path.getmtime(f"app/data/{path}/{file}.csv"))
+                if is_alt_path:
+                    prefix = 'center-for-llamas/'
+                else:
+                    prefix = ''
+                date = dt.fromtimestamp(os.path.getmtime(f"{prefix}app/data/{path}/{file}.csv"))
                 file_info[file]['last_modified'] = date
                 file_info[file]['days'] = (now_time - date).days
+
+                print(f"{date}\t\t{file}")
             except:
                 print(f"\t\tno file found for {file}")
+    if found_count == 0 and not is_alt_path:
+        return generate_file_info(True)
     return file_info
