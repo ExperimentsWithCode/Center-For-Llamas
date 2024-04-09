@@ -21,40 +21,13 @@
     </div>
 
 
+    {% with actor_type = 'curve_vecrv_locker'%}
+        {% with action_tag = 'Locker'%}
 
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
-    <div class="row">
-      <div class = "col-md">
-        <div class="card border-info mb-3" >
-          <div class="card-header">Voter</div>
-          <div class="card-body">
-              <h4 class="card-title">{{curve_vecrv.iloc[0]['provider']}}</h4>
-              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              {# <div id="chart" class="chart"></div> #}
-
-          </div>
-        </div>
-      </div>
-
-      <div class = "col-md">
-        <div class="card border-warning mb-3" >
-          <div class="card-header">Known As</div>
-          <div class="card-body">
-            {% if curve_vecrv.iloc[0]['known_as'] == '_' %}
-              <h4 class="card-title"> _ </h4>
-
-            {% else %}
-              <h4 class="card-title">{{ curve_vecrv.iloc[0]['known_as'] }}</h4>
-
-            {% endif %}
-              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              {# <div id="chart" class="chart"></div> #}
-
-          </div>
-        </div>
-      </div>
-
-    </div>
 
     <div class ="row">
         <div class = "col-lg">
@@ -133,7 +106,7 @@
         <div class="card text-white bg-primary mb-3" style="max-width: 50%;" >
             <div class="card-header">veCRV Locked</div>
             <div class="card-body">
-                {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart" class="chart"></div>
 
@@ -143,7 +116,7 @@
         <div class="card text-white bg-secondary mb-3" style="max-width: 50%;"  >
             <div class="card-header">veCRV Lock Efficiency</div>
             <div class="card-body">
-                {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart2" class="chart2"></div>
 
@@ -156,7 +129,7 @@ e     </div>
 
     {# {% with df_snapshot=convex_snapshot_aggregate_votes %}
       {% with snapshot_space='convex' %}
-          {% with table_type='agg' %}
+          {% with table_tag='agg' %}
             {% include 'snapshot_table_manager.jinja2' %} 
           {% endwith %}
       {% endwith %}

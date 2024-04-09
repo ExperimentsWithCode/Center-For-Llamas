@@ -8,6 +8,8 @@ from flask import Blueprint, render_template, redirect, url_for
 from app.home.content.nerd_stuff import nerd_stuff
 from app.home.content.to_do import to_do
 
+from app.data.reference import core_filename_list
+
 from app.data.data_manager import Manager
 from .forms import DataManagerForm
 # Blueprint Configuration
@@ -69,6 +71,9 @@ def male_models():
 
         # Warden
         'warden_vesdt_boost_delegation': False,
+
+        # Address Book
+        'address_book_actors': False,
     }
     placeholder_list = []
     for key in manager_config.keys():
@@ -122,33 +127,10 @@ def male_models():
 
 
 def generate_file_info(is_alt_path=False):
-    filename_list = [
-        'gauge_to_lp_map',
-        'curve_locker',
-        'curve_gauge_votes',
-        'curve_liquidity_v2',
-        'curve_liquidity_cutoff_v2',
-        # Convex Data
-        'convex_delegations',
-        'convex_locker',
-        'convex_snapshot_votes',
-        'convex_snapshot_votes_origin',
-        # StakeDao Data
-        'stakedao_delegations',
-        'stakedao_staked_sdcrv',
-        'stakedao_locker',
-        'stakedao_snapshot_votes',
-        'stakedao_snapshot_votes_origin',
-        # Votium
-        'votium_v2',
-        'votium_v1',
-        # Warden
-        'warden_vesdt_boost_delegation',
-        ]
     file_info = {}
     now_time = dt.now()
     found_count = 0
-    for file in filename_list:
+    for file in core_filename_list:
         file_info[file] = {'last_modified': None, 'days': -1}
         for path in ['raw_data']:
             try:

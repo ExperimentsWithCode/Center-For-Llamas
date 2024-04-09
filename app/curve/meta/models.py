@@ -17,7 +17,7 @@ from datetime import datetime as dt
 
 # from app.utilities.utility import get_period, get_checkpoint_timestamp
 from app.data.reference import (
-    known_large_curve_holders,
+    known_large_market_actors,
     gauge_names,
     gauge_symbols,
     current_file_title,

@@ -292,7 +292,9 @@ def convert_animation_to_gif(fig, fig_name, path='app/generated_images/'):
             duration=500,
             loop=1,
         )
-    
+
+def get_address_profile(df, target):
+    return df[df['address'] == target]
 # def calc_lock_efficiency(action_time, final_lock_time):
 #     # if type(action_time) == str:
 #     action_time = get_checkpoint_timestamp(action_time)
@@ -350,6 +352,14 @@ def nullify_amount(value):
     if value == 'null' or value == '' or value == '-':
         return np.nan
     return float(value)
+
+def nullify_list(value, is_unique=False):
+    if type(value) == float:
+        return []
+    elif is_unique:
+        return list(set(value))
+    else:
+        return value
 
 def convert_units(value, decimals=18):
     ignore_values = ['null', '', '-', None]

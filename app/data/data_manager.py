@@ -39,6 +39,9 @@ manager_config = {
     'votium_bounties_v2': default_bool,
     # Warden
     'warden_vesdt_boost_delegation': False,
+
+    # Address Book
+    'address_book_actors': default_bool,
 }
 
 # run['curve_locker'] = True
@@ -84,6 +87,8 @@ class Manager():
         self.convex_locker()
         self.convex_snapshot_curve()
         self.convex_snapshot_curve_from_snapshot()
+        self.convex_delegations()
+        
         # StakeDAO
         self.stakedao_staked_sdcrv()
         self.stakedao_locker()
@@ -93,6 +98,9 @@ class Manager():
         self.votium_bounties_v2()
         self.votium_bounties_v1()
         # Warden
+
+        # Address Book
+        self.address_book_actors()
 
     """
     Curve
@@ -182,15 +190,14 @@ class Manager():
             # from app.convex.locker.process_flipside import process_and_save
 
             # return self._helper(fetch, None)
-    # @timed
-    # def convex_delegations(self):
-    #     if 'convex_delegations' in self.config and self.config['convex_delegations']:   
-    #         from app.convex.delegations.fetch import fetch 
-    #         # from app.convex.locker.process_flipside import process_and_save
+    @timed
+    def convex_delegations(self):
+        if 'convex_delegations' in self.config and self.config['convex_delegations']:   
+            from app.convex.delegations.fetch import fetch 
+            from app.convex.delegations.process_flipside import process_and_get
 
-    #         return self._helper(fetch, process_and_save)
+            return self._helper(fetch, process_and_get)
 
-    ## NEED SNAPSHOT
        
     """
     StakeDAO
@@ -273,6 +280,17 @@ class Manager():
     #         return self._helper(fetch, process_and_save)  
 
     """
+    Address Book
+    """
+    def address_book_actors(self):
+        if 'address_book_actors' in self.config and self.config['address_book_actors']:
+            from app.address_book.actors.process_models import process_and_save
+
+            return self._helper(None, process_and_save)
+
+
+
+    """
     Utility
     """
     def _helper(self, fetch, process_and_save, override_load_initial = None):
@@ -288,6 +306,7 @@ class Manager():
         else:
             print(f"Not Processing: {process_and_save}")
         return None
+        
 
     # def liquidity_helper(self, fetch, process_and_save, override_load_initial = None):
     #     if self.should_fetch:

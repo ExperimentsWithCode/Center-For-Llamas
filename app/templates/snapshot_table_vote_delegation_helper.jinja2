@@ -14,6 +14,13 @@
           columns: [
             { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
             { id: 'proposal_title', name: 'Title' },
+            { id: 'known_as', name: 'Known As' },
+
+            { id: 'voter', name: 'voter',
+                formatter: (_, row) => gridjs.html(
+                `${row.cells[3].data.toString()}`
+            )
+            },
             { id: 'choice', name: 'Choice' ,
                 formatter: (_, row) => gridjs.html(
                 `${row.cells[2].data.toString()}`
@@ -41,6 +48,12 @@
               {
                     'checkpoint_timestamp': '{{ row['checkpoint_timestamp'] }}',
                     'proposal_title': '{{ row['proposal_title']  }}',
+
+                    {% if snapshot_space == "stakedao"  %}
+                    'voter':  `<a href={{ url_for('stakedao_snapshot_bp.voter', voter = row['voter']) }}>{{row['voter']}}</a>`,
+                    {% else %}
+                    'voter':  `<a href={{ url_for('convex_snapshot_bp.voter', voter = row['voter']) }}>{{row['voter']}}</a>`,
+                    {% endif %}
                     {% if snapshot_space == "stakedao"  %}
                     'choice':  `<a href={{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
                     {% else %}

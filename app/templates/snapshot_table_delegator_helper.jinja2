@@ -1,0 +1,95 @@
+   
+{% set is_adjusted = is_adjusted|default(False) -%}
+
+
+{% block content %}
+
+{% if df_snapshot|length > 0 %}
+    <div class="row">
+
+        <div id='{{ id }}' ></div>
+    </div>
+
+
+
+  <script type='text/javascript'>
+        new gridjs.Grid({
+          columns: [
+              { id: 'checkpoint_id', name: 'Checkpoint ID' },
+              { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp' },
+              { id: 'proposal_title', name: 'Title' },
+              { id: 'known_as', name: 'Known As' },
+              { id: 'voter', name: 'Voter',
+                  formatter: (_, row) => gridjs.html(
+                  `${row.cells[4].data.toString()}`
+                )
+              },
+                { id: 'choice', name: 'Choice' ,
+                    formatter: (_, row) => gridjs.html(
+                    `${row.cells[5].data.toString()}`
+                )
+                },
+              { id: 'choice_power', name: 'Vote Power',
+                  formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+              },
+              { id: 'choice_percent', name: 'Percent',
+              formatter: (_, row) =>  `${row.cells[7].data.toString()}`,
+                {% include 'utility_sort_float.jinja2' %} 
+
+              },
+
+              { id: 'available_power', name: 'Available Power',
+                  formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                  {% include 'utility_sort_float.jinja2' %} 
+
+              },
+              { id: 'timestamp', name: 'Vote Timestamp' },
+              { id: 'delegators', name: 'Known Delegators' ,
+              formatter: (_, row) =>  `${row.cells[10].data.toString()}`,
+              }
+
+
+          ],
+          data: [
+            {% for index, row in df_snapshot.iterrows() %}
+              {
+                'checkpoint_id': '{{ row['checkpoint_id']  }}',
+
+                'checkpoint_timestamp': '{{ row['checkpoint_timestamp'].strftime("%Y-%m-%d") }}',
+                'proposal_title': '{{ row['proposal_title']  }}',
+                'known_as': '{{ row['known_as'] }}',
+
+                {% if snapshot_space == "stakedao"  %}
+                'voter':  `<a href={{ url_for('stakedao_snapshot_bp.voter', voter = row['voter']) }}>{{row['voter']}}</a>`,
+                {% else %}
+                'voter':  `<a href={{ url_for('convex_snapshot_bp.voter', voter = row['voter']) }}>{{row['voter']}}</a>`,
+                {% endif %}
+                {% if snapshot_space == "stakedao"  %}
+                'choice':  `<a href={{ url_for('stakedao_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
+                {% else %}
+                'choice':  `<a href={{ url_for('convex_snapshot_bp.show', choice = row['choice']) }}>{{row['choice']}}</a>`,
+                {% endif %}
+                {% if is_adjusted %}
+                'choice_power': '{{ row['choice_power_adj']|round(2)}}',
+                'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
+                'available_power': '{{ row['current_locked']|round(2) }}',
+                {% else %}
+                'choice_power': '{{ row['choice_power']|round(2)}}',
+                'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
+                'available_power': '{{ row['available_power']|round(2) }}',
+                {% endif %}
+                'timestamp': '{{ row['timestamp'] }}',
+                'delegators': '{{ row['known_delegators']|join(', ')  }}'
+
+
+              },
+            {% endfor %}
+          ],
+        {% include 'table_format_helper.jinja2' %}  
+        }).render(document.getElementById( '{{ id }}' ));
+  </script>
+
+{% endif%}
+{% endblock %}

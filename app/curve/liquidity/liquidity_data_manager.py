@@ -47,10 +47,11 @@ class LiquidityManager():
 
 
     def manage(self):
-        df_cutoff = self.cutoff()
-        self.backfill(df_cutoff)
-        df_liquidity = self.join_cutoff(self.forward_filler(), df_cutoff)
+        df_cutoff = self.cutoff()   # if load cutoff, load, else get
+        self.backfill(df_cutoff)    # if load initial, load
+        df_liquidity = self.forward_filler()
         df_to_csv(df_liquidity, filename_curve_liquidity, 'source')
+
 
     def cutoff(self):
         """
@@ -71,15 +72,20 @@ class LiquidityManager():
 
     def backfill(self, df_cutoff):
         if self.load_initial:
-            self.backfill_helper(
+            df = self.backfill_helper(
                 generate_query, 
                 filename_curve_liquidity, 
                 df_cutoff.cutoff.min()
                 )
+            return self.join_cutoff(df, df_cutoff)
 
     def forward_filler(self):
+        """
+        Specifically doesn't fetch forward if also fetching initial to prevent timeouts
+        """
         if self.should_fetch:
-            fetch(False)
+            if not self.load_initial:
+                fetch(False)
         return get_df_from_file(filename_curve_liquidity)
 
     def join_cutoff(self, df, df_cutoff):
@@ -101,43 +107,47 @@ class LiquidityManager():
             })   
         return df_cutoff
 
+    """
+    Since remote hosting has limits on how long processes can run
+    no longer fully backfilling, but still merging first query
+    """
     def backfill_helper(self, generate_query, filename, cutoff_time = None, page_size=10000):
         # Loop Basics
-        should_continue = True
-        try:
-            df = get_df_from_file(filename)
-        except:
-            df = []
+        # should_continue = True
+        # try:
+        #     df = get_df_from_file(filename)
+        # except:
+        #     df = []
         # Controls ending at a fixed cutoff
         if cutoff_time:
             cutoff_time = get_datetime_obj(cutoff_time)
-        while should_continue:
-            if len(df) == 0:
-                df = []
-                print("no starting position")
-                time =  '2023-08-01 00:00:01'
-                start_time = get_datetime_obj(time)
-                end_time = start_time + timedelta(days=8*7)
-            else:
-                end_time = get_datetime_obj(df['block_timestamp'].min())
-                start_time = end_time - timedelta(days=8*7)
-                if cutoff_time and start_time < cutoff_time:
-                    start_time = cutoff_time
-                    print("Last Run!")
-            
-            # Just cause looping paid queries, sometimes good to be able to manually cancel.
-            if self.human_management:
-                user_input = self.user_control_check(start_time, end_time)
-                if len(user_input) > 0:
-                    break
-
-            current_length = len(df)
-            query = generate_query(start_time, end_time)
-            df = query_and_save(query, filename_curve_liquidity, df, page_size)
-            if start_time == cutoff_time:
-                should_continue = False
-            if len(df) < current_length:
-                should_continue = False
+        # while should_continue:
+        # if len(df) == 0:
+        # df = []
+        # print("no starting position")
+        if not cutoff_time:
+            cutoff_time =  '2023-01-01 00:00:01'
+        start_time = get_datetime_obj(cutoff_time)
+        end_time = start_time + timedelta(days=8*7)
+        # else:
+        #     end_time = get_datetime_obj(df['block_timestamp'].min())
+        #     start_time = end_time - timedelta(days=8*7)
+            # if cutoff_time and start_time < cutoff_time:
+            #     start_time = cutoff_time
+            #     print("Last Run!")
+        
+        # Just cause looping paid queries, sometimes good to be able to manually cancel.
+        # if self.human_management:
+        #     user_input = self.user_control_check(start_time, end_time)
+        #     if len(user_input) > 0:
+        #         break
+        # current_length = len(df)
+        query = generate_query(start_time, end_time)
+        df = query_and_save(query, filename, [], page_size)
+            # if start_time == cutoff_time:
+            #     should_continue = False
+            # if len(df) < current_length:
+            #     should_continue = False
 
         return df
 

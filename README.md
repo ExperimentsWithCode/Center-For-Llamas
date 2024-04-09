@@ -271,5 +271,6 @@ ___
         * But thinks pool is 
             * 0xbfab6fa95e0091ed66058ad493189d2cb29385e6: ETHwBETHCRV-gauge'
 
-
-
+## Delegations As Aggregates
+* /convex/delegations/delegator/0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83
+* Snapshot vote does not match delegation.

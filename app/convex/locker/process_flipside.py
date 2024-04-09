@@ -1,5 +1,5 @@
 from flask import current_app as app
-from app.data.reference import filename_convex_delegations , filename_convex_locker, known_large_cvx_holders_addresses
+from app.data.reference import filename_convex_delegations , filename_convex_locker, known_large_market_actors
 
 from datetime import datetime as dt
 from datetime import datetime, timedelta
@@ -68,8 +68,8 @@ class ProcessConvexLocker():
         self.df_locker['display_name'] = self.df_locker.apply(lambda x: self.display_name(x['user'], x['known_as']), axis=1)
     
     def known_as(self, user):
-        if user in known_large_cvx_holders_addresses:
-            return known_large_cvx_holders_addresses[user]
+        if user in known_large_market_actors:
+            return known_large_market_actors[user]
         else:
             return "_"
 

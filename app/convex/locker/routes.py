@@ -19,12 +19,12 @@ from app.data.local_storage import pd
 # from matplotlib.figure import Figure
 # import io
 
-from app.convex.locker.models import df_locker_agg_system, df_locker_agg_current, df_locker_agg_epoch, df_locker_agg_user_epoch
+from app.convex.locker.models import df_locker
 
 from app.utilities.utility import (
     format_plotly_figure,
-    get_now
-
+    get_now,
+    get_address_profile
 )
 
 # Blueprint Configuration
@@ -44,6 +44,7 @@ convex_vote_locker_bp = Blueprint(
 @convex_vote_locker_bp.route('/', methods=['GET'])
 # @login_required
 def index():
+
     df_locker_agg_system = app.config['df_convex_locker_agg_system']
     df_locker_agg_current = app.config['df_convex_locker_agg_current']
     df_locker_agg_epoch = app.config['df_convex_locker_agg_epoch']
@@ -66,6 +67,7 @@ def index():
         ]).agg(
         current_locked=pd.NamedAgg(column='current_locked', aggfunc=sum)
         ).reset_index()
+    
     local_df_locker_agg_user_epoch = local_df_locker_agg_user_epoch.sort_values(['this_epoch', 'current_locked'], axis = 0, ascending = False)
     # df_locker_agg_user_epoch_current =  df_locker_agg_user_epoch[df_locker_agg_user_epoch['end_date']]
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
@@ -98,7 +100,7 @@ def index():
         ),
         # secondary_y=True
     )
-    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
+    fig.add_vline(x=get_now(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
     fig = format_plotly_figure(fig)
@@ -135,7 +137,7 @@ def index():
         ),
         secondary_y=False
     )
-    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
+    fig.add_vline(x=get_now(), line_width=2, line_dash="dash", line_color="black")
     fig = format_plotly_figure(fig)
 
     # # Build Plotly object
@@ -183,7 +185,7 @@ def index():
         secondary_y=False
     )
 
-    fig.add_vline(x=dt.utcnow(), line_width=3, line_dash="dash", line_color="black", )
+    fig.add_vline(x=get_now(), line_width=3, line_dash="dash", line_color="black", )
 
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")
@@ -201,7 +203,7 @@ def index():
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
-    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
+    fig.add_vline(x=get_now(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
         title=f"Convex vlCVX Balances",
             xaxis_title="This Epoch",
@@ -275,7 +277,7 @@ def show(user):
         ),
         # secondary_y=True
     )
-    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
+    fig.add_vline(x=get_now(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(rangemode="tozero")
@@ -311,7 +313,7 @@ def show(user):
         ),
         # secondary_y=True
     )
-    fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black" )
+    fig.add_vline(x=get_now(), line_width=2, line_dash="dash", line_color="black" )
 
     fig.update_layout(autotypenumbers='convert types')
     fig = format_plotly_figure(fig)
@@ -348,7 +350,7 @@ def show(user):
         ),
         secondary_y=True
     )
-    fig.add_vline(x=dt.utcnow(), line_width=3, line_dash="dash", line_color="black", )
+    fig.add_vline(x=get_now(), line_width=3, line_dash="dash", line_color="black", )
 
     fig.update_layout(autotypenumbers='convert types')
     fig.update_yaxes(rangemode="tozero")
@@ -359,9 +361,11 @@ def show(user):
 
     return render_template(
         'show_convex_vote_locker.jinja2',
-        title='Convex Vote Locker',
+        title='Convex Vote Locker User',
         template='convex-vote-locker-index',
         body="",
+        actor_profile = get_address_profile(app.config['df_actors'], user),
+
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         # convex_agg_vote_locks = df_locker_agg_system,

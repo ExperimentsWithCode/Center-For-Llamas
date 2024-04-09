@@ -13,7 +13,7 @@ from datetime import datetime as dt
 
 from app.utilities.utility import  get_checkpoint_id, get_checkpoint
 from app.data.reference import (
-    known_large_curve_holders,
+    known_large_market_actors,
     current_file_title,
     fallback_file_title,
 )
@@ -21,7 +21,7 @@ from app.data.reference import (
 import traceback
 
 
-from app.data.reference import known_large_cvx_holders_addresses
+from app.data.reference import known_large_market_actors
 
 try:
     from flask import current_app as app
@@ -388,8 +388,8 @@ class Voter():
         self.vote_change_per_gauge_proposal = {}
 
         self.choices = []
-        if self.address in known_large_cvx_holders_addresses:
-            self.known_as = known_large_cvx_holders_addresses[self.address]
+        if self.address in known_large_market_actors:
+            self.known_as = known_large_market_actors[self.address]
         else:
             self.known_as = "_"
         self.vote_id = 0

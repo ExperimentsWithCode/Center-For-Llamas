@@ -11,7 +11,7 @@ def generate_query(min_block_timestamp=None, max_block_timestamp = None):
     temp_list = df_curve_gauge_registry.pool_addr.unique()
     temp_list = temp_list[temp_list != '']
     pool_addresses = str(temp_list).replace('\n', ',')[1:-1]
-    filter_secondary_line = f"AND BLOCK_TIMESTAMP <= '{shift_time_days(min_block_timestamp, 7*6) }'"
+    filter_secondary_line = f"AND BLOCK_TIMESTAMP <= '{shift_time_days(min_block_timestamp, 7*8) }'"
 
     if min_block_timestamp:
         if not max_block_timestamp:

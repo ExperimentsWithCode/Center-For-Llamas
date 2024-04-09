@@ -25,6 +25,7 @@ from app.stakedao.locker.models import df_stakedao_vesdt, df_stakedao_vesdt_know
 from app.utilities.utility import (
     format_plotly_figure,
     get_lock_diffs,
+    get_address_profile
 )
 # Blueprint Configuration
 stakedao_locked_vesdt_bp = Blueprint(
@@ -312,6 +313,8 @@ def show(user):
         title='StakeDAO Locked veSDT',
         template='stakedao-staked-vesdt-show',
         body="",
+        actor_profile = get_address_profile(app.config['df_actors'], user),
+
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         # convex_agg_vote_locks = df_locker_agg_system,

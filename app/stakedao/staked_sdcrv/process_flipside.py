@@ -1,5 +1,5 @@
 from flask import current_app as app
-from app.data.reference import filename_stakedao_staked_sdcrv , known_large_cvx_holders_addresses
+from app.data.reference import filename_stakedao_staked_sdcrv , known_large_market_actors
 
 from datetime import datetime as dt
 from datetime import datetime, timedelta
@@ -49,8 +49,8 @@ class StakeDAOsdCRV():
             return -1 * row['value']
         
     def known_as(self, user):
-        if user in known_large_cvx_holders_addresses:
-            return known_large_cvx_holders_addresses[user]
+        if user in known_large_market_actors:
+            return known_large_market_actors[user]
         else:
             return "_"
         

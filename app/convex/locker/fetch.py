@@ -38,7 +38,7 @@ def generate_query(min_block_timestamp=None):
     EVENT_NAME as event_name,
     TX_HASH as tx_hash
     FROM ethereum.core.ez_decoded_event_logs
-    WHERE CONTRACT_ADDRESS =  lower('{{cxv_locker}}')
+    WHERE CONTRACT_ADDRESS =  lower('{cxv_locker}')
     AND EVENT_NAME = 'Withdrawn'
     {filter_line}
     ORDER BY block_timestamp desc

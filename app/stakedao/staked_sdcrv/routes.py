@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from app.data.local_storage import pd
-
+from app.utilities.utility import get_address_profile
 
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -219,6 +219,8 @@ def show(user):
         title='StakeDAO Staked sdCRV',
         template='stakedao-staked-sdcrv-show',
         body="",
+        actor_profile = get_address_profile(app.config['df_actors'], user),
+
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         # convex_agg_vote_locks = df_locker_agg_system,

@@ -17,34 +17,13 @@
     <div class="row">
       <h1>{{ title }}</h1>
     </div>
-    <div class="row">
 
-        <div class="card border-info mb-3", style="max-width: 50%;" >
-          <div class="card-header">Voter Address</div>
-          <div class="card-body">
-              <h4 class="card-title">{{user}}</h4>
-              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              {# <div id="chart" class="chart"></div> #}
-            <a href="{{ url_for('curve_locker_vecrv_bp.show', user= user) }}">
-              <button type="button" class="btn btn-primary">View Locks</button>
-            </a>
-          </div>
-        </div>
+    {% with actor_type = 'curve_voters'%}
+        {% with action_tag = 'Voter'%}
 
-
-        <div class="card border-warning mb-3", style="max-width: 50%;" >
-          <div class="card-header">Known As</div>
-          <div class="card-body">
-              <h4 class="card-title">{{votes.iloc[0]['known_as']}}</h4>
-
-              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              {# <div id="chart" class="chart"></div> #}
-
-          </div>
-        </div>
-
-
-    </div>
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
     <div class ="row">
       <div class="card text-white bg-info mb-3" style="max-width: 50%;">

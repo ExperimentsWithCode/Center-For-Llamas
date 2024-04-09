@@ -12,7 +12,7 @@ from app.utilities.utility import (
     get_checkpoint
 )
 
-from app.data.reference import known_large_cvx_holders_addresses
+from app.data.reference import known_large_market_actors
 from app.curve.gauges.models import gauge_registry
 
 from app.data.snapshot_api import get_space, get_proposals, get_votes
@@ -84,10 +84,10 @@ class SnapshotAsSource():
             return choice_weight
 
     def get_known_as(self, voter_address):
-        if not voter_address in known_large_cvx_holders_addresses:
+        if not voter_address in known_large_market_actors:
             return '_'    
         else: 
-            return known_large_cvx_holders_addresses[voter_address]
+            return known_large_market_actors[voter_address]
       
 
     def generate_output(self, this_proposal, df_votes):

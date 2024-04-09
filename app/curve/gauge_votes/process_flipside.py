@@ -28,7 +28,7 @@ from app.utilities.utility import (
 )
 
 from app.data.reference import (
-    known_large_curve_holders,
+    known_large_market_actors,
     gauge_names,
     gauge_symbols,
     current_file_title,
@@ -51,8 +51,8 @@ class Voter():
         self.votes = []
         self.active_votes = {}
         self.known_as = "_"
-        if self.address in known_large_curve_holders:
-            self.known_as = known_large_curve_holders[self.address]
+        if self.address in known_large_market_actors:
+            self.known_as = known_large_market_actors[self.address]
 
     def new_vote(self, row):
         if 'TX_HASH' in row:

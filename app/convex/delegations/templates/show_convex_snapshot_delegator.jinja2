@@ -1,0 +1,111 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% set active_category = "convex" -%}
+  {% set active_page = "convex_delegations" -%}
+  {% set sub_active_page = 'home' -%}
+
+  {% include "navigation.jinja2" %}
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+    {% with actor_type = 'convex_delegator'%}
+        {% with action_tag = 'Delegator'%}
+
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+
+
+
+    {% with df_snapshot=df_snapshot_user %}
+      {% with choice=False %}
+        {% include 'snapshot_index_header.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+    <div class="row">
+
+        <div class="card text-white bg-info mb-3" style="max-width: 50%;">
+          <div class="card-header">This Rounds Vote Distribution</div>
+          <div class="card-body">
+              {# <h4 class="card-title">}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart1" class="chart1"></div>
+          </div>
+        </div>
+
+        <div class="card text-white bg-danger mb-3" style="max-width: 50%;" >
+          <div class="card-header">vlCVX Available Per Proposal</div>
+          <div class="card-body">
+              {# <h4 class="card-title">}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart2" class="chart2"></div>
+          </div>
+        </div>
+      </div>
+
+    <div class="row">
+        <div class="card text-white bg-primary mb-3"   >
+          <div class="card-header">Delegated Amount Per Proposal</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart4" class="chart4"></div>
+          </div>
+        </div>
+      </div>
+
+    <div class="row">
+
+        <div class="card text-white bg-primary mb-3" >
+          <div class="card-header">Delegator Vote Power by Choice</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart5" class="chart5"></div>
+          </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+      <div class="card text-white bg-danger mb-3"   >
+        <div class="card-header">Delegate Vote Power by Choice</div>
+        <div class="card-body">
+            {# <h4 class="card-title">??}}</h4> #}
+            {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+            <div id="chart3" class="chart3"></div>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="text-primary">Delegate Votes</h4>
+
+    {% with df_snapshot=df_snapshot_user %}
+      {% with df_snapshot_adj=df_snapshot_user_adj %}
+        {% with snapshot_space='convex' %}
+            {% with table_tag='delegator' %}
+              {% include 'snapshot_table_manager.jinja2' %} 
+            {% endwith %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+
+
+{% for graph_json in graph_list %}
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script type='text/javascript'>
+      var graphs = {{graph_json | safe}};
+      Plotly.plot("chart{{loop.index}}",graphs,{});
+    </script> 
+{% endfor %}
+{% endblock %}

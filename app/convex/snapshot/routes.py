@@ -11,7 +11,7 @@ import plotly
 import plotly.express as px
 
 
-
+from app.utilities.utility import get_address_profile
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
 # import io
@@ -259,7 +259,7 @@ def voter(voter):
                     x=local_df_vote_choice['proposal_end'],
                     y=local_df_vote_choice['choice_power'],
                     color='choice',
-                    title='Choices Per Round',
+                    title='Vote Distribution Per Proposal',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
@@ -305,6 +305,7 @@ def voter(voter):
         title='Convex Snapshot Voter Profile',
         template='snapshot-voter-show',
         body="",
+        actor_profile = get_address_profile(app.config['df_actors'], voter),
         df_snapshot_user = local_df_vote_choice,
         current_votes = df_current_votes.choice_power.sum(),
         votium_bounty_registry = app.config['votium_bounty_registry'],

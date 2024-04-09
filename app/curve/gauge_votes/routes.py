@@ -12,7 +12,7 @@ import plotly.express as px
 
 from app.utilities.utility import (
     format_plotly_figure,
-
+    get_address_profile
 )
 
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -237,6 +237,8 @@ def show(user):
         title='Curve Gauge Votes',
         template='gauge-votes-show',
         body="",
+        actor_profile = get_address_profile(app.config['df_actors'], user),
+
         votes = local_df_gauge_votes,
         inactive_votes = local_df_gauge_votes_inactive,
         all_votes = local_df_gauge_votes_formatted,

@@ -25,7 +25,7 @@
         <div class="card text-white bg-info mb-3" >
             <div class="card-header">Total CVX Locked </div>
             <div class="card-body">
-                {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart3" class="chart3"></div>
 
@@ -45,7 +45,7 @@
         <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
             <div class="card-header">Historic Locks</div>
             <div class="card-body">
-                {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart2" class="chart2"></div>
 
@@ -55,7 +55,7 @@
         <div class="card text-white bg-primary mb-3" style="max-width: 50%;"  >
             <div class="card-header">vlCVX Current Locks</div>
             <div class="card-body">
-                {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart" class="chart"></div>
 
@@ -69,7 +69,7 @@
         <div class="card text-white bg-info mb-3" >
             <div class="card-header">Known Holder Comparison</div>
             <div class="card-body">
-                {# <h4 class="card-title">Gauge Rounnds By Gauge</h4> #}
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart4" class="chart4"></div>
 
@@ -82,7 +82,7 @@
 
     {# {% with df_snapshot=convex_snapshot_aggregate_votes %}
       {% with snapshot_space='convex' %}
-          {% with table_type='agg' %}
+          {% with table_tag='agg' %}
             {% include 'snapshot_table_manager.jinja2' %} 
           {% endwith %}
       {% endwith %}
@@ -116,13 +116,12 @@
   Plotly.plot('chart4',graphs4,{});
 </script>
 
-
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
           { id: 'this_epoch', name: 'This Epoch' },
           { id: 'known_as', name: 'Known As' },
-          { id: 'user', name: 'Voter' ,
+          { id: 'user', name: 'Locker' ,
             formatter: (_, row) => gridjs.html(
                 `${row.cells[2].data.toString()}`
             )
@@ -135,8 +134,7 @@
         { id: 'lock_count', name: 'Lock Count',
             formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
             {% include 'utility_sort_int.jinja2' %} 
-         },
-
+         }
 
         ],
         data: [
@@ -147,23 +145,13 @@
               'user': `<a href={{ url_for('convex_vote_locker_bp.show', user = row['user']) }}>{{row['user']}}</a>`,
 
               'current_locked': '{{ row['current_locked']|round(2) }}',
-              'lock_count': '{{ row['lock_count'] }}',
-
+              'lock_count': '{{ row['lock_count'] }}'
 
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
+      {%include 'table_format_helper.jinja2' %}
+
       }).render(document.getElementById('vote_locker_table'));
 </script>
 

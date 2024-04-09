@@ -16,24 +16,14 @@
 
     <div class="row">
       <h1>{{ title }}</h1>
-
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Voter</div>
-        <div class="card-body">
-          <h4 class="card-title">{{df_snapshot_user.iloc[0]['voter']}}</h4>
-
-        </div>
-      </div>
-
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Known As</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">{{df_snapshot_user.iloc[0]['known_as']}}</h4>
-
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
     </div>
+
+    {% with actor_type = 'stakedao_snapshot_voter'%}
+        {% with action_tag = 'Voter'%}
+
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
 
     {% with df_snapshot=df_snapshot_user %}
       {% with choice=False %}
@@ -79,7 +69,7 @@
     <h4 class="text-primary">Votes by this Voter</h4>
     {% with df_snapshot=df_snapshot_user %}
       {% with snapshot_space='stakedao' %}
-          {% with table_type='voter' %}
+          {% with table_tag='voter' %}
             {% include 'snapshot_table_manager.jinja2' %} 
           {% endwith %}
       {% endwith %}

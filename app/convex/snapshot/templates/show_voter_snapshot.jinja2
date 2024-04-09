@@ -16,25 +16,16 @@
 
     <div class="row">
       <h1>{{ title }}</h1>
-
-
-      <div class="card border-primary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Voter</div>
-        <div class="card-body">
-          <h4 class="card-title">{{df_snapshot_user.iloc[0]['voter']}}</h4>
-
-        </div>
-      </div>
-
-      <div class="card border-secondary mb-3" style="max-width: 50%;" >
-        <div class="card-header">Known As</div>
-        <div class="card-body">
-          <h4 class="card-title text-primary">{{df_snapshot_user.iloc[0]['known_as']}}</h4>
-
-          {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-        </div>
-      </div>
     </div>
+
+    {% with actor_type = 'convex_snapshot_voter'%}
+        {% with action_tag = 'Voter'%}
+
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+
+
 
     {% with df_snapshot=df_snapshot_user %}
       {% with choice=False %}
@@ -53,7 +44,7 @@
         </div>
 
         <div class="card text-white bg-danger mb-3" style="max-width: 50%;" >
-          <div class="card-header">vlCVX Available Per Vote</div>
+          <div class="card-header">vlCVX Available Per Proposal</div>
           <div class="card-body">
               {# <h4 class="card-title">}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -80,7 +71,7 @@
 
     {% with df_snapshot=df_snapshot_user %}
       {% with snapshot_space='convex' %}
-          {% with table_type='voter' %}
+          {% with table_tag='voter' %}
             {% include 'snapshot_table_manager.jinja2' %} 
           {% endwith %}
       {% endwith %}

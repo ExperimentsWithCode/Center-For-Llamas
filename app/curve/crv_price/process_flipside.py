@@ -17,7 +17,7 @@ from datetime import datetime as dt
 
 from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id, convert_units
 from app.data.reference import (
-    known_large_curve_holders,
+    known_large_market_actors,
     current_file_title,
     fallback_file_title
 )

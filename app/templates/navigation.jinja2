@@ -142,6 +142,12 @@
                   href="{{ url_for('convex_vote_locker_bp.index') }}">vlCVX Locker</a>
               </li>
 
+              <li class="nav-item">
+                <a class="nav-link {% if 'convex_delegations' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('convex_snapshot_delegations_bp.index') }}">vlCVX Delegations</a>
+              </li>
+
+
             </ul>
 
 

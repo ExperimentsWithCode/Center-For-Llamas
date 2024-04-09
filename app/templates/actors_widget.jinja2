@@ -1,0 +1,174 @@
+{% set actor_profile = actor_profile|default([]) -%}
+
+{%if actor_profile |length > 0 %}
+
+   
+{# {% set actor_type = 'curve_vecrv_locker' -%} #}
+{% set actor_type = actor_type|default("curve_vecrv_locker") -%}
+{% set action_tag = action_tag|default("User") -%}
+
+{% set actor_profile = actor_profile.iloc[0] -%}
+
+<div class="row">
+    <div class="col-md">
+    <div class="card border-primary mb-3"  >
+        <div class="card-header">{{action_tag}}</div>
+        <div class="card-body">
+        <h4 class="card-title">{{actor_profile['address']}}</h4>
+
+        </div>
+    </div>
+
+    <div class="card border-secondary mb-3" >
+        <div class="card-header">Known As</div>
+        <div class="card-body">
+        <h4 class="card-title text-primary">{{actor_profile['known_as']}}</h4>
+
+        {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+        </div>
+        
+
+    </div>
+    </div>
+    <div class="col-md">
+
+
+        <div class = 'row '>
+            <div class="card mb-3" style=" display:grid" >
+                <div class="card-header bg-primary text-white">Curve Participation</div>
+                <div class="card-body">
+                    <div class ="tabbable Curve border-primary">
+                        <ul class="nav nav-tabs">
+                        {% for key in actor_profile.keys() %}
+                            {% if actor_profile[key] == 'True' %}
+
+
+                                {% if key == "curve_vecrv_locker" %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-primary  {% endif%}" 
+                                    href="{{ url_for('curve_locker_vecrv_bp.show', user= actor_profile['address']) }}">
+                                    veCRV Locker</a>
+                                </li>
+                                {% elif key == "curve_voters" %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-primary  {% endif%}" 
+                                    href="{{ url_for('gauge_votes_bp.show', user= actor_profile['address']) }}">
+                                    veCRV Voter</a>
+                                </li>
+
+                                {% endif %}
+                            {% endif %}
+
+                        {% endfor %} 
+                        </ul>
+
+
+                    </div>
+                </div>
+
+                <div class="card-header bg-secondary text-white">Convex Participation</div>
+                <div class="card-body">
+                    <div class ="tabbable Convex border-secondary">
+                        <ul class="nav nav-tabs">
+                        {% for key in actor_profile.keys() %}
+                            {% if actor_profile[key] == 'True' %}
+
+                                {% if key == 'convex_snapshot_voter' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active {% endif%}" 
+                                    href="{{ url_for('convex_snapshot_bp.voter', voter= actor_profile['address']) }}">
+                                    vlCVX Curve Snaphot Voter</a>
+                                </li>
+                                {% elif key == 'convex_delegator' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                    href="{{ url_for('convex_snapshot_delegations_bp.delegator', delegator= actor_profile['address']) }}">
+                                    vlCVX Delegator</a>
+                                </li>
+                                {# {% elif key == 'convex_delegate' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                    href="{{ url_for('convex_snapshot_delegations_bp.delegate', delegate= actor_profile['address']) }}">
+                                    vlCVX Delegate</a>
+                                </li> #}
+                                {% elif key == 'convex_vlcvx_locker' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                    href="{{ url_for('convex_vote_locker_bp.show', user= actor_profile['address']) }}">
+                                    vlCVX Locker</a>
+                                </li>
+
+                                {% endif %}
+
+                            {% endif %}
+
+                        {% endfor %} 
+                        </ul>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="card-header bg-info text-white">StakeDAO Participation</div>
+                <div class="card-body">
+                    <div class ="tabbable StakeDAO border-info">
+                        <ul class="nav nav-tabs">
+                        {% for key in actor_profile.keys() %}
+                            {% if actor_profile[key] == 'True' %}
+
+                                {% if key == 'stakedao_snapshot_voter' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-info  {% endif%}" 
+                                    href="{{ url_for('stakedao_snapshot_bp.voter', voter= actor_profile['address']) }}">
+                                    sdCRV Curve Snapshot Voter</a>
+                                </li>
+                                {% elif key == 'stakedao_vesdt_locker' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-info  {% endif%}" 
+                                    href="{{ url_for('stakedao_staked_sdcrv_bp.show', user= actor_profile['address']) }}">
+                                    sdCRV Staker</a>
+                                </li>
+                                {% elif key == 'stakedao_vesdt_locker' %}
+                                <li class="nav-item">
+                                <a class="nav-link {% if key == actor_type %} active border-info  {% endif%}" 
+                                    href="{{ url_for('stakedao_locked_vesdt_bp.show', user= actor_profile['address']) }}">
+                                    sdCRV Locker</a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+
+                        {% endfor %} 
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
+
+{% else %}
+    <div class ="row">
+        <div class="card border-info mb-3"  >
+            <div class="card-header">Something went wrong</div>
+            <div class="card-body">
+                <h4 class="card-title text-info">
+                    Unable to link Actor Mapping
+                </h4>
+
+                <p class="card-text">Its likely that the data is present but the link could not be made.</p>
+                <p>{{actor_profile}}</p>
+            </div>
+        </div>   
+    </div>
+    </div>
+{% endif %}
+
+
+

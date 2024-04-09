@@ -19,6 +19,7 @@ from app.utilities.utility import (
     format_plotly_figure,
     get_lock_diffs,
     get_now,
+    get_address_profile
 )
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
@@ -326,6 +327,8 @@ def show(user):
         title='Curve - Locked veCRV - User',
         template='stakedao-staked-vecrv-show',
         body="",
+        actor_profile = get_address_profile(app.config['df_actors'], user),
+
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         # convex_agg_vote_locks = df_locker_agg_system,

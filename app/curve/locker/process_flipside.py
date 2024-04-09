@@ -1,7 +1,7 @@
 from flask import current_app as app
 from app.data.reference import (
     filename_curve_locker,
-    known_large_cvx_holders_addresses
+    known_large_market_actors
 )
 # from ... import db
 
@@ -115,8 +115,8 @@ class ProcessCurveLocker():
             return -1 * row['value']
             
     def known_as(self, user):
-        if user in known_large_cvx_holders_addresses:
-            return known_large_cvx_holders_addresses[user]
+        if user in known_large_market_actors:
+            return known_large_market_actors[user]
         else:
             return "_"
         

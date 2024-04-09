@@ -21,7 +21,7 @@ from app.data.local_storage import (
 import traceback
 
 
-from app.data.reference import known_large_cvx_holders_addresses
+from app.data.reference import known_large_market_actors
 
 from app.snapshot.models import Snapshot
 from app.snapshot.alt_models import merge_target
