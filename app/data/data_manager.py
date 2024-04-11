@@ -94,6 +94,8 @@ class Manager():
         self.stakedao_locker()
         self.stakedao_snapshot_curve()
         self.stakedao_snapshot_curve_from_snapshot()
+        self.stakedao_delegations()
+
         # Votium
         self.votium_bounties_v2()
         self.votium_bounties_v1()
@@ -247,6 +249,14 @@ class Manager():
                 target = None
                 snapshot = SnapshotAsSource(space_address, first, skip, target )
                 snapshot.save_files('stakedao')
+
+    @timed
+    def stakedao_delegations(self):
+        if 'stakedao_delegations' in self.config and self.config['stakedao_delegations']:   
+            from app.stakedao.delegations.fetch import fetch 
+            from app.stakedao.delegations.process_flipside import process_and_get
+
+            return self._helper(fetch, process_and_get)
 
     """
     Votium

@@ -1,0 +1,197 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% set active_category = "convex" -%}
+  {% set active_page = "convex_delegations" -%}
+  {% set sub_active_page = 'home' -%}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+    {% with actor_type = 'convex_delegate'%}
+        {% with action_tag = 'Delegate'%}
+
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+
+    <div class="row">
+
+        <div class="card text-white bg-info mb-3" >
+            <div class="card-header">Total CVX Locked and Delegated</div>
+            <div class="card-body">
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
+                {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+                <div id="chart1" class="chart1"></div>
+
+            </div>
+        </div>
+    </div>
+
+    {# {% with sum_current_votes=sum_current_votes %}
+      {% with sum_prior_votes=sum_prior_votes %}
+        {% include 'utility_vote_compare.jinja2' %} 
+      {% endwith %}
+    {% endwith %} #}
+
+
+
+    <div class="row">
+        <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
+            <div class="card-header">Delegator Distribution By Known As</div>
+            <div class="card-body">
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
+                {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+                <div id="chart2" class="chart2"></div>
+
+            </div>
+        </div>
+
+        <div class="card text-white bg-primary mb-3" style="max-width: 50%;"  >
+            <div class="card-header">Delegator Distribution By Address</div>
+            <div class="card-body">
+                {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
+                {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+                <div id="chart3" class="chart3"></div>
+
+            </div>
+        </div>
+
+    </div>
+
+    {# <h4 class="text-primary">Vote Locks by Epoch</h4> #}
+
+
+
+<div class ="row">
+
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link active" data-bs-toggle="tab" href="#aggDelegations" aria-selected="true" role="tab">Aggregate Delegations</a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" data-bs-toggle="tab" href="#lastDelegations" aria-selected="false" role="tab" tabindex="-1">Unique Delegators Last Proposal</a>
+    </li>
+  </ul>
+  <div id="myTabContent" class="tab-content">
+    <div class="tab-pane fade active show" id="aggDelegations" role="tabpanel">
+
+      <div id='vote_locker_table' ></div>
+    </div>
+    <div class="tab-pane fade" id="lastDelegations" role="tabpanel">
+
+      <div id='vote_locker_table2' ></div>
+    </div>
+
+  </div>
+
+</div>
+
+{% for graph_json in graph_list %}
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script type='text/javascript'>
+      var graphs = {{graph_json | safe}};
+      Plotly.plot("chart{{loop.index}}",graphs,{});
+    </script> 
+{% endfor %}
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'this_epoch', name: 'vlCVX Epoch' },
+          { id: 'proposal_start', name: 'Proposal Start' },
+          { id: 'proposal_title', name: 'Proposal Title' },
+
+          { id: 'delegate_known_as', name: 'Known As' },
+          { id: 'delegate', name: 'Delegate' ,
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[4].data.toString()}`
+            )
+          },
+          
+          { id: 'total_delegated', name: 'vlCVX Delegated',
+            formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+        { id: 'delegators_count', name: 'Delegators Count' },
+        { id: 'known_delegators', name: 'Known Delegators End' },
+
+        ],
+        data: [
+          {% for index, row in df_locker.iterrows() %}
+            {
+              'this_epoch': '{{ row['this_epoch'] }}',
+              'proposal_start': '{{ row['proposal_start'] }}',
+              'proposal_title': '{{ row['proposal_title'] }}',
+              'delegate_known_as': '{{ row['delegate_known_as'] }}',
+              'delegate': `<a href="#">{{row['delegate']}}</a>`,
+
+              'total_delegated': '{{ row['total_delegated']|round(2) }}',
+              'delegators_count': '{{ row['delegators_count'] }}',
+              'known_delegators': '{{ row['known_delegators']|join(', ')  }}',
+
+            },
+          {% endfor %}
+        ],
+        {% include 'table_format_helper.jinja2' %}  
+
+      }).render(document.getElementById('vote_locker_table'));
+</script>
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+          { id: 'this_epoch', name: 'vlCVX Epoch' },
+          { id: 'proposal_start', name: 'Proposal Start' },
+          { id: 'proposal_title', name: 'Proposal Title' },
+
+          { id: 'delegator_known_as', name: 'Known As' },
+          { id: 'delegator', name: 'Delegator' ,
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[4].data.toString()}`
+            )
+          },
+          
+          { id: 'current_locked', name: 'vlCVX Delegated',
+            formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+        { id: 'lock_count', name: 'Lock Count' },
+
+        ],
+        data: [
+          {% for index, row in local_delegations.iterrows() %}
+            {
+              'this_epoch': '{{ row['this_epoch'] }}',
+              'proposal_start': '{{ row['proposal_start'] }}',
+              'proposal_title': '{{ row['proposal_title'] }}',
+              'delegator_known_as': '{{ row['delegator_known_as'] }}',
+              'delegator': `<a href="{{ url_for('convex_snapshot_delegations_bp.delegator', delegator= row['delegator']) }}">{{row['delegator']}}</a>`,
+
+              'current_locked': '{{ row['current_locked']|round(2)}}',
+              'lock_count': '{{ row['lock_count'] }}',
+
+            },
+          {% endfor %}
+        ],
+        {% include 'table_format_helper.jinja2' %}  
+
+      }).render(document.getElementById('vote_locker_table2'));
+</script>
+
+
+{% endblock %}
+href="{{ url_for('convex_snapshot_delegations_bp.delegator', delegator= actor_profile['address']) }}">

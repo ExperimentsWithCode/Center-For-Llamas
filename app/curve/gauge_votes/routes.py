@@ -9,6 +9,7 @@ from datetime import datetime as dt
 import json
 import plotly
 import plotly.express as px
+import plotly.graph_objects as go
 
 from app.utilities.utility import (
     format_plotly_figure,
@@ -217,18 +218,23 @@ def show(user):
     # Build Plotly object
     graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    # Build chart
-    fig = px.bar(df_local_checkpoints,
-                    x=df_local_checkpoints['checkpoint_timestamp'],
-                    y=df_local_checkpoints['vote_power'],
-                    color='gauge_symbol',
-                    title='Gauge Round Vote Weights',
-                    # facet_row=facet_row,
-                    # facet_col_wrap=facet_col_wrap
-                    )
-    # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
-
+    if len(df_local_checkpoints)> 0:    
+        # Build chart
+        fig = px.bar(df_local_checkpoints,
+                        x=df_local_checkpoints['checkpoint_timestamp'],
+                        y=df_local_checkpoints['vote_power'],
+                        color='gauge_symbol',
+                        title='Gauge Round Vote Weights',
+                        # facet_row=facet_row,
+                        # facet_col_wrap=facet_col_wrap
+                        )
+        # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+    else:
+        fig = go.Figure(go.Indicator(
+            title = {'text': "No Locks During Votes"},
+            ))
+    fig = format_plotly_figure(fig)
     # Build Plotly object
     graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 

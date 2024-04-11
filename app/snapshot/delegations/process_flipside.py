@@ -11,12 +11,12 @@ from app.data.reference import (
     known_large_market_actors,
 )
 
-class ProcessConvexDelegations():
-    def __init__(self, df_delegations, df_snapshot_votes, convex_locker ):
+class ProcessSnapshotDelegations():
+    def __init__(self, df_delegations, df_snapshot_votes, df_locker, is_not_convex = False):
         # Existing
         self.df_delegations = df_delegations
         self.df_snapshot_votes = df_snapshot_votes
-        self.convex_locker = convex_locker
+        self.df_locker = df_locker
         # New
         self.delegator_per_proposal = []    # aggregates delegator per proposal
         self.delegator_locks_per_proposal = [] # delegator per proposal plus lock info
@@ -24,6 +24,8 @@ class ProcessConvexDelegations():
         self.locks_with_delegate_context = [] # df_aggregate_user_epoch + delegate identifier per epoch
 
         self.votes_with_delegate_context = []
+
+        self.is_not_convex = is_not_convex
         # self.vote_power = []
         self.process()
         self.process_aggregate_system()
@@ -39,7 +41,7 @@ class ProcessConvexDelegations():
         delegator_lock_list = []
         lock_delegate_list = []
         vote_deletage_list = []
-        pcl_agg_user = self.convex_locker
+        pcl_agg_user = self.df_locker
         
         for i, row in df_proposal_aggs.iterrows():
             # delegation
@@ -53,9 +55,17 @@ class ProcessConvexDelegations():
             local_delegators_copy = local_delegators.copy()
 
             # locks
-            df_lock_local = pcl_agg_user[pcl_agg_user['this_epoch'] < row['proposal_start'] ]
-            target_epoch = df_lock_local.this_epoch.max()
-            df_lock_local = df_lock_local[df_lock_local['this_epoch'] == target_epoch ]
+            if not self.is_not_convex:
+                df_lock_local = pcl_agg_user[pcl_agg_user['this_epoch'] < row['proposal_start'] ]
+                target_epoch = df_lock_local.this_epoch.max()
+                df_lock_local = df_lock_local[df_lock_local['this_epoch'] == target_epoch ]
+                balance_user = 'user'
+                balance_var = 'current_locked'
+            else:
+                df_lock_local = pcl_agg_user[pcl_agg_user['block_timestamp'] < row['proposal_start'] ]
+                df_lock_local = df_lock_local.sort_values(['block_timestamp', 'event_name', 'staked_balance']).groupby(['provider']).tail(1)
+                balance_user = 'provider'
+                balance_var = 'staked_balance'
 
             # Join Delegators and Locks
             local_delegators_with_locks = local_delegators_copy[[
@@ -65,14 +75,14 @@ class ProcessConvexDelegations():
                 'delegator_known_as',
                 'proposal_start',
                 'proposal_title'
-                ]].set_index('delegator').join(df_lock_local.set_index('user')).reset_index()
+                ]].set_index('delegator').join(df_lock_local.set_index(balance_user)).reset_index()
             
             delegator_list.append(local_delegators)
             delegator_lock_list.append(local_delegators_with_locks)
 
             # Join Locks and Delegates (to reference delegation on locks per epoch per user)
             # df_local_3
-            local_locks_with_delegators = df_lock_local.set_index('user').join(
+            local_locks_with_delegators = df_lock_local.set_index(balance_user).join(
                 local_delegators[[
                     'delegate', 
                     'delegator',
@@ -86,7 +96,7 @@ class ProcessConvexDelegations():
             
         self.delegator_per_proposal = pd.concat(delegator_list)
         temp = pd.concat(delegator_lock_list)
-        self.delegator_locks_per_proposal = temp[temp['current_locked'] > 0]
+        self.delegator_locks_per_proposal = temp[temp[balance_var] > 0]
         self.locks_with_delegate_context = pd.concat(lock_delegate_list)
         # self.votes_with_delegate_context = pd.concat(vote_deletage_list)
         return
@@ -97,26 +107,44 @@ class ProcessConvexDelegations():
         return '_'
 
     def process_aggregate_system(self):
-        df = self.delegator_locks_per_proposal.groupby([
-                'proposal_start',
-                'proposal_title',
-                'delegate_known_as',
-                'delegate',
-                'this_epoch'
-            ]).agg(
-            total_delegated=pd.NamedAgg(column='current_locked', aggfunc=sum),
-            delegated_lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
-            delegators_count=pd.NamedAgg(column='delegator', aggfunc=lambda x: len(x.unique())),
-            delegators=pd.NamedAgg(column='delegator', aggfunc=list),
-            known_delegators=pd.NamedAgg(column='delegator_known_as', aggfunc=list),
+        if not self.is_not_convex:
+            df = self.delegator_locks_per_proposal.groupby([
+                    'proposal_start',
+                    'proposal_title',
+                    'delegate_known_as',
+                    'delegate',
+                    'this_epoch'
+                ]).agg(
+                total_delegated=pd.NamedAgg(column='current_locked', aggfunc=sum),
+                delegated_lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
+                delegators_count=pd.NamedAgg(column='delegator', aggfunc=lambda x: len(x.unique())),
+                delegators=pd.NamedAgg(column='delegator', aggfunc=list),
+                known_delegators=pd.NamedAgg(column='delegator_known_as', aggfunc=list),
 
 
-        ).reset_index()
-        df['delegators'] = df['delegators'].apply(lambda x: nullify_list(x))
-        df['known_delegators'] = df['known_delegators'].apply(lambda x: nullify_list(x, True))
-        self.aggregate_delegates = df
-        return
-    
+            ).reset_index()
+            df['delegators'] = df['delegators'].apply(lambda x: nullify_list(x))
+            df['known_delegators'] = df['known_delegators'].apply(lambda x: nullify_list(x, True))
+            self.aggregate_delegates = df
+            return
+        else:
+            df = self.delegator_locks_per_proposal.groupby([
+                    'proposal_start',
+                    'proposal_title',
+                    'delegate_known_as',
+                    'delegate',
+                ]).agg(
+                    total_delegated=pd.NamedAgg(column='staked_balance', aggfunc=sum),
+                    # delegated_lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
+                    delegators_count=pd.NamedAgg(column='delegator', aggfunc=lambda x: len(x.unique())),
+                    delegators=pd.NamedAgg(column='delegator', aggfunc=list),
+                    known_delegators=pd.NamedAgg(column='delegator_known_as', aggfunc=list),
+                ).reset_index()
+            df['delegators'] = df['delegators'].apply(lambda x: nullify_list(x))
+            df['known_delegators'] = df['known_delegators'].apply(lambda x: nullify_list(x, True))
+            self.aggregate_delegates = df
+            return
+        
     def get_snapshot_proposal_aggregates(self):
         return self.df_snapshot_votes.groupby([
             'proposal_start', 'proposal_title', 'checkpoint_id'
@@ -128,7 +156,12 @@ class ProcessConvexDelegations():
    
     def process_aggregate_votes(self):
         # self.aggregate_delegates
-        # self.df_snapshot_votes
+        # print(len(self.df_snapshot_votes))
+        # print(self.df_snapshot_votes.keys())
+
+        # print(len(self.aggregate_delegates))
+        # print(self.aggregate_delegates.keys())
+
         df = pd.merge(
             self.df_snapshot_votes,
             self.aggregate_delegates,
@@ -140,5 +173,8 @@ class ProcessConvexDelegations():
         df['known_delegators'] = df['known_delegators'].apply(lambda x: nullify_list(x, True))
         self.votes_with_delegate_context = df
         return
+    
+
+
     
 

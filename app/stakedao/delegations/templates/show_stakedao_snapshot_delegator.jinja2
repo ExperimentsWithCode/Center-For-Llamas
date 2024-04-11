@@ -9,8 +9,8 @@
 #}
 
 {% block content %}
-  {% set active_category = "convex" -%}
-  {% set active_page = "convex_delegations" -%}
+  {% set active_category = "stakedao" -%}
+  {% set active_page = "stakedao_delegations" -%}
   {% set sub_active_page = 'home' -%}
 
   {% include "navigation.jinja2" %}
@@ -18,7 +18,7 @@
       <h1>{{ title }}</h1>
     </div>
 
-    {% with actor_type = 'convex_delegator'%}
+    {% with actor_type = 'stakedao_delegator'%}
         {% with action_tag = 'Delegator'%}
 
         {% include 'actors_widget.jinja2' %} 
@@ -92,7 +92,7 @@
 
     {% with df_snapshot=df_snapshot_user %}
       {% with df_snapshot_adj=df_snapshot_user_adj %}
-        {% with snapshot_space='convex' %}
+        {% with snapshot_space='stakedao' %}
             {% with table_tag='delegator' %}
               {% include 'snapshot_table_manager.jinja2' %} 
             {% endwith %}

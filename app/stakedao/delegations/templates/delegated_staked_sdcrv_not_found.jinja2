@@ -1,0 +1,39 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% set active_category = "stakedao" -%}
+  {% set active_page = "stakedao_delegations" -%}
+  {% set sub_active_page = 'home' -%}
+
+  {% include "navigation.jinja2" %}
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+    {% with actor_type = 'stakedao_delegator'%}
+        {% with action_tag = 'Delegator'%}
+
+        {% include 'actors_widget.jinja2' %} 
+      {% endwith %}
+    {% endwith %}
+
+    <div class="row">
+
+        <div class="card text-white bg-danger mb-3" >
+          <div class="card-header">Something Went Wrong</div>
+          <div class="card-body">
+              <h4 class="card-title">No staked sdCRV found to delegate</h4>
+              <p class="card-text">Perhaps they never got around to locking?</p>
+          </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -3,11 +3,16 @@ from flask import current_app as app
 # from ... import db
 from app.data.local_storage import (
     pd,
-    read_json,
-    read_csv,
-    write_dataframe_csv,
-    write_dfs_to_xlsx
+    csv_to_df,
+    df_to_csv
     )
+
+from app.utilities.utility import (
+    format_plotly_figure,
+    get_checkpoint_id,
+    get_checkpoint_timestamp_from_id,
+    convert_units
+)
 
 
 # filename = 'crv_locker_logs'
@@ -29,10 +34,18 @@ try:
     # df_curve_locker_history = app.config['df_curve_locker_history']
     # df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
     df_checkpoints_agg = app.config['df_checkpoints_agg']
+    df_votium_v2 = app.config['df_votium_v2']
+    df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
+    # df_curve_liquidity = app.config['df_curve_liquidity']
+    df_curve_oracles_agg = app.config['df_curve_oracles_agg']
+
 except:
     # from app.curve.gauge_votes.models import df_gauge_votes_formatted
     # from app.curve.locker.models import df_curve_locker_history
     from app.curve.gauge_checkpoints.models import df_checkpoints_agg
+    from app.convex.votium_bounties_v2.models import df_votium_v2
+    from app.curve.liquidity.models import df_curve_liquidity_aggregates
+    from app.curve.liquidity.models import df_curve_oracles_agg
 
 
 
@@ -147,3 +160,178 @@ def get_meta(round=0, top_x = 20, compare_round=1):
     df_vote_deltas = pd.json_normalize(output)
     df_head, df_tail = generate_head_and_tail(df_vote_deltas, top_x)
     return df_head, df_tail
+
+
+class ProcessContributingFactors():
+    def __init__(self):
+        pass
+
+    def process_all(self, target_gauge, compare_back):
+        df0 = self.process(target_gauge, compare_back)
+        df1 = self.process_issuance(df0)
+        df2 = self.process_oracle(df1)
+        return df2.sort_values(['checkpoint_timestamp', 'issuance_value'], ascending=False)
+
+    def process(self, target_gauge, compare_back):
+        df_checkpoints_local = df_checkpoints_agg[df_checkpoints_agg['gauge_addr'] == target_gauge]
+        df_checkpoints_local = df_checkpoints_local[df_checkpoints_local['checkpoint_id'] > df_checkpoints_local.checkpoint_id.max() - compare_back]
+
+        df_votium_v2_local = df_votium_v2[df_votium_v2['gauge_addr'] == target_gauge]
+        df_votium_v2_local = df_votium_v2_local[df_votium_v2_local['checkpoint_id'] > df_votium_v2_local.checkpoint_id.max() - compare_back]
+
+        df_curve_liquidity_local = df_curve_liquidity_aggregates[df_curve_liquidity_aggregates['gauge_addr'] == target_gauge]
+        df_curve_liquidity_local = df_curve_liquidity_local[df_curve_liquidity_local['checkpoint_id'] > df_curve_liquidity_local.checkpoint_id.max() - compare_back]
+
+        df_checkpoints_local = df_checkpoints_local[[
+            'checkpoint_id',
+            'checkpoint_timestamp',
+            'gauge_addr',
+            'gauge_name',
+            'gauge_symbol',
+            'total_vote_power',
+            'total_vote_percent'
+            ]]
+        
+        df_votium_v2_local = df_votium_v2_local[[
+            'bounty_amount',
+            'bounty_value',
+            # 'price',
+            # 'depositor',
+            # 'excluded',
+            # 'gauge_addr',
+            'votium_round',
+            'token',
+            'token_name',
+            'token_symbol',
+            'checkpoint_id',
+            # 'total_vote_power',
+            # 'total_vote_percent',
+            # 'total_bounty_value',
+            'relative_vote_power',
+            'bounty_per_vecrv',
+            'bounty_per_vecrv_percent',
+            'vecrv_per_bounty',
+            'vecrv_percent_per_bounty'
+            ]].sort_values(['checkpoint_id', 'token_symbol', ])
+
+        df_votium_v2_local = df_votium_v2_local.groupby([
+            'checkpoint_id',
+            'votium_round',
+            # 'total_vote_percent',
+            # 'total_vote_power',
+            # 'total_bounty_value',
+            # 'gauge_name',
+            # 'gauge_addr',
+            # 'total_vote_power'
+            ]).agg(
+            total_bounty_value=pd.NamedAgg(column='bounty_value', aggfunc='sum'),
+            bounty_values=pd.NamedAgg(column='bounty_value', aggfunc=list),
+            bounty_tokens=pd.NamedAgg(column='token_symbol', aggfunc=list),
+            bounty_amounts=pd.NamedAgg(column='bounty_amount', aggfunc=list),
+
+            ).reset_index()
+
+
+
+        df_curve_liquidity_local['tradable_assets'] = df_curve_liquidity_local['tradable_assets'].apply(self.format_list)
+
+        df_curve_liquidity_local = df_curve_liquidity_local.groupby([
+                # 'final_lock_time',
+            'checkpoint_id',
+            'pool_addr',
+            # 'total_vote_power',
+            'tradable_assets',
+            ]).agg(
+            total_balance=pd.NamedAgg(column='total_balance', aggfunc='mean'),
+            total_balance_usd=pd.NamedAgg(column='total_balance_usd', aggfunc='mean'),
+            liquidity_over_votes=pd.NamedAgg(column='liquidity_over_votes', aggfunc='mean'),
+            liquidity_usd_over_votes=pd.NamedAgg(column='liquidity_usd_over_votes', aggfunc='mean'),
+
+            ).reset_index()
+            
+        df_combo = pd.merge(
+            df_checkpoints_local, 
+            df_votium_v2_local, 
+            how='left', 
+            on = ['checkpoint_id'], 
+            )
+
+        df_combo[['votium_round']] = df_combo[['votium_round']].ffill()
+            
+        df_combo = pd.merge(
+            df_combo, 
+            df_curve_liquidity_local[0:-1], 
+            how='left', 
+            on = ['checkpoint_id'], 
+            )
+        
+        return df_combo
+
+    def format_list(self, string_in):
+        out = []
+        try:
+            for n in string_in.split(','):
+                n2 = n.strip().strip('[').strip(']')
+                # print(n2)
+                out.append(n2)
+            out.sort()
+        except:
+            print(string_in)
+        return str(out).replace("'", "")
+
+    def generate_issuance_map(self, annual_issuance):
+        i = 1
+        issuance_map = {}
+        while i < 52*6:
+            issuance_rate_id = int(i/52)
+            annual_crv = annual_issuance[issuance_rate_id]
+            issuance_map[i] = annual_crv / 52
+            i+= 1
+        return issuance_map
+    
+    def apply_issuance(self, row, weekly_issuance_map):
+        return weekly_issuance_map[row['checkpoint_id']] * row['total_vote_percent']
+
+    def process_issuance(self, df):
+        annual_issuance = [
+            194323750.00,
+            163406144.00,
+            137407641.00,
+            115545593.00,
+            97161875.00,
+            81703072.50,
+        ]
+        weekly_issuance_map = self.generate_issuance_map(annual_issuance)
+
+        df['issuance_received'] = df.apply(lambda x: self.apply_issuance(x, weekly_issuance_map), axis=1)
+        return df
+
+    def get_oracle_checkpoint_aggs(self, df):
+        df = df.copy()
+
+        df['checkpoint_id'] = df['block_timestamp'].apply(get_checkpoint_id)
+        df['checkpoint_timestamp'] = df['checkpoint_id'].apply(get_checkpoint_timestamp_from_id)
+        processed_agg = df[['checkpoint_id', 'calc_price']].groupby([
+            'checkpoint_id',
+            ]).agg(
+            avg_crv_price=pd.NamedAgg(column='calc_price', aggfunc='mean')).reset_index()
+        return processed_agg
+
+    def process_oracle(self, df):
+        df_crv_oracle = df_curve_oracles_agg[df_curve_oracles_agg['token_addr'] == '0xd533a949740bb3306d119cc777fa900ba034cd52']
+
+        df_checkpoint_oracle = self.get_oracle_checkpoint_aggs(df_crv_oracle)
+        df_oracle_combo = pd.merge(
+            df, 
+            df_checkpoint_oracle, 
+            how='left', 
+            on = ['checkpoint_id'], 
+            )
+        
+        df_oracle_combo['issuance_value'] = df_oracle_combo['issuance_received'] * df_oracle_combo['avg_crv_price']
+        # df_oracle_combo['relative_issuance'] = df_oracle_combo['issuance_value'] * df_oracle_combo['bounty_value'] / df_oracle_combo['total_bounty_value']
+        # df_oracle_combo['relative_issuance_value'] = df_oracle_combo['relative_issuance'] * df_oracle_combo['avg_crv_price']
+
+        df_oracle_combo['yield_rate'] = (df_oracle_combo['issuance_value'] * 52) / df_oracle_combo['total_balance_usd']
+        df_oracle_combo['yield_rate_adj'] = df_oracle_combo['yield_rate'] * 100
+        return df_oracle_combo

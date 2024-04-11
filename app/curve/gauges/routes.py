@@ -39,8 +39,8 @@ gauges_bp = Blueprint(
 def index():
     # local_df_curve_gauge_registry = df_curve_gauge_registry.sort_values("deployed_timestamp", axis = 0, ascending = False)
     # local_df_curve_gauge_registry
-    df_approved = get_approved(df_curve_gauge_registry)
-    df_deployed = get_deployed(df_curve_gauge_registry)
+    df_approved = get_approved()
+    df_deployed = get_deployed()
 
     df_approved_grouped = get_checkpoint_counts(df_approved, True)
     df_deployed_grouped = get_checkpoint_counts(df_deployed, False)
@@ -137,10 +137,10 @@ def show(gauge_addr):
 
 
 
-def get_approved(df):
+def get_approved():
     return df_curve_gauge_registry.dropna(subset=['vote_timestamp']).sort_values(['vote_timestamp'], ascending=False)
 
-def get_deployed(df):
+def get_deployed():
     return df_curve_gauge_registry.dropna(subset=['deployed_timestamp']).sort_values(['deployed_timestamp'], ascending=False)
 
 def get_checkpoint_counts(df, is_approved=False):

@@ -21,6 +21,8 @@ def monster_mash():
         df_stakedao_vesdt = app.config['df_stakedao_vesdt']
 
         df_stakedao_sdcrv = app.config['df_stakedao_sdcrv']
+        df_stakedao_sdcrv = app.config['df_stakedao_delegations']
+
     except:
         from app.curve.locker.models import df_curve_vecrv
         from app.curve.gauge_votes.models import df_all_votes
@@ -34,6 +36,8 @@ def monster_mash():
         from app.stakedao.locker.models import df_stakedao_vesdt
 
         from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv
+        from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv
+        from app.stakedao.delegations.models import df_stakedao_delegations
 
 
     curve_vecrv_lockers = df_curve_vecrv.provider.unique()
@@ -47,6 +51,9 @@ def monster_mash():
     stakedao_snapshot_voters = df_snapshot_stakedao.voter.unique()
     stakedao_vesdt_lockers = df_stakedao_vesdt.provider.unique()
     stakedao_sdcrv_stakers = df_stakedao_sdcrv.provider.unique()
+    stakedao_delegators = df_stakedao_delegations.delegator.unique()
+    stakedao_delegates = df_stakedao_delegations.delegate.unique()
+
 
     all_addresses = list(curve_vecrv_lockers) + list(curve_voters)
     all_addresses += list(convex_snapshot_voters) + list(convex_delegates) +list(convex_delegators) + list(convex_vlcvx_lockers)
@@ -61,13 +68,17 @@ def monster_mash():
             'known_as': known_large_market_actors[address] if address in known_large_market_actors else '_',
             'curve_vecrv_locker': True if address in curve_vecrv_lockers else False,
             'curve_voters': True if address in curve_voters else False,
+            
             'convex_snapshot_voter': True if address in convex_snapshot_voters else False,
+            'convex_vlcvx_locker': True if address in convex_vlcvx_lockers else False,
             'convex_delegator': True if address in convex_delegators else False,
             'convex_delegate': True if address in convex_delegates else False,
-            'convex_vlcvx_locker': True if address in convex_vlcvx_lockers else False,
+            
             'stakedao_snapshot_voter': True if address in stakedao_snapshot_voters else False,
-            'stakedao_vesdt_locker': True if address in stakedao_vesdt_lockers else False,
             'stakedao_sdcrv_staker': True if address in stakedao_sdcrv_stakers else False,
+            'stakedao_vesdt_locker': True if address in stakedao_vesdt_lockers else False,
+            'stakedao_delegator': True if address in stakedao_delegators else False,
+            'stakedao_delegate': True if address in stakedao_delegates else False,
         }
         output.append(row)
 

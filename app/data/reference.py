@@ -73,14 +73,15 @@ known_large_market_actors = {
     '0xb742da24d6d5803b6c5e4f5bf0ff2c0ef1e94f55' : 'StakeCapital.eth',
     '0xdc4e6dfe07efca50a197df15d9200883ef4eb1c8' : 'Angle',
     '0x65bb797c2b9830d891d87288f029ed8dacc19705' : 'Stargate',
-    '0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb' : 'Convergence',
     '0xdbbfc051d200438dd5847b093b22484b842de9e7' : 'APWine',
     '0x9d5df30f475cea915b1ed4c0cca59255c897b61b' : 'Inverse DAO',
     '0xab125ccb7660b717fc3a1df5d04ac4cfc3558d8a' : 'Mento',
     '0x6feb7be522db641a5c0f246924d8a92cf3218692' : 'Temple',
     '0x73eb240a06f0e0747c698a219462059be6aaccc8' : 'Llamas',
     '0x3dfc49e5112005179da613bde5973229082dac35' : 'BAO Finance',
-    '0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb' : 'Convergence',
+    '0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb' : 'Convergence (alt)',
+    '0x3216D2A52f0094AA860ca090BC5C335dE36e6273' : 'Alchemix (alt)',
+    '0x21777106355ba506a31ff7984c0ae5c924deb77f' : 'Convergence',
 
     # Non Votium Delegations
     '0x14f83ff95d4ec5e8812ddf42da1232b0ba1015e6' : 'Badger (Delegate)',	
@@ -88,11 +89,11 @@ known_large_market_actors = {
     '0x5180db0237291a6449dda9ed33ad90a38787621c' : 'Frax (Delegate)',	
     '0x9b8b04b6f82cd5e1dae58ca3614d445f93defc5c' : 'Silo (Delegate)',	
     '0x131bd1a2827cceb2945b2e3b91ee1bf736ccbf80' : 'Olympus (Delegate)',	
-    # '0x79e76c14b3bb6236dfc06d2d7ff219c8b070169c' : 'Reserve Delegate 1',	
+    '0x79e76c14b3bb6236dfc06d2d7ff219c8b070169c' : 'Reserve Delegate 1',	
     '0x68378fcb3a27d5613afcfddb590d35a6e751972c' : 'Paladin (Delegate)',	
     '0x8200d84590eceb10c6471268930e2924f34e3d69' : 'Bent (Delegate)',	
-    # '0xd733d4cc5b42206a62ed7b1ceec5b4d61898f429' : 'Reserve Delegate 2',
-    # '0x578a4af5cbc3009487a89be88bc560157200795b' : 'Reserve Delegate 3',
+    '0xd733d4cc5b42206a62ed7b1ceec5b4d61898f429' : 'Reserve Delegate 2',
+    '0x578a4af5cbc3009487a89be88bc560157200795b' : 'Reserve Delegate 3',
 
     # Crv Holders
     '0x52f541764e6e90eebc5c21ff570de0e2d63766b6' : 'StakeDAO (sdCRV)',
@@ -197,14 +198,13 @@ core_filename_list = [
     filename_convex_delegations,
     filename_convex_locker,
     filename_convex_curve_snapshot,
-    filename_convex_curve_snapshot_origin,
+    filename_convex_delegations,
 
     # StakeDao Data
-    filename_stakedao_delegations,
     filename_stakedao_staked_sdcrv,
     filename_stakedao_locker,
     filename_stakedao_curve_snapshot,
-    filename_stakedao_curve_snapshot_origin,
+    filename_stakedao_delegations,
 
     # Votium
     filename_votium_v2,
@@ -214,7 +214,7 @@ core_filename_list = [
     filename_warden_vesdt_boost_delegation,
     
     # Meta
-    filename_actors,
+    # filename_actors,
 ]
 
 filename_list = [

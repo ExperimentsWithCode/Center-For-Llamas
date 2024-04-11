@@ -117,7 +117,11 @@
                         <a class="nav-link {% if 'curve_top_vote_changes' == sub_active_page %} active border-info  {% endif%}" 
                           href="{{ url_for('curve_meta_bp.index') }}">Top Vote Changes</a>
                       </li>
-                    
+
+                      <li class="nav-item">
+                        <a class="nav-link {% if 'contributing_factors' == sub_active_page %} active border-info  {% endif%}" 
+                          href="{{ url_for('curve_meta_bp.contributing_factors') }}">Contributing Factors</a>
+                      </li>
                     </ul>
 
 
@@ -171,6 +175,11 @@
               <li class="nav-item">
                 <a class="nav-link {% if 'stakedao_locker' == active_page %} active border-secondary   {% endif%}" 
                   href="{{ url_for('stakedao_locked_vesdt_bp.index') }}">veSDT Locker</a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link {% if 'stakedao_delegations' == active_page %} active border-secondary   {% endif%}" 
+                  href="{{ url_for('stakedao_snapshot_delegations_bp.index') }}">sdCRV Delegations</a>
               </li>
 
 

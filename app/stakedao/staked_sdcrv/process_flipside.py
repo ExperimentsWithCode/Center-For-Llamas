@@ -47,6 +47,9 @@ class StakeDAOsdCRV():
             return row['value']
         elif row['event_name'] == 'Withdraw':
             return -1 * row['value']
+        elif row['event_name'] == 'Transfer':
+            return row['value']
+
         
     def known_as(self, user):
         if user in known_large_market_actors:

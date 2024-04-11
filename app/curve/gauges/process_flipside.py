@@ -216,6 +216,12 @@ class Gauge_Set():
 
             self.deployed_timestamp = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
 
+        # Pass names up stack if available
+        if not self.gauge_name and self.pool_name:
+            self.gauge_name = self.pool_name
+        if not self.gauge_symbol and self.pool_symbol:
+            self.gauge_symbol = self.pool_symbol
+
         try:
             self.deployed_period = get_checkpoint_id(row['deployed_timestamp'])
             self.deployed_period_end_date = get_checkpoint_timestamp_from_id(self.deployed_period)

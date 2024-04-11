@@ -56,6 +56,8 @@ def init_app():
             from .stakedao.staked_sdcrv.routes import stakedao_staked_sdcrv_bp
             from .stakedao.locker.routes import stakedao_locked_vesdt_bp
 
+            from .stakedao.delegations.routes import stakedao_snapshot_delegations_bp
+
             from .address_book.routes import address_book_bp
 
         
@@ -81,6 +83,7 @@ def init_app():
             app.register_blueprint(stakedao_snapshot_bp, url_prefix='/stakedao/snapshot')
             app.register_blueprint(stakedao_staked_sdcrv_bp, url_prefix='/stakedao/staked_sdcrv')
             app.register_blueprint(stakedao_locked_vesdt_bp, url_prefix='/stakedao/locker')
+            app.register_blueprint(stakedao_snapshot_delegations_bp, url_prefix='/stakedao/delegations')
 
             app.register_blueprint(address_book_bp, url_prefix='/address_book/')
 

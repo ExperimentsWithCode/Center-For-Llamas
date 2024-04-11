@@ -49,8 +49,9 @@ class LiquidityManager():
     def manage(self):
         df_cutoff = self.cutoff()   # if load cutoff, load, else get
         self.backfill(df_cutoff)    # if load initial, load
-        df_liquidity = self.forward_filler()
-        df_to_csv(df_liquidity, filename_curve_liquidity, 'source')
+        df_liquidity = self.forward_filler() # Each fetc doesn't see cutoff data and so wont return cutoff data
+        df_joined = self.join_cutoff(df_liquidity, df_cutoff) # join before saving to source so processng uses both
+        df_to_csv(df_joined, filename_curve_liquidity, 'source')
 
 
     def cutoff(self):
@@ -77,7 +78,8 @@ class LiquidityManager():
                 filename_curve_liquidity, 
                 df_cutoff.cutoff.min()
                 )
-            return self.join_cutoff(df, df_cutoff)
+            return None
+        return None
 
     def forward_filler(self):
         """

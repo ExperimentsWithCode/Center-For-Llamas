@@ -74,7 +74,7 @@
                 {% if is_adjusted %}
                 'choice_power': '{{ row['choice_power_adj']|round(2)}}',
                 'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
-                'available_power': '{{ row['current_locked']|round(2) }}',
+                'available_power': '{{ row['staked_balance']|round(2) }}',
                 {% else %}
                 'choice_power': '{{ row['choice_power']|round(2)}}',
                 'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',

@@ -9,8 +9,8 @@
 #}
 
 {% block content %}
-  {% set active_category = "convex" -%}
-  {% set active_page = "convex_delegations" -%}
+  {% set active_category = "stakedao" -%}
+  {% set active_page = "stakedao_delegations" -%}
   {% set sub_active_page = 'home' -%}
   {% include "navigation.jinja2" %}
 
@@ -67,13 +67,13 @@
 
         ],
         data: [
-          {% for index, row in df_convex_delegations.iterrows() %}
+          {% for index, row in df_stakedao_delegations.iterrows() %}
             {
               'block_timestamp': '{{ row['block_timestamp'] }}',
               'event_name': '{{ row['event_name'] }}',
-              'delegate':  `<a href={{ url_for('convex_snapshot_delegations_bp.delegate', delegate = row['delegate']) }}>{{row['delegate']}}</a>`,
+              'delegate':  `<a href={{ url_for('stakedao_snapshot_delegations_bp.delegate', delegate = row['delegate']) }}>{{row['delegate']}}</a>`,
 
-              'delegator':  `<a href={{ url_for('convex_snapshot_delegations_bp.delegator', delegator = row['delegator']) }}>{{row['delegator']}}</a>`,
+              'delegator':  `<a href={{ url_for('stakedao_snapshot_delegations_bp.delegator', delegator = row['delegator']) }}>{{row['delegator']}}</a>`,
 
               'tx_hash': '{{ row['tx_hash'] }}'
 

@@ -10,20 +10,20 @@ from wtforms.validators import (
 )
 
 
-class PowerDiffForm(FlaskForm):
+class ContributingFactorsForm(FlaskForm):
     """User Sign-up Form."""
-    main_round = IntegerField(
-        'Main Round',
+    target_gauge = StringField(
+        'Target Gauge',
+        validators=[DataRequired()]
+    )
+    compare_back = IntegerField(
+        'Compare Back',
         # validators=[DataRequired()]
     )
-    compare_round = IntegerField(
-        'Compare Round',
-        validators=[DataRequired()]
-    )
-    top_results = IntegerField(
-        'Top Results',
-        validators=[DataRequired()]
-    )
+    # top_results = IntegerField(
+    #     'Top Results',
+    #     validators=[DataRequired()]
+    # )
     submit = SubmitField('Submit')
 
 

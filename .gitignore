@@ -9,3 +9,5 @@ trash/
 *.ipynb
 app/static/fonts/*
 wsgi.py
+
+__pycache__/

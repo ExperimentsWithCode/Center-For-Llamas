@@ -2,11 +2,12 @@
 
 {% block content %}
 {% set table_type = table_type|default("primary") -%}
+{% set max_size = max_size|default(20) -%}
 
     search: true,
     sort: true,
     pagination: {
-    limit: 20,
+    limit: {{max_size}},
     summary: true
     },
     autoWidth: true,

@@ -20,7 +20,7 @@ from app.data.local_storage import pd
 # from matplotlib.figure import Figure
 # import io
 
-from app.convex.delegations.models import df_convex_delegations
+from app.stakedao.delegations.models import df_stakedao_delegations
 
 from app.utilities.utility import (
     format_plotly_figure,
@@ -30,33 +30,33 @@ from app.utilities.utility import (
 )
 
 # Blueprint Configuration
-convex_snapshot_delegations_bp = Blueprint(
-    'convex_snapshot_delegations_bp', __name__,
-    url_prefix='/convex/delegations',
+stakedao_snapshot_delegations_bp = Blueprint(
+    'stakedao_snapshot_delegations_bp', __name__,
+    url_prefix='/stakedao/delegations',
     template_folder='templates',
     static_folder='static'
 )
 
-# df_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
-# df_vote_choice = app.config['df_convex_snapshot_vote_choice']
+# df_vote_aggregates = app.config['df_stakedao_snapshot_vote_aggregates']
+# df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
 
 
 # proposal_end	proposal_title	choice	sum	count
 
-@convex_snapshot_delegations_bp.route('/', methods=['GET'])
+@stakedao_snapshot_delegations_bp.route('/', methods=['GET'])
 # @login_required
 def index():
 
-    df_convex_delegations_agg = app.config['df_convex_delegations_agg']
-    df_convex_delegations = app.config['df_convex_delegations']
+    df_stakedao_delegations_agg = app.config['df_stakedao_delegations_agg']
+    df_stakedao_delegations = app.config['df_stakedao_delegations']
 
     
     # Filter Data
 
 
     # Build chart
-    temp_df_convex_delegations_agg = df_convex_delegations_agg.sort_values(['proposal_start', 'total_delegated'], ascending = False)
-    fig = px.line(temp_df_convex_delegations_agg, x="proposal_start", y="total_delegated", color='delegate')
+    temp_df_stakedao_delegations_agg = df_stakedao_delegations_agg.sort_values(['proposal_start', 'total_delegated'], ascending = False)
+    fig = px.line(temp_df_stakedao_delegations_agg, x="proposal_start", y="total_delegated", color='delegate')
     fig.update_layout(
         title=f"Delegated Balance Per Delegate",
     #     xaxis_title="X Axis Title",
@@ -76,8 +76,8 @@ def index():
 
 
 
-    temp_df_convex_delegations_agg = df_convex_delegations_agg.sort_values(['proposal_start', 'delegators_count'], ascending = False)
-    fig = px.line(temp_df_convex_delegations_agg, x="proposal_start", y="delegators_count", color='delegate')
+    temp_df_stakedao_delegations_agg = df_stakedao_delegations_agg.sort_values(['proposal_start', 'delegators_count'], ascending = False)
+    fig = px.line(temp_df_stakedao_delegations_agg, x="proposal_start", y="delegators_count", color='delegate')
     fig.update_layout(
         title=f"Delegator Count Per Delegate",
     #     xaxis_title="X Axis Title",
@@ -97,49 +97,49 @@ def index():
 
     
     return render_template(
-        'index_convex_delegations.jinja2',
-        title='Convex Delegations',
-        template='convex-delegations-index',
+        'index_stakedao_delegations.jinja2',
+        title='stakedao Delegations',
+        template='stakedao-delegations-index',
         body="",
-        df_convex_delegations = df_convex_delegations,
+        df_stakedao_delegations = df_stakedao_delegations,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
     )
 
 
 
-@convex_snapshot_delegations_bp.route('/delegate/<string:delegate>', methods=['GET'])
+@stakedao_snapshot_delegations_bp.route('/delegate/<string:delegate>', methods=['GET'])
 def delegate(delegate):
-    # df_vote_choice = app.config['df_convex_snapshot_vote_choice']
-    df_convex_delegation_locks_per_proposal = app.config['df_convex_delegation_locks_per_proposal']
-    df_convex_delegations_agg = app.config['df_convex_delegations_agg']
+    # df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
+    df_stakedao_delegation_locks_per_proposal = app.config['df_stakedao_delegation_locks_per_proposal']
+    df_stakedao_delegations_agg = app.config['df_stakedao_delegations_agg']
 
     # Filter Data
 
     # Aggregate Delegate
-    local_df_convex_delegate_agg = df_convex_delegations_agg[df_convex_delegations_agg['delegate'] == delegate]
-    local_df_convex_delegate_agg = local_df_convex_delegate_agg.sort_values(["proposal_start", 'total_delegated'], axis = 0, ascending = False)
+    local_df_stakedao_delegate_agg = df_stakedao_delegations_agg[df_stakedao_delegations_agg['delegate'] == delegate]
+    local_df_stakedao_delegate_agg = local_df_stakedao_delegate_agg.sort_values(["proposal_start", 'total_delegated'], axis = 0, ascending = False)
 
 
-    local_df_convex_delegation_locks_per_proposal = df_convex_delegation_locks_per_proposal[
-        df_convex_delegation_locks_per_proposal['delegate'] == delegate
+    local_df_stakedao_delegation_locks_per_proposal = df_stakedao_delegation_locks_per_proposal[
+        df_stakedao_delegation_locks_per_proposal['delegate'] == delegate
         ]   
-    local_df_convex_delegation_locks_per_proposal = local_df_convex_delegation_locks_per_proposal.sort_values(["proposal_start", 'current_locked'], axis = 0, ascending = False)
+    local_df_stakedao_delegation_locks_per_proposal = local_df_stakedao_delegation_locks_per_proposal.sort_values(["proposal_start", 'staked_balance'], axis = 0, ascending = False)
 
-    local_df_current_delegate_locks = local_df_convex_delegation_locks_per_proposal[
-        local_df_convex_delegation_locks_per_proposal['proposal_start'] == local_df_convex_delegation_locks_per_proposal.proposal_start.max()
+    local_df_current_delegate_locks = local_df_stakedao_delegation_locks_per_proposal[
+        local_df_stakedao_delegation_locks_per_proposal['proposal_start'] == local_df_stakedao_delegation_locks_per_proposal.proposal_start.max()
     ]
 
-    local_delegations = local_df_convex_delegation_locks_per_proposal[
-            ['this_epoch', 'delegator', 'delegator_known_as', 'proposal_start', 'proposal_title', 'current_locked', 'lock_count']
+    local_delegations = local_df_stakedao_delegation_locks_per_proposal[
+            ['delegator', 'delegator_known_as', 'proposal_start', 'proposal_title', 'staked_balance']
         ].groupby(['delegator']).head(1)
     
     graph_list = []
     # Build chart
 
-    fig = px.bar(local_df_convex_delegate_agg,
-                    x=local_df_convex_delegate_agg['proposal_start'],
-                    y=local_df_convex_delegate_agg['total_delegated'],
+    fig = px.bar(local_df_stakedao_delegate_agg,
+                    x=local_df_stakedao_delegate_agg['proposal_start'],
+                    y=local_df_stakedao_delegate_agg['total_delegated'],
                     color='delegators_count',
                     title='vlCVX Delegated Power by Delegate',
                     # facet_row=facet_row,
@@ -155,7 +155,7 @@ def delegate(delegate):
 
     # # Build chart
     fig = px.pie(local_df_current_delegate_locks, 
-                values=local_df_current_delegate_locks['current_locked'],
+                values=local_df_current_delegate_locks['staked_balance'],
                 names=local_df_current_delegate_locks['delegator_known_as'],
                 title='Current Round Gauge Distribution',
                 # hover_data=['known_as'], labels={'known_as':'known_as'}
@@ -168,7 +168,7 @@ def delegate(delegate):
 
     # # Build chart
     fig = px.pie(local_df_current_delegate_locks, 
-                values=local_df_current_delegate_locks['current_locked'],
+                values=local_df_current_delegate_locks['staked_balance'],
                 names=local_df_current_delegate_locks['delegator'],
                 title='Current Round Gauge Distribution',
                 # hover_data=['known_as'], labels={'known_as':'known_as'}
@@ -181,7 +181,7 @@ def delegate(delegate):
     # # # Build chart
     # fig = px.bar(local_df_locker_user_epoch,
     #                 x=local_df_locker_user_epoch['proposal_start'],
-    #                 y=local_df_locker_user_epoch['current_locked'],
+    #                 y=local_df_locker_user_epoch['staked_balance'],
     #                 color='delegate',
     #                 title='Locked vlCVX by Delegate',
     #                 # facet_row=facet_row,
@@ -195,13 +195,13 @@ def delegate(delegate):
 
 
     return render_template(
-        'show_convex_snapshot_delegate.jinja2',
-        title='Convex Delegate Lock Profile',
-        template='show_convex_snapshot_delegate',
+        'show_stakedao_snapshot_delegate.jinja2',
+        title='stakedao Delegate Lock Profile',
+        template='show_stakedao_snapshot_delegate',
         body="",
         actor_profile = get_address_profile(app.config['df_actors'], delegate),
-        df_locker = local_df_convex_delegate_agg,
-        # current_votes = local_df_current_delegate_locks.iloc[0]['current_locked'].sum(),
+        df_locker = local_df_stakedao_delegate_agg,
+        # current_votes = local_df_current_delegate_locks.iloc[0]['staked_balance'].sum(),
         local_delegations = local_delegations,
         votium_bounty_registry = app.config['votium_bounty_registry'],
         graph_list = graph_list
@@ -209,12 +209,12 @@ def delegate(delegate):
 
 
 
-@convex_snapshot_delegations_bp.route('/delegator/<string:delegator>', methods=['GET'])
+@stakedao_snapshot_delegations_bp.route('/delegator/<string:delegator>', methods=['GET'])
 def delegator(delegator):
     df_actors  = app.config['df_actors']
-    df_vote_choice = app.config['df_convex_snapshot_vote_choice']
-    # df_convex_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
-    df_convex_delegation_locks_per_proposal = app.config['df_convex_delegation_locks_per_proposal']
+    df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
+    # df_stakedao_locker_agg_user_epoch = app.config['df_stakedao_locker_agg_user_epoch']
+    df_stakedao_delegation_locks_per_proposal = app.config['df_stakedao_delegation_locks_per_proposal']
 
     # Filter Data
     ## Votes
@@ -228,33 +228,38 @@ def delegator(delegator):
         df_vote_choice['voter'] == delegator
         ]
     
-    df_vote_temp = local_df_vote_choice[~local_df_vote_choice['proposal_start'].isin(local_df_vote_choice_self_vote.proposal_start.unique())]
+    df_vote_temp = local_df_vote_choice[
+        ~local_df_vote_choice['proposal_start'].isin(local_df_vote_choice_self_vote.proposal_start.unique())
+        ]
     local_df_vote_choice = pd.concat([df_vote_temp, local_df_vote_choice_self_vote])
-
+    local_df_vote_choice = local_df_vote_choice.sort_values(['proposal_end', 'choice_power'], ascending=False)
     ## Current Votes
     max_value = local_df_vote_choice['proposal_end'].max()
     df_current_votes = local_df_vote_choice[local_df_vote_choice['proposal_end'] == max_value]
-    
+
     ## Locks
-    # local_df_locker_user_epoch = df_convex_locker_agg_user_epoch[df_convex_locker_agg_user_epoch['user'] == delegator]
+    # local_df_locker_user_epoch = df_stakedao_locker_agg_user_epoch[df_stakedao_locker_agg_user_epoch['user'] == delegator]
     
     # Locks per proposal
-    local_df_convex_delegation_locks_per_proposal = df_convex_delegation_locks_per_proposal[df_convex_delegation_locks_per_proposal['delegator'] == delegator]
-    local_df_convex_delegation_locks_per_proposal = local_df_convex_delegation_locks_per_proposal.sort_values(['proposal_start'])
-    if not len(local_df_convex_delegation_locks_per_proposal) > 0:
+    local_df_stakedao_delegation_locks_per_proposal = df_stakedao_delegation_locks_per_proposal[
+        df_stakedao_delegation_locks_per_proposal['delegator'] == delegator
+        ]
+    local_df_stakedao_delegation_locks_per_proposal = local_df_stakedao_delegation_locks_per_proposal.sort_values(['proposal_start'], ascending=False)
+
+    if not len(local_df_stakedao_delegation_locks_per_proposal) > 0:
         return render_template(
-            'delegated_locks_not_found.jinja2',
-            title='Convex Delegated Vote Profile',
+            'delegated_staked_sdcrv_not_found.jinja2',
+            title='stakedao Delegated Vote Profile',
             template='delegated_locks_not_found',
             body="",
             delegator = delegator,
             actor_profile = get_address_profile(app.config['df_actors'], delegator),
             )
     
-    local_df_vote_choice_adj = adjust_delegators_votes(local_df_vote_choice, local_df_convex_delegation_locks_per_proposal)
+    local_df_vote_choice_adj = adjust_delegators_votes(local_df_vote_choice, local_df_stakedao_delegation_locks_per_proposal)
     
     # Get last delegation per delegate
-    local_delegations = local_df_convex_delegation_locks_per_proposal[
+    local_delegations = local_df_stakedao_delegation_locks_per_proposal[
         ['delegate', 'delegate_known_as', 'proposal_start', 'proposal_title']
         ].groupby('delegate').tail(1)
     
@@ -305,10 +310,10 @@ def delegator(delegator):
 
     
     # # Build chart
-    fig = px.bar(local_df_convex_delegation_locks_per_proposal,
-                    x=local_df_convex_delegation_locks_per_proposal['proposal_start'],
-                    y=local_df_convex_delegation_locks_per_proposal['current_locked'],
-                    color=local_df_convex_delegation_locks_per_proposal['delegate_known_as'] + ' ('+local_df_convex_delegation_locks_per_proposal['delegate']+')' ,
+    fig = px.bar(local_df_stakedao_delegation_locks_per_proposal,
+                    x=local_df_stakedao_delegation_locks_per_proposal['proposal_start'],
+                    y=local_df_stakedao_delegation_locks_per_proposal['staked_balance'],
+                    color=local_df_stakedao_delegation_locks_per_proposal['delegate_known_as'] + ' ('+local_df_stakedao_delegation_locks_per_proposal['delegate']+')' ,
                     title='Delegator Locked vlCVX by Delegate',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
@@ -336,8 +341,8 @@ def delegator(delegator):
 
 
     return render_template(
-        'show_convex_snapshot_delegator.jinja2',
-        title='Convex Delegated Vote Profile',
+        'show_stakedao_snapshot_delegator.jinja2',
+        title='stakedao Delegated Vote Profile',
         template='snapshot-voter-show',
         body="",
         actor_profile = get_address_profile(app.config['df_actors'], delegator),
@@ -356,12 +361,12 @@ def adjust_delegators_votes(df_local_votes, df_local_delegate_locks):
         df_local_votes,
         df_local_delegate_locks,
         how='left',
-        left_on=['proposal_start', 'proposal_title', 'voter', 'delegate_known_as', 'this_epoch', 'delegate'],
-        right_on=['proposal_start', 'proposal_title', 'delegate', 'delegate_known_as', 'this_epoch', 'delegate' ]
+        left_on=['proposal_start', 'proposal_title', 'voter', 'delegate_known_as', 'delegate'],
+        right_on=['proposal_start', 'proposal_title', 'delegate', 'delegate_known_as', 'delegate' ]
         ).reset_index()
     
     # Adjusts choice distribution to the vote power of the delegator
-    df['choice_power_adj'] = (df['voting_weight'] / df['total_weight']) * df['current_locked']
+    df['choice_power_adj'] = (df['voting_weight'] / df['total_weight']) * df['staked_balance']
     df = df.rename(columns={
         "known_as_y": 'delegator_known_as',
         "known_as_x": 'known_as',

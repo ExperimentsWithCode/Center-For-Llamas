@@ -9,10 +9,13 @@ from datetime import datetime
 import json
 import plotly
 import plotly.express as px
+import plotly.graph_objects as go
 
 from .forms.power_diff_form import PowerDiffForm
+from .forms.contributing_factors_form import ContributingFactorsForm
+from app.curve.gauges.routes import get_approved
 
-from .models import get_meta
+from .models import get_meta, ProcessContributingFactors
 
 # Blueprint Configuration
 curve_meta_bp = Blueprint(
@@ -142,6 +145,271 @@ def custom_index():
         this_round = this_round,
         top_x = top_x, 
         compare_round = compare_round
+    )
+
+
+@curve_meta_bp.route('/contributing_factors', methods=['GET', 'POST'])
+def contributing_factors():
+    df_approved_gauges = get_approved()
+
+    form = ContributingFactorsForm()
+    if form.validate_on_submit():
+        target_gauge= form.target_gauge.data if form.target_gauge.data else None
+        compare_back = form.compare_back.data if form.compare_back.data else 16
+    else:
+        target_gauge=None
+        compare_back=16
+
+    if not target_gauge:
+        return render_template(
+            'contributing_factors.jinja2',
+            title='Curve Meta: Contributing Factors',
+            template='contributing_factors',
+            body="",
+            form=form,
+            df_approved_gauges = df_approved_gauges
+            )
+    pcf = ProcessContributingFactors()
+    df = pcf.process_all(target_gauge, compare_back)
+
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+    local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == target_gauge]
+    # try:
+    #     pcf = ProcessContributingFactors()
+    #     df = pcf.process_all(target_gauge, compare_back)
+    # except Exception as e:
+    #     return render_template(
+    #         'contributing_factors.jinja2',
+    #         title='Curve Meta: Contributing Factors',
+    #         template='contributing_factors',
+    #         body=e,
+    #         form=form,
+    #         df_curve_gauge_registry = df_approved_gauges
+    #         )
+        
+    # Build chart
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        x=df.checkpoint_timestamp,
+        y=df.total_bounty_value,
+        name="Bounty Value"
+    ))
+
+
+    fig.add_trace(go.Bar(
+        x=df.checkpoint_timestamp,
+        y=df.issuance_value,
+        name="Issuance Value",
+        # yaxis="y2"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=df.checkpoint_timestamp,
+        y=df.avg_crv_price,
+        name="Avg CRV Price",
+        yaxis="y2"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=df.checkpoint_timestamp,
+        y=df.total_vote_percent,
+        name="veCRV Vote Percent",
+        yaxis="y3"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=df.checkpoint_timestamp,
+        y=df.total_balance_usd,
+        name="Pool Balance",
+        yaxis="y4"
+    ))
+
+
+    # Create axis objects
+    fig.update_layout(
+        xaxis=dict(
+            domain=[0.1, 0.9]
+        ),
+        yaxis=dict(
+            title="Bounty or Issuance Value (USD)",
+            titlefont=dict(
+                color="#1f77b4"
+            ),
+            tickfont=dict(
+                color="#1f77b4"
+            )
+        ),
+        yaxis2=dict(
+            title="Avg. CRV Price (USD)",
+            titlefont=dict(
+                color="#ff7f0e"
+            ),
+            tickfont=dict(
+                color="#ff7f0e"
+            ),
+            anchor="free",
+            overlaying="y",
+            side="left",
+            position=0.01
+        ),
+        yaxis3=dict(
+            title="Total veCRV Vote Percent",
+            titlefont=dict(
+                color="#9467bd"
+            ),
+            tickfont=dict(
+                color="#9467bd"
+            ),
+            anchor="x",
+            overlaying="y",
+            side="right"
+        ),
+        yaxis4=dict(
+            title="Pool Balance (USD)",
+            titlefont=dict(
+                color="#ff7f0e"
+            ),
+            tickfont=dict(
+                color="#ff7f0e"
+            ),
+            anchor="free",
+            overlaying="y",
+            side="right",
+            position=0.99
+        )
+    )
+
+    # Update layout properties
+    fig.update_layout(
+        title_text=f"Curve Incentives: {df.iloc[0]['gauge_symbol']}",
+        height=600,
+    )
+    fig.update_yaxes(rangemode="tozero")
+
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    # Build chart
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        x=df.votium_round,
+        y=df.total_bounty_value,
+        name="Bounty Value"
+    ))
+
+
+    fig.add_trace(go.Bar(
+        x=df.votium_round,
+        y=df.issuance_value,
+        name="Issuance Value",
+        # yaxis="y2"
+    ))
+
+    fig.add_trace(go.Box(
+        x=df.votium_round,
+        y=df.avg_crv_price,
+        name="Avg CRV Price",
+        yaxis="y2"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=df.votium_round,
+        y=df.total_vote_percent,
+        name="veCRV Vote Percent",
+        yaxis="y3"
+    ))
+
+    fig.add_trace(go.Box(
+        x=df.votium_round,
+        y=df.total_balance_usd,
+        name="Pool Balance",
+        yaxis="y4"
+    ))
+
+
+    # Create axis objects
+    fig.update_layout(
+        xaxis=dict(
+            domain=[0.1, 0.9]
+        ),
+        yaxis=dict(
+            title="Bounty or Issuance Value (USD)",
+            titlefont=dict(
+                color="#1f77b4"
+            ),
+            tickfont=dict(
+                color="#1f77b4"
+            )
+        ),
+        yaxis2=dict(
+            title="Avg. CRV Price (USD)",
+            titlefont=dict(
+                color="#ff7f0e"
+            ),
+            tickfont=dict(
+                color="#ff7f0e"
+            ),
+            anchor="free",
+            overlaying="y",
+            side="left",
+            position=0.01
+        ),
+        yaxis3=dict(
+            title="Total veCRV Vote Percent",
+            titlefont=dict(
+                color="#9467bd"
+            ),
+            tickfont=dict(
+                color="#9467bd"
+            ),
+            anchor="x",
+            overlaying="y",
+            side="right"
+        ),
+        yaxis4=dict(
+            title="Pool Balance (USD)",
+            titlefont=dict(
+                color="#ff7f0e"
+            ),
+            tickfont=dict(
+                color="#ff7f0e"
+            ),
+            anchor="free",
+            overlaying="y",
+            side="right",
+            position=0.99
+        )
+    )
+    fig.update_layout(
+        title_text=f"Curve Incentives: {df.iloc[0]['gauge_symbol']}",
+        height=600,
+    )
+    fig.update_yaxes(rangemode="tozero")
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+    fig.update_layout(autotypenumbers='convert types')
+
+    # Build Plotly object
+    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+    return render_template(
+        'contributing_factors.jinja2',
+        title='Curve Meta: Contributing Factors',
+        template='curve-meta-show',
+        body="",
+
+        form=form,
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
+        graphJSON = graphJSON,
+        graphJSON2 = graphJSON2,
+        df = df,
+        df_approved_gauges = df_approved_gauges
+
     )
 
 

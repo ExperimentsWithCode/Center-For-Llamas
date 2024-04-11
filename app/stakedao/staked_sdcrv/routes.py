@@ -153,6 +153,7 @@ def show(user):
     
     # Filter Data
     local_df_stakedao_sdcrv = df_stakedao_sdcrv[df_stakedao_sdcrv['provider'] == user]
+    local_df_stakedao_sdcrv = local_df_stakedao_sdcrv.sort_values(['block_timestamp', 'staked_balance'])
     # local_df_locker = df_locker[df_locker['user'] == user]
 
     # local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >= dt.utcnow()]
