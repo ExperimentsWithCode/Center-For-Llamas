@@ -23,7 +23,13 @@ from app.utilities.utility import (
 
 from app.convex.delegations.process_flipside import process_and_get
 
-print("Loading... { address_book.actors.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { address_book.actors.models }")
 
 
 def format_df(df):

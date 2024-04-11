@@ -21,7 +21,13 @@ from app.utilities.utility import (
 )
 
 
-print("Loading... { stakedao.staked_sdcrv.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { stakedao.staked_sdcrv.models }")
 
 
 def format_df(df):

@@ -74,7 +74,7 @@ def write_json(filename, data):
 
 
 def write_dataframe_csv(filename, df, source='output'):
-    print(f"{cwd}/app/data/{source}/{filename}.csv")
+    # print(f"{cwd}/app/data/{source}/{filename}.csv")
     try:
         full_filename = f"{cwd}/app/data/{source}/{filename}.csv"
         df.to_csv(full_filename,  index=False)
@@ -88,7 +88,7 @@ def write_dataframe_csv(filename, df, source='output'):
 def write_dfs_to_xlsx(filename, dfs, titles=None):
     with pd.ExcelWriter(cwd+"/app/data/output/"+ filename+'.xlsx') as writer:
         i= 1
-        print(titles)
+        # print(titles)
         for df in dfs:
             title = None
             if titles:
@@ -96,7 +96,7 @@ def write_dfs_to_xlsx(filename, dfs, titles=None):
                     title = titles[i-1]
             if not title:
                 title = f"Sheet {i}"
-            print(title)
+            # print(title)
             df.to_excel(writer, sheet_name = title)
             i+= 1
 

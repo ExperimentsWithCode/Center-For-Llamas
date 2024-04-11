@@ -3,12 +3,20 @@ from datetime import date, timedelta, tzinfo
 import numpy as np
 from functools import wraps
 from time import time
+
 from app.data.local_storage import (
     pd,
     )
 
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
 import PIL
 import io
+
+
 
 def timed(f):
   @wraps(f)
@@ -16,9 +24,10 @@ def timed(f):
     start = time()
     result = f(*args, **kwds)
     elapsed = time() - start
-    print("-"*50)
-    print ("\t%s took \n\t\t%d time to finish" % (f.__name__, elapsed))
-    print("-"*50)
+    if activate_print_mode:
+        print("-"*50)
+        print ("\t%s took \n\t\t%d time to finish" % (f.__name__, elapsed))
+        print("-"*50)
     return result
   return wrapper
 
@@ -130,9 +139,9 @@ def get_period(week_num, week_day, time, target=5):
         if week_num < 10 or week_num == 0:
             week_num = f"0{week_num}"
         return f"{vote_year}.{week_num}"
-    print('WEEK NOT FOUND')
-    print(week_day)
-    print(week_num)
+    # print('WEEK NOT FOUND')
+    # print(week_day)
+    # print(week_num)
     return "0"
 
 
@@ -497,7 +506,7 @@ def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint)
     # max_weeks = int(diff_max_lock / pd.Timedelta(seconds= 7 * 86400))
 
     if checkpoint_diff / max_lock_diff > 1:
-        print(f"Checkpoint Diff {action_checkpoint}, {final_lock_checkpoint}")
+        # print(f"Checkpoint Diff {action_checkpoint}, {final_lock_checkpoint}")
         efficiency = 1
     else:
         efficiency = checkpoint_diff / max_lock_diff

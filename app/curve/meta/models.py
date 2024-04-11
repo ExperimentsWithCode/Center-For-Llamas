@@ -49,7 +49,13 @@ except:
 
 
 
-print("Loading... { curve.meta.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { curve.meta.models }")
 
 
 def generate_round_differences(df, current_round = 0, compare_round=1):

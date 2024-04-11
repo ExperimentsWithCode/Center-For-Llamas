@@ -175,6 +175,12 @@ def process_checkpoint_aggs(df):
 
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { curve.gauge_checkpoints.models }")
 
     df_checkpoints = process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv)

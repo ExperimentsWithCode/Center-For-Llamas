@@ -15,7 +15,13 @@ from app.data.local_storage import (
     csv_to_df
     )
 
-print("Loading... { curve.gauges_votes.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { curve.gauges_votes.models }")
 
 
 def format_df(df):

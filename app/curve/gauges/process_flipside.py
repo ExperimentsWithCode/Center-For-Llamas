@@ -350,7 +350,13 @@ def get_df_gauge_pool_map():
     return df_gauge_pool_map
 
 def process_and_save():
-    print("Processing... { curve.gauges.models }")
+    try:
+        from config import activate_print_mode
+    except:
+        activate_print_mode = False
+
+    if activate_print_mode:
+        print("Processing... { curve.gauges.models }")
 
     gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
     df = pd.json_normalize(gauge_registry.format_output())
@@ -363,7 +369,13 @@ def process_and_save():
     return df
 
 def process_and_get():
-    print("Processing... { curve.gauges.models }")
+    try:
+        from config import activate_print_mode
+    except:
+        activate_print_mode = False
+
+    if activate_print_mode:
+        print("Processing... { curve.gauges.models }")
     gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
     return gauge_registry
 

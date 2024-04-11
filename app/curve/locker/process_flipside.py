@@ -233,6 +233,12 @@ class ProcessCurveLocker():
         
 
 def process_and_save(filename= filename_curve_locker, platform='curve', asset='vecrv'):
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { "+platform+".locker.models }")
     ve_asset = ProcessCurveLocker(csv_to_df(filename, 'raw_data'))
     ve_asset_base = ve_asset.processed_df

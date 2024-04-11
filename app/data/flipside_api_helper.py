@@ -31,13 +31,13 @@ def query_and_save(_query, _filename, _df_base = [], _page_size = 5000):
     try:
         # Initial Query
         if len(_df_base) > 0:
-            print("based")
+            # print("based")
             df_output = _df_base
         else:
             df_output = []
 
-        print(f"___\n{_filename}")
-        print(f"querying page: 1")
+        # print(f"___\n{_filename}")
+        # print(f"querying page: 1")
         query_result_set = sdk.query(_query, page_size = _page_size)
         if len(df_output) == 0:
             df_output = pd.json_normalize(query_result_set.records)
@@ -47,14 +47,14 @@ def query_and_save(_query, _filename, _df_base = [], _page_size = 5000):
             df_output = pd.concat([df_output, df_local], ignore_index=True)
 
         # Metrics
-        print_metrics(query_result_set)
+        # print_metrics(query_result_set)
         i = 2
             
         # Handle Pagination
         if len(query_result_set.records) >= _page_size:
             keep_going = True
             while keep_going:
-                print(f"Querying Page: {i}")
+                # print(f"Querying Page: {i}")
                 extended_result_set = sdk.get_query_results(
                     query_result_set.query_id,
                     page_number=i,
@@ -69,7 +69,7 @@ def query_and_save(_query, _filename, _df_base = [], _page_size = 5000):
                 
                 # Check if continue
                 result_length = len(extended_result_set.records) 
-                print(f"\tCompleted? {result_length} {result_length < _page_size} ")
+                # print(f"\tCompleted? {result_length} {result_length < _page_size} ")
                 # print(len(extended_result_set.records) < _page_size)
                 # print(len(extended_result_set.records))
                 if len(extended_result_set.records) < _page_size:
@@ -92,7 +92,7 @@ def get_df_and_target(filename, target = 'block_timestamp'):
     # gets dataframe and max value of target intended for time values
     resp_dict = read_csv(filename, 'raw_data')
     df = pd.json_normalize(resp_dict)
-    print(df.keys())
+    # print(df.keys())
 
     # Get Max Value of target
     temp_df = df.sort_values(target).tail(1)
@@ -104,7 +104,7 @@ def get_df_and_target(filename, target = 'block_timestamp'):
             search_result = split[0]+" "+split[1][:-1]
     except:
         pass
-    print(search_result)
+    # print(search_result)
     return df, search_result
 
 

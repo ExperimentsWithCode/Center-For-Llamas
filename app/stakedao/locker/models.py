@@ -21,7 +21,13 @@ from app.utilities.utility import (
 )
 
 
-# print("Loading... { stakedao.vesdt.models }")
+# try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { stakedao.vesdt.models }")
 
 
 # def format_df(df):
@@ -69,7 +75,13 @@ from app.utilities.utility import (
 
 
 
-print("Loading... { stakedao.locker.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { stakedao.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
     now = dt.utcnow()

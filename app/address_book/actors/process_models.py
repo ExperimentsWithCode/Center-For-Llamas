@@ -86,6 +86,12 @@ def monster_mash():
 
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { AddressBook.actors.models }")
     df = monster_mash()
 

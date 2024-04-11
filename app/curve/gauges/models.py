@@ -13,7 +13,13 @@ from app.curve.gauges.process_flipside import process_and_get, process_and_save
 
 from app.utilities.utility import nullify_amount
 
-print("Loading... { curve.gauges.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { curve.gauges.models }")
 
 
 def format_df(df):

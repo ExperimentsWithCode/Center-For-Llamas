@@ -22,6 +22,12 @@ except:
     
 
 def process_and_get(save=False):
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { convex.snapshot.delegations.models }")
     df_delegations = csv_to_df(filename_convex_delegations, 'raw_data')
 
@@ -64,7 +70,13 @@ def process_and_get(save=False):
     }
 
 # def process_and_save():
-#     print("Processing... { convex.snapshot.delegations.models }")
+#     try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Processing... { convex.snapshot.delegations.models }")
 #     df_delegations = csv_to_df(filename_convex_delegations, 'raw_data')
 
 #     pcb = ProcessSnapshotDelegations(df_delegations, df_convex_snapshot_vote_choice, df_convex_locker_agg_user_epoch)

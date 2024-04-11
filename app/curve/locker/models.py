@@ -28,7 +28,13 @@ from app.utilities.utility import (
     timed
     # nullify_amount,
 )
-print("Loading... { curve.locker.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { curve.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
     now = dt.utcnow()

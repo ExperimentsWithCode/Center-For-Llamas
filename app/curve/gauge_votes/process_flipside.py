@@ -299,6 +299,12 @@ def get_current_votes(df_gauge_votes_formatted):
     return df_current_gauge_votes
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { curve.gauge_votes.models }")
     vr = get_vote_registry_obj()
 

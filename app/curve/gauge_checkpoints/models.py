@@ -14,7 +14,13 @@ from app.data.local_storage import (
     )
 
 
-print("Loading... { curve.gauge_checkpoints.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { curve.gauge_checkpoints.models }")
 
 def format_df(df):
     key_list = df.keys()

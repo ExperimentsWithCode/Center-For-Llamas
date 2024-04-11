@@ -158,6 +158,12 @@ def get_df_convex_locks():
     return df   
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { convex.locker.models }")
     pcl = ProcessConvexLocker(get_df_convex_locks())
     pcl_base = pcl.df_locker

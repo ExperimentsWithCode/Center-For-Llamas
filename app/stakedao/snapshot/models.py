@@ -34,7 +34,13 @@ except:
 
 
 
-print("Loading... { stakedao.snapshot.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { stakedao.snapshot.models }")
 
 
 

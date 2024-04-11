@@ -12,6 +12,8 @@ from app.data.reference import core_filename_list
 
 from app.data.data_manager import Manager
 from .forms import DataManagerForm
+
+
 # Blueprint Configuration
 
 home_bp = Blueprint(
@@ -144,7 +146,8 @@ def generate_file_info(is_alt_path=False):
 
                 found_count+=1
             except:
-                print(f"\t\tno file found for {file}")
+                pass
+                # print(f"\t\tno file found for {file}")
     if found_count == 0 and not is_alt_path:
         return generate_file_info(True)
     return file_info

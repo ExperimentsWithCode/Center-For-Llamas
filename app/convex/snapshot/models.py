@@ -20,7 +20,13 @@ from app.data.local_storage import (
 from app.snapshot.models import Snapshot
 from app.snapshot.alt_models import merge_target
 
-print("Loading... { convex.snapshot.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { convex.snapshot.models }")
 
 
 def get_df_snapshot():

@@ -23,7 +23,13 @@ from app.utilities.utility import (
 
 from app.stakedao.delegations.process_flipside import process_and_get
 
-print("Loading... { convex.locker.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { convex.locker.models }")
 
 
 def format_df(df):

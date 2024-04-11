@@ -19,7 +19,7 @@
     <h1>{{ title }}</h1>
     <div class="row">
 
-        <div class="card bg-warning mb-3" >
+        <div class="card bg-warning text-infomb-3" >
           <div class="card-body">
 
           <form method="POST" action="{{ url_for('curve_meta_bp.contributing_factors') }}">
@@ -53,6 +53,11 @@
                 {% endif %}
             </tbody>
             </table>
+
+            <div class="submit-button" >
+                {{ form.submit }}
+            </div>
+
         </form>
         </div>
       </div>
@@ -211,7 +216,7 @@
           {% endfor %}
         ],
         {% with max_size = 5 %}
-        {% with table_type = 'info' %}
+        {% with table_type = 'infoZ' %}
 
           {% include 'table_format_helper.jinja2' %}
         {% endwith %}

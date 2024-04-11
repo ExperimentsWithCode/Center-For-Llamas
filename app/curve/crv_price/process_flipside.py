@@ -58,6 +58,12 @@ def get_df():
     return df_gauge_pool_map
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { curve.crv_pricing.models }")
 
     crv_pricing = get_aggs(get_df())

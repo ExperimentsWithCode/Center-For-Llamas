@@ -147,6 +147,12 @@ def get_df_votium():
 
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { curve.liquidity.models }")
     votium_v2 = ProcessVotiumV2(get_df_votium())
     df_votium_v2 = votium_v2.process()   

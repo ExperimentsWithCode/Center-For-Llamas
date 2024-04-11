@@ -382,6 +382,12 @@ def process_checkpoint_aggs(df):
     return df_aggs
 
 def process_and_save():
+    try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
     print("Processing... { curve.liquidity.models }")
     liquidity = Liquidity(get_curve_liquidity_df(), df_checkpoints_agg, gauge_registry)
 

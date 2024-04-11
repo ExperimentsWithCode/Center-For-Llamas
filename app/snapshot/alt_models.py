@@ -28,7 +28,13 @@ from app.data.reference import filename_convex_curve_snapshot_origin, filename_s
 
 
 
-print("Loading... { snapshot.alt_models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { snapshot.alt_models }")
 
 
 class SnapshotAsSource():

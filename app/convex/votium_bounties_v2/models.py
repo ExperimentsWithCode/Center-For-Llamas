@@ -21,7 +21,13 @@ except:
     # from app.curve.liquidity.models import df_curve_liquidity
     from app.curve.gauges.models import df_curve_gauge_registry
 
-print("Loading... { convex.votium_v2.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { convex.votium_v2.models }")
 
 # def nullify_amount(value):
 #     if value == 'null' or value == '' or value == '-':

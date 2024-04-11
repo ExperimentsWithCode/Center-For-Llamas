@@ -22,7 +22,13 @@ from app.utilities.utility import (
 )
 
 
-print("Loading... { convex.locker.models }")
+try:
+    from config import activate_print_mode
+except:
+    activate_print_mode = False
+
+if activate_print_mode:
+    print("Loading... { convex.locker.models }")
 
 
 def format_df(df):
