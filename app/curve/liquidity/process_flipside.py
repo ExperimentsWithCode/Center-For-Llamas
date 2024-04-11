@@ -21,7 +21,8 @@ from app.utilities.utility import (
     df_default_checkpoints,
     concat_all,
     utc,
-    timed
+    timed,
+    print_mode
 )
 
 try:
@@ -328,7 +329,7 @@ class Liquidity():
             how='left', 
             on = ['block_timestamp', 'symbol', 'token_addr' ], 
             )
-        print(df_combo.keys())
+        print_mode(df_combo.keys())
         # calc USD priced balance
         df_combo['balance_usd'] = df_combo.apply(
             lambda x: self.calc_amount_usd(x), 
@@ -382,13 +383,8 @@ def process_checkpoint_aggs(df):
     return df_aggs
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Processing... { curve.liquidity.models }")
+    print_mode("Processing... { curve.liquidity.models }")
     liquidity = Liquidity(get_curve_liquidity_df(), df_checkpoints_agg, gauge_registry)
 
     df_curve_liquidity = liquidity.df_processed_liquidity
@@ -409,7 +405,7 @@ if activate_print_mode:
         app.config['df_curve_oracles_agg'] = df_curve_oracles_agg
 
     except:
-        print("could not register in app.config\n\tGauge Liquidity")
+        print_mode("could not register in app.config\n\tGauge Liquidity")
     return {
         # 'df_active_votes': df_active_votes,
         'df_curve_liquidity': df_curve_liquidity,
@@ -436,7 +432,7 @@ if activate_print_mode:
     #     app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
     #     app.config['df_current_gauge_votes'] = df_current_gauge_votes
     # except:
-    #     print("could not register in app.config\n\tGauge Votes")
+    #     print_mode("could not register in app.config\n\tGauge Votes")
     # return {
     #     # 'df_active_votes': df_active_votes,
     #     'df_all_votes': df_all_votes,

@@ -11,7 +11,7 @@ from app.data.local_storage import (
 import ast
 from datetime import datetime as dt
 
-from app.utilities.utility import  get_checkpoint_id, get_checkpoint
+from app.utilities.utility import  get_checkpoint_id, get_checkpoint, print_mode
 from app.data.reference import (
     known_large_market_actors,
     current_file_title,
@@ -348,13 +348,13 @@ class Proposal():
             except Exception as e:
 
                 if self.fails_logged < 3:
-                    print("== Failed")
-                    print("\tproposal")
-                    print(self.proposal_title)
-                    print(_choices)
-                    print(type(_choices))
-                    print("\tvote")
-                    print(traceback.format_exc())
+                    print_mode("== Failed")
+                    print_mode("\tproposal")
+                    print_mode(self.proposal_title)
+                    print_mode(_choices)
+                    print_mode(type(_choices))
+                    print_mode("\tvote")
+                    print_mode(traceback.format_exc())
                 self.fails_logged += 1
                 return None
         return choices
@@ -487,9 +487,9 @@ class Voter():
                             'available_power': this_vote_by_choice[choice]['available_power'],
                         }
                 else:
-                    print(this_vote_by_choice)
-                    print("Not Found")
-                    print("___________")
+                    print_mode(this_vote_by_choice)
+                    print_mode("Not Found")
+                    print_mode("___________")
         except Exception as e:
             pass
             # print(e)
@@ -631,13 +631,13 @@ class Vote():
                 options = _vote_options
         except Exception as e:
             if self.proposal.fails_logged < 3:
-                print("== Failed")
-                print("\tproposal")
-                print(self.proposal.proposal_title)
-                print("\tvote")
-                print(_vote_options)
-                print(type(_vote_options))
-                print(traceback.format_exc())
+                print_mode("== Failed")
+                print_mode("\tproposal")
+                print_mode(self.proposal.proposal_title)
+                print_mode("\tvote")
+                print_mode(_vote_options)
+                print_mode(type(_vote_options))
+                print_mode(traceback.format_exc())
             self.proposal.fails_logged += 1
             return None
         return options
@@ -685,13 +685,13 @@ class Vote():
                                 }
         except Exception as e:
             if self.proposal.fails_logged < 3:
-                print("== Failed")
-                print("\tproposal")
-                print(self.proposal.proposal_title)
-                print(f"O: {len(options)} {type(options)} || {options}")
-                print(f"C: {len(choices)} {type(choices)} || {choices}")
-                print(traceback.format_exc())
-                print(e)
+                print_mode("== Failed")
+                print_mode("\tproposal")
+                print_mode(self.proposal.proposal_title)
+                print_mode(f"O: {len(options)} {type(options)} || {options}")
+                print_mode(f"C: {len(choices)} {type(choices)} || {choices}")
+                print_mode(traceback.format_exc())
+                print_mode(e)
             self.proposal.fails_logged += 1
             return None
         # print(output)

@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_votium_v2 
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     votium_v2 = '0x63942E31E98f1833A234077f47880A66136a2D1e'
@@ -42,7 +42,7 @@ def generate_query(min_block_timestamp=None):
     return query
 
 def fetch(fetch_initial = False):
-    print("Fetching... { convex.votium_v2.models }")
+    print_mode("Fetching... { convex.votium_v2.models }")
 
     filename = filename_votium_v2
     df = fetch_and_save_data(filename, generate_query, fetch_initial)

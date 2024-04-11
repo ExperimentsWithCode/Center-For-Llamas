@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_convex_locker 
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     cxv_locker = '0x72a19342e8F1838460eBFCCEf09F6585e32db86E'
@@ -74,7 +74,7 @@ def generate_query(min_block_timestamp=None):
     return query
 
 def fetch(fetch_initial = False):
-    print("Fetching... { convex.locker.models }")
+    print_mode("Fetching... { convex.locker.models }")
 
     filename = filename_convex_locker
     df = fetch_and_save_data(filename, generate_query, fetch_initial)

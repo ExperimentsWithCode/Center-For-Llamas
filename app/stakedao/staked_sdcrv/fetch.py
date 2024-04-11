@@ -88,7 +88,7 @@ def generate_query(min_block_timestamp=None):
     return query
 
 def fetch(fetch_initial = False):
-    print("Fetching... { convex.sdcrv_staker.models }")
+    print_mode("Fetching... { convex.sdcrv_staker.models }")
 
     filename = filename_stakedao_staked_sdcrv
     df = fetch_and_save_data(filename, generate_query, fetch_initial)

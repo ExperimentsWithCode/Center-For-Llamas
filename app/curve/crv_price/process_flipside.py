@@ -15,7 +15,7 @@ from app.data.local_storage import (
 
 from datetime import datetime as dt
 
-from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id, convert_units
+from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id, convert_units, print_mode
 from app.data.reference import (
     known_large_market_actors,
     current_file_title,
@@ -58,13 +58,8 @@ def get_df():
     return df_gauge_pool_map
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Processing... { curve.crv_pricing.models }")
+     
+    print_mode("Processing... { curve.crv_pricing.models }")
 
     crv_pricing = get_aggs(get_df())
 
@@ -74,7 +69,7 @@ if activate_print_mode:
         app.config['df_curve_crv_pricing'] = df
         app.config['crv_pricing'] = crv_pricing
     except:
-        print("could not register in app.config\n\tGauges")
+        print_mode("could not register in app.config\n\tGauges")
     return df
 
 # ,type_id,

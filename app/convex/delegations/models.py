@@ -12,24 +12,16 @@ from app.data.local_storage import (
 
 
 from app.utilities.utility import (
-    # get_period_direct, 
-    # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
-    nullify_amount
-    # shift_time_days,
-    # df_remove_nan
+    nullify_amount,
+    print_mode
 )
 
 from app.convex.delegations.process_flipside import process_and_get
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Loading... { convex.locker.models }")
+print_mode("Loading... { convex.locker.models }")
 
 
 def format_df(df):
@@ -98,7 +90,7 @@ try:
     app.config['df_convex_delegation_locks_per_proposal'] = df_convex_delegation_locks_per_proposal
 
 except:
-    print("could not register in app.config\n\tConvex Delegations")
+    print_mode("could not register in app.config\n\tConvex Delegations")
 
 
 

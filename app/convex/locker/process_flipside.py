@@ -16,14 +16,13 @@ from app.data.local_storage import (
 # from app.utilities.utility import get_period
 
 from app.utilities.utility import (
-    # get_period_direct, 
-    # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
     shift_time_days,
     df_remove_nan,
     get_now,
-    nullify_amount
+    nullify_amount,
+    print_mode
 
 )
 
@@ -158,13 +157,7 @@ def get_df_convex_locks():
     return df   
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Processing... { convex.locker.models }")
+    print_mode("Processing... { convex.locker.models }")
     pcl = ProcessConvexLocker(get_df_convex_locks())
     pcl_base = pcl.df_locker
     pcl_user = pcl.df_user_epoch

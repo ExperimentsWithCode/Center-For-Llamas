@@ -19,14 +19,9 @@ from app.data.local_storage import (
 
 from app.snapshot.models import Snapshot
 from app.snapshot.alt_models import merge_target
-
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { convex.snapshot.models }")
+from app.utilities.utility import print_mode
+ 
+print_mode("Loading... { convex.snapshot.models }")
 
 
 def get_df_snapshot():
@@ -84,6 +79,6 @@ try:
     app.config['df_convex_snapshot_vote_aggregates'] = df_convex_snapshot_vote_aggregates
     app.config['df_convex_snapshot_vote_choice'] = df_convex_snapshot_vote_choice
 except:
-    print("could not register in app.config\n\tSnapshot")
+    print_mode("could not register in app.config\n\tSnapshot")
 
 # print(convex_snapshot_proposal_choice_map)

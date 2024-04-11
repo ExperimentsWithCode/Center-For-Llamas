@@ -14,7 +14,7 @@ from app.data.local_storage import (
 
 from datetime import datetime as dt
 
-from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id
+from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id, print_mode
 from app.data.reference import (
     known_large_market_actors,
     current_file_title,
@@ -38,13 +38,8 @@ except:
     from app.convex.snapshot.models import convex_snapshot_proposal_choice_map
     from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates as df_vote_aggregates
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { convex.votium_bounties.models }")
+ 
+    print_mode("Loading... { convex.votium_bounties.models }")
 
 class VBRegistry():
     def __init__(self):
@@ -63,8 +58,8 @@ class VBRegistry():
             except Exception as e:
                 # pass
                 print(e)
-                print(row)
-                print(traceback.format_exc())
+                print_mode(row)
+                print_mode(traceback.format_exc())
                 continue
             if not b.checkpoint_id in self.bounty_map:
                 self.bounty_map[b.checkpoint_id] = {}
@@ -91,14 +86,14 @@ class VBRegistry():
             bounty_paid = 0
             for bounty in bounties:
                 bounty_paid += (vote_power / bounty.relative_vote_power) * bounty.bounty_value
-            # print(f"bounty {bounty_paid}")
+            # print_mode(f"bounty {bounty_paid}")
             return bounty_paid
         except Exception as e:
-            # print("_"*50)
-            # print(e)
-            # print(traceback.format_exc())
-            # print(f"checkpoint_id {checkpoint_id}, type: {type(checkpoint_id)}")
-            # print(f"checkpoint_id {choice_index}, type: {type(choice_index)}")
+            # print_mode("_"*50)
+            # print_mode(e)
+            # print_mode(traceback.format_exc())
+            # print_mode(f"checkpoint_id {checkpoint_id}, type: {type(checkpoint_id)}")
+            # print_mode(f"checkpoint_id {choice_index}, type: {type(choice_index)}")
             return 0
     
     def get_bounty_currency(self, checkpoint_id, choice_index):
@@ -120,11 +115,11 @@ class VBRegistry():
                 total_value += bounty.bounty_value
             return total_value
         except Exception as e:
-            # print("_"*50)
-            # print(e)
-            # print(traceback.format_exc())
-            # print(f"checkpoint_id {checkpoint_id}, type: {type(checkpoint_id)}")
-            # print(f"checkpoint_id {choice_index}, type: {type(choice_index)}")
+            # print_mode("_"*50)
+            # print_mode(e)
+            # print_mode(traceback.format_exc())
+            # print_mode(f"checkpoint_id {checkpoint_id}, type: {type(checkpoint_id)}")
+            # print_mode(f"checkpoint_id {choice_index}, type: {type(choice_index)}")
             return 0
         
     def format_output(self):
@@ -180,9 +175,9 @@ class Bounty():
             if temp_id in convex_snapshot_proposal_choice_map:
                 if self.choice_index < len(convex_snapshot_proposal_choice_map[temp_id]):
                     self.checkpoint_id += 1
-                    return convex_snapshot_proposal_choice_map[self.checkpoint_id][self.choice_index]                # print("_"*50)
-                # print (self.checkpoint_id)
-                # print (len(convex_snapshot_proposal_choice_map[self.checkpoint_id]))
+                    return convex_snapshot_proposal_choice_map[self.checkpoint_id][self.choice_index]                # print_mode("_"*50)
+                # print_mode (self.checkpoint_id)
+                # print_mode (len(convex_snapshot_proposal_choice_map[self.checkpoint_id]))
         return "Not Found"
         
     def get_gauge_address(self):
@@ -207,11 +202,11 @@ class Bounty():
                 self.checkpoint_timestamp = df_aggs.iloc[0]['checkpoint_timestamp']
             except Exception as e:
                 pass
-                # print(self.checkpoint_id)
-                # print(self.gauge_ref)
-                # # print(df_vote_aggregates['choice'])
-                # print(e)
-                # print(traceback.format_exc())
+                # print_mode(self.checkpoint_id)
+                # print_mode(self.gauge_ref)
+                # # print_mode(df_vote_aggregates['choice'])
+                # print_mode(e)
+                # print_mode(traceback.format_exc())
 
 
     def format_output(self):
@@ -247,7 +242,7 @@ def get_df_bounty_formatted(vbr, df):
     # vbr = VBRegistry()
     vbr.process_bounties(df)
     temp = vbr.format_output()
-    # print(temp)
+    # print_mode(temp)
     df_bounty_formatted = pd.json_normalize(temp)
     df_bounty_formatted = df_bounty_formatted[(df_bounty_formatted['block_timestamp'] > "2022-12-18")]
 
@@ -309,8 +304,8 @@ try:
         update_snapshot_aggregates(votium_bounty_registry)
     except Exception as e:
         print(e)
-        print(traceback.format_exc())
+        print_mode(traceback.format_exc())
 except:
-    print("could not register in app.config\n\tVotium Bounties")
+    print_mode("could not register in app.config\n\tVotium Bounties")
 
-# print(df_bounty_formatted.head())
+# print_mode(df_bounty_formatted.head())

@@ -16,19 +16,15 @@ from app.utilities.utility import (
     # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
-    nullify_amount
+    nullify_amount,
+    print_mode
     # shift_time_days,
     # df_remove_nan
 )
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Loading... { convex.locker.models }")
+print_mode("Loading... { convex.locker.models }")
 
 
 def format_df(df):
@@ -94,7 +90,7 @@ try:
     app.config['df_convex_locker_agg_epoch'] = df_locker_agg_epoch
     app.config['df_convex_locker_agg_current'] = df_locker_agg_current
 except:
-    print("could not register in app.config\n\tConvex Locker")
+    print_mode("could not register in app.config\n\tConvex Locker")
 
 
 

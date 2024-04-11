@@ -17,17 +17,13 @@ from app.utilities.utility import (
     get_date_obj, 
     get_dt_from_timestamp,
     shift_time_days,
-    df_remove_nan
+    df_remove_nan,
+    print_mode
 )
 
 
-# try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { stakedao.vesdt.models }")
+#  
+# print_mode("Loading... { stakedao.vesdt.models }")
 
 
 # def format_df(df):
@@ -75,13 +71,8 @@ if activate_print_mode:
 
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { stakedao.locker.models }")
+ 
+print_mode("Loading... { stakedao.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
     now = dt.utcnow()
@@ -187,4 +178,4 @@ try:
     app.config[f"{name_prefix}_decay"] = df_stakedao_vesdt_decay
     app.config[f"{name_prefix}_decay_agg"] = df_stakedao_vesdt_decay_agg
 except:
-    print("could not register in app.config\n\Curve Locked veCRV")
+    print_mode("could not register in app.config\n\Curve Locked veCRV")

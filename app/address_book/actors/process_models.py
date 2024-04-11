@@ -7,6 +7,8 @@ from app.data.local_storage import (
     write_dataframe_csv,
     )
 
+from app.utilities.utility import print_mode
+
 def monster_mash():
     try:
         df_curve_vecrv = app.config['df_curve_vecrv']
@@ -86,13 +88,9 @@ def monster_mash():
 
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Processing... { AddressBook.actors.models }")
+
+    print_mode("Processing... { AddressBook.actors.models }")
     df = monster_mash()
 
     write_dataframe_csv(filename_actors, df, 'processed')
@@ -101,7 +99,7 @@ if activate_print_mode:
         # app.config['df_active_votes'] = df_active_votes
         app.config['df_actors'] = df
     except:
-        print("could not register in app.config\n\tVotium v2")
+        print_mode("could not register in app.config\n\tVotium v2")
     return {
         # 'df_active_votes': df_active_votes,
         'df_actors': df,

@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_stakedao_locker
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     stakedao_vote_locker = '0x0C30476f66034E11782938DF8e4384970B6c9e8a'
@@ -186,7 +186,7 @@ def generate_query(min_block_timestamp=None):
 
 
 def fetch(fetch_initial = False):
-    print("Fetching... { stakedao.locker.models }")
+    print_mode("Fetching... { stakedao.locker.models }")
 
     filename = filename_stakedao_locker
     df = fetch_and_save_data(filename, generate_query, fetch_initial)

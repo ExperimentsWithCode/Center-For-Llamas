@@ -19,6 +19,7 @@ from app.utilities.utility import (
     calc_lock_efficiency_by_checkpoint,
     get_checkpoint_timestamp_from_id,
     concat_all,
+    print_mode
 )
 
 try:
@@ -175,13 +176,8 @@ def process_checkpoint_aggs(df):
 
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Processing... { curve.gauge_checkpoints.models }")
+     
+    print_mode("Processing... { curve.gauge_checkpoints.models }")
 
     df_checkpoints = process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv)
     df_checkpoints_aggs = process_checkpoint_aggs(df_checkpoints)
@@ -194,7 +190,7 @@ if activate_print_mode:
         app.config['df_checkpoints'] = df_checkpoints
         app.config['df_checkpoints_aggs'] = df_checkpoints_aggs
     except:
-        print("could not register in app.config\n\tGauge Rounds")
+        print_mode("could not register in app.config\n\tGauge Rounds")
     return {
         'df_checkpoints': df_checkpoints,
         'df_checkpoints_aggs': df_checkpoints_aggs

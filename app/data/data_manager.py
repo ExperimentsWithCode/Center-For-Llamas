@@ -1,4 +1,4 @@
-from app.utilities.utility import timed
+from app.utilities.utility import timed, print_mode
 
 from app.data.local_storage import (
     read_json,
@@ -314,7 +314,7 @@ class Manager():
         if process_and_save != None:
             return process_and_save()
         else:
-            print(f"Not Processing: {process_and_save}")
+            print_mode(f"Not Processing: {process_and_save}")
         return None
         
 

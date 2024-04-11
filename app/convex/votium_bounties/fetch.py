@@ -5,7 +5,7 @@ votium_bounty_query = f"""
 
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_votium_v1 
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     cxv_locker = '0x72a19342e8F1838460eBFCCEf09F6585e32db86E'
@@ -48,7 +48,7 @@ ORDER BY block_timestamp
     return query
 
 def fetch(fetch_initial = False):
-    print("Fetching... { convex.votium_v1.models }")
+    print_mode("Fetching... { convex.votium_v1.models }")
 
     filename = filename_votium_v1
     df = fetch_and_save_data(filename, generate_query, fetch_initial)

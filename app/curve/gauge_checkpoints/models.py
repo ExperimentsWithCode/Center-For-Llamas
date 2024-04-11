@@ -4,6 +4,7 @@ from app.data.reference import (
     filename_curve_gauge_rounds_by_aggregate, 
 )
 
+from app.utilities.utility import print_mode
 from app.data.local_storage import (
     pd,
     read_json,
@@ -14,13 +15,8 @@ from app.data.local_storage import (
     )
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { curve.gauge_checkpoints.models }")
+ 
+print_mode("Loading... { curve.gauge_checkpoints.models }")
 
 def format_df(df):
     key_list = df.keys()
@@ -132,7 +128,7 @@ try:
     app.config['df_checkpoints'] = df_checkpoints
     app.config['df_checkpoints_agg'] = df_checkpoints_agg
 except:
-    print("could not register in app.config\n\tGauge Rounds")
+    print_mode("could not register in app.config\n\tGauge Rounds")
 
 
 

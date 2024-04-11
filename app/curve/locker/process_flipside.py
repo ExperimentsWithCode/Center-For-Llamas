@@ -21,12 +21,9 @@ from app.utilities.utility import (
     timed,
     get_date_obj, 
     get_dt_from_timestamp,
-    # shift_time_days,
-    # df_remove_nan,
-    # format_plotly_figure,
-    # convert_animation_to_gif,
     calc_lock_efficiency_by_checkpoint,
     nullify_amount,
+    print_mode
 )
 # filename = 'crv_locker_logs'
 
@@ -233,13 +230,8 @@ class ProcessCurveLocker():
         
 
 def process_and_save(filename= filename_curve_locker, platform='curve', asset='vecrv'):
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Processing... { "+platform+".locker.models }")
+     
+    print_mode("Processing... { "+platform+".locker.models }")
     ve_asset = ProcessCurveLocker(csv_to_df(filename, 'raw_data'))
     ve_asset_base = ve_asset.processed_df
     ve_asset_known = ve_asset.processed_known
@@ -263,7 +255,7 @@ if activate_print_mode:
 
         # app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
     except:
-        print(f"could not register in app.config\n\t{platform} Locked {asset}")
+        print_mode(f"could not register in app.config\n\t{platform} Locked {asset}")
     return {
         f"{name_prefix}" : ve_asset_base,
         f"{name_prefix}_known" : ve_asset_known,

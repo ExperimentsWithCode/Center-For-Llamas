@@ -16,20 +16,19 @@ from app.utilities.utility import (
     # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
-    nullify_amount
+    nullify_amount,
+    print_mode
     # shift_time_days,
     # df_remove_nan
+    
+
 )
 
 from app.convex.delegations.process_flipside import process_and_get
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Loading... { address_book.actors.models }")
+
+print_mode("Loading... { address_book.actors.models }")
 
 
 def format_df(df):
@@ -48,7 +47,7 @@ try:
     app.config['df_actors'] = df_actors
 
 except:
-    print("could not register in app.config\n\Address Book Actors")
+    print_mode("could not register in app.config\n\Address Book Actors")
 
 
 

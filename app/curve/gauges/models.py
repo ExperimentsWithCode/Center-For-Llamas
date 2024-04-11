@@ -11,15 +11,10 @@ from app.data.local_storage import (
     )
 from app.curve.gauges.process_flipside import process_and_get, process_and_save
 
-from app.utilities.utility import nullify_amount
+from app.utilities.utility import nullify_amount, print_mode
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { curve.gauges.models }")
+ 
+print_mode("Loading... { curve.gauges.models }")
 
 
 def format_df(df):
@@ -89,7 +84,7 @@ try:
     app.config['df_curve_gauge_registry'] = df_curve_gauge_registry
     app.config['gauge_registry'] = gauge_registry
 except:
-    print("could not register in app.config\n\tGauges")
+    print_mode("could not register in app.config\n\tGauges")
 
 
 # ,type_id,

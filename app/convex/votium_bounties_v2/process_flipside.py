@@ -7,7 +7,8 @@ from app.utilities.utility import (
     get_datetime_obj,
     get_checkpoint_id,
     get_checkpoint_timestamp_from_date,
-    nullify_amount
+    nullify_amount,
+    print_mode
 )
 from app.data.local_storage import (
     pd,
@@ -132,8 +133,8 @@ class ProcessVotiumV2():
         df_combo['vecrv_per_bounty'] = df_combo['total_vote_power'] / df_combo['total_bounty_value']
         df_combo['vecrv_percent_per_bounty'] = df_combo['total_vote_percent'] / df_combo['total_bounty_value']
         df_combo = df_combo.sort_values(['votium_round', 'total_bounty_value'], ascending=False)
-        print(f"Votium Length: {len(votium_v2_temp)}")
-        print(f"Total Output Length: {len(df_combo)}")
+        print_mode(f"Votium Length: {len(votium_v2_temp)}")
+        print_mode(f"Total Output Length: {len(df_combo)}")
         return df_combo
     
 
@@ -147,13 +148,8 @@ def get_df_votium():
 
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Processing... { curve.liquidity.models }")
+     
+    print_mode("Processing... { curve.liquidity.models }")
     votium_v2 = ProcessVotiumV2(get_df_votium())
     df_votium_v2 = votium_v2.process()   
 
@@ -163,7 +159,7 @@ if activate_print_mode:
         # app.config['df_active_votes'] = df_active_votes
         app.config['df_votium_v2'] = df_votium_v2
     except:
-        print("could not register in app.config\n\tVotium v2")
+        print_mode("could not register in app.config\n\tVotium v2")
     return {
         # 'df_active_votes': df_active_votes,
         'df_votium_v2': df_votium_v2,

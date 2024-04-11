@@ -37,7 +37,7 @@ def read_csv(filename, path='source'):
         return data
     except Exception as e:
         print(e)
-        traceback.format_exc()
+        # print(traceback.format_exc())
         return False
 
 def write_csv(filename, data, path='output'):
@@ -58,13 +58,13 @@ def read_json(filename, path='storage'):
            data = json.load(f)
         return data
     except Exception as e:
-        print (filename)
-        print(cwd)
+        # print (filename)
+        # print(cwd)
         print (e)
         return False
 
 def write_json(filename, data):
-    print(cwd+"/app/data/source/"+ filename+'.json')
+    # print(cwd+"/app/data/source/"+ filename+'.json')
     try:
         with open(cwd+"/app/data/output/"+ filename+'.json', "w") as f:
             json.dump(data, f)
@@ -81,7 +81,7 @@ def write_dataframe_csv(filename, df, source='output'):
         return True
     except Exception as e:
         print(e)
-        traceback.format_exc()
+        # traceback.format_exc()
         return False
 
 

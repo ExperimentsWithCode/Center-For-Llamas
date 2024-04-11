@@ -13,9 +13,15 @@ from app.data.local_storage import (
 
 # filename = 'crv_locker_logs'
 
+    
 from datetime import datetime as dt
 
-from app.utilities.utility import get_checkpoint_id, get_checkpoint_timestamp_from_id, convert_units
+from app.utilities.utility import (
+    get_checkpoint_id, 
+    get_checkpoint_timestamp_from_id, 
+    convert_units,
+    print_mode
+    )
 from app.data.reference import (
     known_large_market_actors,
     current_file_title,
@@ -350,13 +356,7 @@ def get_df_gauge_pool_map():
     return df_gauge_pool_map
 
 def process_and_save():
-    try:
-        from config import activate_print_mode
-    except:
-        activate_print_mode = False
-
-    if activate_print_mode:
-        print("Processing... { curve.gauges.models }")
+    print_mode("Processing... { curve.gauges.models }")
 
     gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
     df = pd.json_normalize(gauge_registry.format_output())
@@ -365,17 +365,11 @@ def process_and_save():
         app.config['df_curve_gauge_registry'] = df
         app.config['gauge_registry'] = gauge_registry
     except:
-        print("could not register in app.config\n\tGauges")
+        print_mode("could not register in app.config\n\tGauges")
     return df
 
 def process_and_get():
-    try:
-        from config import activate_print_mode
-    except:
-        activate_print_mode = False
-
-    if activate_print_mode:
-        print("Processing... { curve.gauges.models }")
+    print_mode("Processing... { curve.gauges.models }")
     gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
     return gauge_registry
 

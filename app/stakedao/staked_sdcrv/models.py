@@ -17,17 +17,13 @@ from app.utilities.utility import (
     get_date_obj, 
     get_dt_from_timestamp,
     shift_time_days,
-    df_remove_nan
+    df_remove_nan,
+    print_mode
 )
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { stakedao.staked_sdcrv.models }")
+ 
+print_mode("Loading... { stakedao.staked_sdcrv.models }")
 
 
 def format_df(df):
@@ -68,7 +64,7 @@ try:
     app.config['df_stakedao_sdcrv_known'] = df_stakedao_sdcrv_known
     app.config['df_stakedao_sdcrv_agg'] = df_stakedao_sdcrv_agg
 except:
-    print("could not register in app.config\n\tStakeDAO Staked sdCRV")
+    print_mode("could not register in app.config\n\tStakeDAO Staked sdCRV")
 
 
 

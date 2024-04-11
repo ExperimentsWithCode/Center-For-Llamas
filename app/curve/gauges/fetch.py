@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_curve_gauges
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     curve_voter_address = '0x2F50D538606Fa9EDD2B11E2446BEb18C9D5846bB'
@@ -260,7 +260,7 @@ def generate_query(min_block_timestamp=None):
 
 
 def fetch(fetch_initial = False):
-    print("Fetching... { curve.gauges.models }")
+    print_mode("Fetching... { curve.gauges.models }")
 
     filename = filename_curve_gauges
     df = fetch_and_save_data(filename, generate_query, fetch_initial, 'deployed_timestamp')

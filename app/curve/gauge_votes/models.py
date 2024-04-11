@@ -15,13 +15,8 @@ from app.data.local_storage import (
     csv_to_df
     )
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { curve.gauges_votes.models }")
+from app.utilities.utility import print_mode
+print_mode("Loading... { curve.gauges_votes.models }")
 
 
 def format_df(df):
@@ -62,4 +57,4 @@ try:
     app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
     app.config['df_current_gauge_votes'] = df_current_gauge_votes
 except:
-    print("could not register in app.config\n\tGauge Votes")
+    print_mode("could not register in app.config\n\tGauge Votes")

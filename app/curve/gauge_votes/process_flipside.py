@@ -24,7 +24,8 @@ from app.utilities.utility import (
     get_period, 
     get_period_end_date, 
     get_checkpoint_timestamp, 
-    get_checkpoint_id
+    get_checkpoint_id,
+    print_mode
 )
 
 from app.data.reference import (
@@ -99,7 +100,7 @@ class Voter():
                 self.active_votes[gauge_addr] = v
             except Exception as e:
                 print(e)
-                print(row['DECODED_LOG'])
+                print_mode(row['DECODED_LOG'])
         else:
             tx_hash = row['tx_hash']
             try:
@@ -299,13 +300,8 @@ def get_current_votes(df_gauge_votes_formatted):
     return df_current_gauge_votes
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Processing... { curve.gauge_votes.models }")
+     
+    print_mode("Processing... { curve.gauge_votes.models }")
     vr = get_vote_registry_obj()
 
 
@@ -326,7 +322,7 @@ if activate_print_mode:
         app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
         app.config['df_current_gauge_votes'] = df_current_gauge_votes
     except:
-        print("could not register in app.config\n\tGauge Votes")
+        print_mode("could not register in app.config\n\tGauge Votes")
     return {
         # 'df_active_votes': df_active_votes,
         'df_all_votes': df_all_votes,

@@ -1,6 +1,6 @@
 from flask import current_app as app
 from app.data.reference import filename_votium_v2
-from app.utilities.utility import nullify_amount
+from app.utilities.utility import nullify_amount, print_mode
 
 from app.data.local_storage import (
     pd,
@@ -21,13 +21,8 @@ except:
     # from app.curve.liquidity.models import df_curve_liquidity
     from app.curve.gauges.models import df_curve_gauge_registry
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { convex.votium_v2.models }")
+ 
+    print_mode("Loading... { convex.votium_v2.models }")
 
 # def nullify_amount(value):
 #     if value == 'null' or value == '' or value == '-':
@@ -104,5 +99,5 @@ try:
     app.config['df_votium_v2'] = df_votium_v2
 
 except:
-    print("could not register in app.config\n\tVotium v2")
+    print_mode("could not register in app.config\n\tVotium v2")
 

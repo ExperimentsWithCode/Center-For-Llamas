@@ -16,6 +16,10 @@ except:
 import PIL
 import io
 
+def print_mode(to_print):
+    if activate_print_mode:
+        print(to_print)
+    
 
 
 def timed(f):
@@ -25,14 +29,15 @@ def timed(f):
     result = f(*args, **kwds)
     elapsed = time() - start
     if activate_print_mode:
-        print("-"*50)
-        print ("\t%s took \n\t\t%d time to finish" % (f.__name__, elapsed))
-        print("-"*50)
+        print_mode("-"*50)
+        print_mode ("\t%s took \n\t\t%d time to finish" % (f.__name__, elapsed))
+        print_mode("-"*50)
     return result
   return wrapper
 
 def df_remove_nan(df):
     return df.where(pd.notnull(df), None)
+
 
 
 ## Datetime stuff
@@ -461,10 +466,10 @@ def get_checkpoint_id(timestamp, df_checkpoints = df_default_checkpoints):
         this_id = int((date_diff.days + seconds_diff_as_days ) / 7)
     except Exception as e:
         print(e)
-        print(timestamp)
-        print(time_obj)
-        print(df_checkpoints.checkpoint_timestamp.min())
-        print(date_diff)
+        print_mode(timestamp)
+        print_mode(time_obj)
+        print_mode(df_checkpoints.checkpoint_timestamp.min())
+        print_mode(date_diff)
         this_id = 0
     if this_id < 1:
         this_id = 0
@@ -512,3 +517,4 @@ def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint)
         efficiency = checkpoint_diff / max_lock_diff
 
     return efficiency
+

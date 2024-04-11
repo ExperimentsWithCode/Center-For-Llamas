@@ -114,12 +114,7 @@ def get_df(filename):
     return df
 
 def process_and_save():
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
+     
     print("Processing... { stakedao.sdcrv.models }")
     sdcrv = StakeDAOsdCRV(get_df(filename_stakedao_staked_sdcrv))
     sdcrv_base = sdcrv.processed_df

@@ -11,7 +11,8 @@ from app.utilities.utility import (
     format_plotly_figure,
     get_checkpoint_id,
     get_checkpoint_timestamp_from_id,
-    convert_units
+    convert_units,
+    print_mode
 )
 
 
@@ -49,13 +50,8 @@ except:
 
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { curve.meta.models }")
+ 
+    print_mode("Loading... { curve.meta.models }")
 
 
 def generate_round_differences(df, current_round = 0, compare_round=1):
@@ -282,7 +278,7 @@ class ProcessContributingFactors():
                 out.append(n2)
             out.sort()
         except:
-            print(string_in)
+            print_mode(string_in)
         return str(out).replace("'", "")
 
     def generate_issuance_map(self, annual_issuance):

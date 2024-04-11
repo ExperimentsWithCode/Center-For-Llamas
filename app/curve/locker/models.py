@@ -16,25 +16,13 @@ from app.data.local_storage import (
     )
 
 from app.utilities.utility import (
-    get_period,
-    get_period_direct, 
-    get_period_end_date, 
     get_date_obj, 
-    get_dt_from_timestamp,
-    shift_time_days,
-    df_remove_nan,
-    format_plotly_figure,
-    convert_animation_to_gif,
-    timed
+    timed,
+    print_mode
     # nullify_amount,
 )
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { curve.locker.models }")
+ 
+print_mode("Loading... { curve.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
     now = dt.utcnow()
@@ -146,4 +134,4 @@ try:
     app.config[f"{name_prefix}_decay"] = df_curve_vecrv_decay
     app.config[f"{name_prefix}_decay_agg"] = df_curve_vecrv_decay_agg
 except:
-    print("could not register in app.config\n\Curve Locked veCRV")
+    print_mode("could not register in app.config\n\Curve Locked veCRV")

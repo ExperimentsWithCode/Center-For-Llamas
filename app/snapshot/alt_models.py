@@ -9,7 +9,8 @@ from app.utilities.utility import (
     get_checkpoint_id, 
     get_dt_from_timestamp,
     get_checkpoint_timestamp_from_id,
-    get_checkpoint
+    get_checkpoint,
+    print_mode
 )
 
 from app.data.reference import known_large_market_actors
@@ -28,13 +29,8 @@ from app.data.reference import filename_convex_curve_snapshot_origin, filename_s
 
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { snapshot.alt_models }")
+ 
+print_mode("Loading... { snapshot.alt_models }")
 
 
 class SnapshotAsSource():

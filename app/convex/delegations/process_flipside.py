@@ -11,6 +11,8 @@ from app.data.local_storage import (
     write_dataframe_csv
     )
 
+from app.utilities.utility import print_mode
+
 try:
     df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
     df_convex_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
@@ -22,13 +24,9 @@ except:
     
 
 def process_and_get(save=False):
-    try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Processing... { convex.snapshot.delegations.models }")
+
+    print_mode("Processing... { convex.snapshot.delegations.models }")
     df_delegations = csv_to_df(filename_convex_delegations, 'raw_data')
 
     pcb = ProcessSnapshotDelegations(df_delegations, df_convex_snapshot_vote_choice, df_convex_locker_agg_user_epoch)
@@ -58,7 +56,7 @@ if activate_print_mode:
 
 
     except:
-        print("could not register in app.config\n\tConvex Snapshot Delegations")
+        print_mode("could not register in app.config\n\tConvex Snapshot Delegations")
     return {
         # 'df_active_votes': df_active_votes,
         'df_convex_snapshot_vote_choice': df_snapshot_delegated_votes,
@@ -70,13 +68,9 @@ if activate_print_mode:
     }
 
 # def process_and_save():
-#     try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
 
-if activate_print_mode:
-    print("Processing... { convex.snapshot.delegations.models }")
+
+#     print_mode("Processing... { convex.snapshot.delegations.models }")
 #     df_delegations = csv_to_df(filename_convex_delegations, 'raw_data')
 
 #     pcb = ProcessSnapshotDelegations(df_delegations, df_convex_snapshot_vote_choice, df_convex_locker_agg_user_epoch)

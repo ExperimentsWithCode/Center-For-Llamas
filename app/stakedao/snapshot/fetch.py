@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_stakedao_curve_snapshot 
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     if min_block_timestamp:
@@ -47,7 +47,7 @@ def generate_query(min_block_timestamp=None):
     return query
 
 def fetch(fetch_initial = False):
-    print("Fetching... { stakedao.snapshot_curve_votes.models }")
+    print_mode("Fetching... { stakedao.snapshot_curve_votes.models }")
 
     filename = filename_stakedao_curve_snapshot
     df = fetch_and_save_data(filename, generate_query, fetch_initial, 'vote_timestamp')

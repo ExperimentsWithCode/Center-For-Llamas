@@ -15,6 +15,8 @@ from app.data.local_storage import (
     write_dfs_to_xlsx
     )
 
+from app.utilities.utility import print_mode
+
 # filename = 'crv_locker_logs'
 
 
@@ -34,13 +36,8 @@ except:
 
 
 
-try:
-    from config import activate_print_mode
-except:
-    activate_print_mode = False
-
-if activate_print_mode:
-    print("Loading... { stakedao.snapshot.models }")
+ 
+print_mode("Loading... { stakedao.snapshot.models }")
 
 
 
@@ -103,6 +100,6 @@ try:
     app.config['df_stakedao_snapshot_vote_aggregates'] = df_stakedao_snapshot_vote_aggregates
     app.config['df_stakedao_snapshot_vote_choice'] = df_stakedao_snapshot_vote_choice
 except:
-    print("could not register in app.config\n\tSnapshot")
+    print_mode("could not register in app.config\n\tSnapshot")
 
 # print(stakedao_snapshot_proposal_choice_map)

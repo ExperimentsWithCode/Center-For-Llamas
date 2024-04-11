@@ -1,6 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_stakedao_delegations
-
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     gnosis_delegations = '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
@@ -58,7 +58,7 @@ def generate_query(min_block_timestamp=None):
 
 
 def fetch(fetch_initial = False):
-    print("Fetching... { convex.delegates.models }")
+    print_mode("Fetching... { convex.delegates.models }")
 
     filename = filename_stakedao_delegations
     df = fetch_and_save_data(filename, generate_query, fetch_initial)
