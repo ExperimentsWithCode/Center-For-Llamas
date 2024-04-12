@@ -177,7 +177,7 @@ class ProcessContributingFactors():
     def process(self, target_gauge, compare_back):
         df_checkpoints_local = df_checkpoints_agg[df_checkpoints_agg['gauge_addr'] == target_gauge]
         df_checkpoints_local = df_checkpoints_local[df_checkpoints_local['checkpoint_id'] > df_checkpoints_local.checkpoint_id.max() - compare_back]
-
+        
         df_votium_v2_local = df_votium_v2[df_votium_v2['gauge_addr'] == target_gauge]
         df_votium_v2_local = df_votium_v2_local[df_votium_v2_local['checkpoint_id'] > df_votium_v2_local.checkpoint_id.max() - compare_back]
 
@@ -292,7 +292,10 @@ class ProcessContributingFactors():
         return issuance_map
     
     def apply_issuance(self, row, weekly_issuance_map):
-        return weekly_issuance_map[row['checkpoint_id']] * row['total_vote_percent']
+        if int(row['checkpoint_id']) in weekly_issuance_map and 'total_vote_percent' in row:
+            return weekly_issuance_map[int(row['checkpoint_id'])] * row['total_vote_percent']
+        else:
+            return 0
 
     def process_issuance(self, df):
         annual_issuance = [
@@ -305,7 +308,7 @@ class ProcessContributingFactors():
         ]
         weekly_issuance_map = self.generate_issuance_map(annual_issuance)
 
-        df['issuance_received'] = df.apply(lambda x: self.apply_issuance(x, weekly_issuance_map), axis=1)
+        df['issuance_distributed'] = df.apply(lambda x: self.apply_issuance(x, weekly_issuance_map), axis=1)
         return df
 
     def get_oracle_checkpoint_aggs(self, df):
@@ -330,7 +333,7 @@ class ProcessContributingFactors():
             on = ['checkpoint_id'], 
             )
         
-        df_oracle_combo['issuance_value'] = df_oracle_combo['issuance_received'] * df_oracle_combo['avg_crv_price']
+        df_oracle_combo['issuance_value'] = df_oracle_combo['issuance_distributed'] * df_oracle_combo['avg_crv_price']
         # df_oracle_combo['relative_issuance'] = df_oracle_combo['issuance_value'] * df_oracle_combo['bounty_value'] / df_oracle_combo['total_bounty_value']
         # df_oracle_combo['relative_issuance_value'] = df_oracle_combo['relative_issuance'] * df_oracle_combo['avg_crv_price']
 

@@ -159,7 +159,9 @@ def contributing_factors():
     else:
         target_gauge=None
         compare_back=16
-
+    form.process(data={'target_gauge': target_gauge, 
+                       'compare_back':compare_back, 
+                       })
     if not target_gauge:
         return render_template(
             'contributing_factors.jinja2',
@@ -169,24 +171,13 @@ def contributing_factors():
             form=form,
             df_approved_gauges = df_approved_gauges
             )
+    
     pcf = ProcessContributingFactors()
     df = pcf.process_all(target_gauge, compare_back)
 
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == target_gauge]
-    # try:
-    #     pcf = ProcessContributingFactors()
-    #     df = pcf.process_all(target_gauge, compare_back)
-    # except Exception as e:
-    #     return render_template(
-    #         'contributing_factors.jinja2',
-    #         title='Curve Meta: Contributing Factors',
-    #         template='contributing_factors',
-    #         body=e,
-    #         form=form,
-    #         df_curve_gauge_registry = df_approved_gauges
-    #         )
-        
+
     # Build chart
     fig = go.Figure()
 

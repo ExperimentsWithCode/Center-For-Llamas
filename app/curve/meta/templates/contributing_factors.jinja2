@@ -122,7 +122,7 @@
             { id: 'avg_crv_price', name: 'Avg CRV Price',
               {% include 'utility_sort_float.jinja2' %} 
             },
-            { id: 'issuance_received', name: 'Issuance Recieved',
+            { id: 'issuance_distributed', name: 'Issuance Recieved',
               {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'issuance_value', name: 'Issuance Value',
@@ -159,7 +159,7 @@
               'checkpoint_id': '{{ row['checkpoint_id'] }}',
               'checkpoint_timestamp': '{{ row['checkpoint_timestamp']  }}',
               'avg_crv_price': '{{ row['avg_crv_price']| round(4) }}',
-              'issuance_received': '{{ row['issuance_received']| round(2) }}',
+              'issuance_distributed': '{{ row['issuance_distributed']| round(2) }}',
               'issuance_value': '{{ row['issuance_value']|round(2)  }}',
               'yield_rate_adj': '{{ row['yield_rate_adj']|round(2) }}',
               'total_vote_percent': '{{ row['total_vote_percent']|round(2) }}',
