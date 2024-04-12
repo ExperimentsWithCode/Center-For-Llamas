@@ -24,6 +24,10 @@ class DataManagerForm(FlaskForm):
     'Should Fetch',
     # validators=[DataRequired()]
     )
+    should_process = BooleanField(
+    'Should Process',
+    # validators=[DataRequired()]
+    )
     load_cutoff = BooleanField(
     'Load Cutoff ',
     # validators=[DataRequired()]

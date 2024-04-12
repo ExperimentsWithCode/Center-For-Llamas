@@ -1,5 +1,6 @@
 from flipside import Flipside
-from config import flipside_api_key, flipside_nft_holder_address
+from config import flipside_api_key
+from app.data.reference import filename_file_meta
 
 import pandas as pd
 
@@ -7,7 +8,9 @@ from app.utilities.utility import print_mode
 from app.data.local_storage import (
     read_json,
     read_csv,
-    write_dataframe_csv
+    write_dataframe_csv,
+    csv_to_df,
+    df_to_csv
 )
 
 sdk = Flipside(flipside_api_key)
@@ -116,6 +119,38 @@ def fetch_and_save_data(filename, generate_query, fetch_initial = False, target 
         df, block_timestamp = get_df_and_target(filename, target)
         query = generate_query(block_timestamp)
         df = query_and_save(query, filename, df)
+    # if target in df.keys():
+    #     max_target = df[target].max()
+    #     update_file_meta(filename, target, max_target)
     return df
+
+
+"""
+Needs to read data but only to get max date value. 
+This is inefficient. 
+Can we reduce need to read whole csv?
+"""
+def update_file_meta(filename, target, value):
+    df_meta = csv_to_df(filename_file_meta, 'source')
+    output = [{
+        'filename': filename,
+        'target': target,
+        'value': value
+        }]
+    for i, row in df_meta.iterrows():
+        if not filename == row['filename']:
+            new_row = {'filename': row['value'],
+                    'target': row['target'],
+                    'value': row['value']}
+            output.append(new_row)
+    df_to_csv(pd.json_normalize(output), 'source')
+
+def get_file_meta(filename):
+    df_meta = csv_to_df(filename_file_meta, 'source')
+    df = df_meta[df_meta['filename'] == filename]
+    if len(df) > 0:
+        return df.iloc[0]
+    else:
+        return None
 
 

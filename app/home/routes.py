@@ -57,15 +57,16 @@ def male_models():
         'curve_liquidity': False, 
         
         # Convex
+        'convex_snapshot_curve': False,
         'convex_locker': False,
         'convex_delegations': False,
-        'convex_snapshot_curve': False,
-        
+
         # StakeDAO
-        'stakedao_delegations': False,
+        'stakedao_snapshot_curve': False,
         'stakedao_staked_sdcrv': False,
         'stakedao_locker': False,
-        'stakedao_snapshot_curve': False,
+        'stakedao_delegations': False,
+
 
         #Votium
         'votium_bounties_v2': False,
@@ -84,6 +85,7 @@ def male_models():
     if form.validate_on_submit():
         load_initial= form.load_initial.data if form.load_initial.data else False
         should_fetch = form.should_fetch.data if form.should_fetch.data else False
+        should_process = form.should_process.data if form.should_process.data else False
         load_cutoff  = form.load_cutoff.data if form.load_cutoff.data else False
         # config = form.manager_config.data if form.manager_config.data else placeholder_list
         mc = {}
@@ -96,6 +98,7 @@ def male_models():
         manager = Manager(
             mc, 
             should_fetch, 
+            should_process,
             load_initial,
             # Liquidity Specific
             load_cutoff,
@@ -104,12 +107,15 @@ def male_models():
     else:
         load_initial = False
         should_fetch = False
+        should_process = False
         load_cutoff = False
         config = placeholder_list
 
     form.process(data={
         'load_initial': load_initial, 
         'should_fetch':should_fetch, 
+        'should_process':should_process, 
+
         'load_cutoff': load_cutoff, 
         'manager_config':config,
         })

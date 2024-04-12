@@ -109,6 +109,7 @@ known_large_market_actors = {
     '0x52f737774c470e38b4f0109a2c852b129df14302': 'Wintermute(?)',
     '0x490b8c6007ffa5d3728a49c2ee199e51f05d2f7e': 'Prisma Fi',
     '0x51c2cef9efa48e08557a361b52db34061c025a1b': 'JPEGd',
+    '0x52ea58f4fc3ced48fa18e909226c1f8a0ef887dc': 'StakeDAO Delegation',
 }
 
 
@@ -183,6 +184,7 @@ filename_votium_v1 = 'votium_v1'
 filename_warden_vesdt_boost_delegation = 'warden_vesdt_boost_delegation'
 
 # Meta
+filename_file_meta = 'file_meta'
 filename_actors = 'actors'
 
 core_filename_list = [

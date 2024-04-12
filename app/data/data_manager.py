@@ -11,7 +11,7 @@ from app.data.local_storage import (
 
 load_initial = False
 should_fetch = True
-
+should_process = False
 default_bool = False
 
 manager_config = {
@@ -53,6 +53,7 @@ class Manager():
     def __init__(self,
                 manager_config=manager_config,
                 should_fetch=should_fetch,
+                should_process =should_process,
                 load_initial = load_initial,
                 # Curve Liquidity Focus
                 load_cutoff = False,   
@@ -62,6 +63,7 @@ class Manager():
         # print(manager_config)
         self.config = manager_config
         self.should_fetch = should_fetch
+        self.should_process = should_process
         self.load_initial = load_initial
         self.load_liquidity_cutoff = load_cutoff
         self.liquidity_cutoff_value = cutoff_value
@@ -70,6 +72,7 @@ class Manager():
     def update_settings(self, new_settings):
         self.config = new_settings['manager_config'] if 'manager_config' in new_settings else None
         self.should_fetch = new_settings['should_fetch'] if 'should_fetch' in new_settings else False
+        self.should_process = new_settings['should_process'] if 'should_process' in new_settings else False
         self.load_initial = new_settings['load_initial'] if 'load_initial' in new_settings else False
         self.load_liquidity_cutoff = new_settings['load_cutoff'] if 'load_cutoff' in new_settings else False
         self.liquidity_cutoff_value = new_settings['cutoff_value'] if 'cutoff_value' in new_settings else None
@@ -310,11 +313,11 @@ class Manager():
                     fetch(self.load_initial)
                 else:
                     fetch(override_load_initial)
-        # Always process if config is True
+
         if process_and_save != None:
-            return process_and_save()
-        else:
-            print_mode(f"Not Processing: {process_and_save}")
+            if self.should_process:
+                return process_and_save()
+        print_mode(f"Not Processing: {process_and_save}")
         return None
         
 
