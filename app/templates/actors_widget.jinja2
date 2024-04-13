@@ -44,13 +44,13 @@
 
                                 {% if key == "curve_vecrv_locker" %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-primary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-primary text-white  {% endif%}" 
                                     href="{{ url_for('curve_locker_vecrv_bp.show', user= actor_profile['address']) }}">
                                     veCRV Locker</a>
                                 </li>
                                 {% elif key == "curve_voters" %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-primary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-primary text-white  {% endif%}" 
                                     href="{{ url_for('gauge_votes_bp.show', user= actor_profile['address']) }}">
                                     veCRV Voter</a>
                                 </li>
@@ -74,25 +74,25 @@
 
                                 {% if key == 'convex_snapshot_voter' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-secondary text-white {% endif%}" 
                                     href="{{ url_for('convex_snapshot_bp.voter', voter= actor_profile['address']) }}">
                                     vlCVX Curve Snaphot Voter</a>
                                 </li>
                                 {% elif key == 'convex_vlcvx_locker' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-secondary text-white  {% endif%}" 
                                     href="{{ url_for('convex_vote_locker_bp.show', user= actor_profile['address']) }}">
                                     vlCVX Locker</a>
                                 </li>
                                 {% elif key == 'convex_delegator' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-secondary text-white  {% endif%}" 
                                     href="{{ url_for('convex_snapshot_delegations_bp.delegator', delegator= actor_profile['address']) }}">
                                     vlCVX Delegator</a>
                                 </li>
                                 {% elif key == 'convex_delegate' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-secondary text-white  {% endif%}" 
                                     href="{{ url_for('convex_snapshot_delegations_bp.delegate', delegate= actor_profile['address']) }}">
                                     vlCVX Delegate</a>
                                 </li>
@@ -118,31 +118,31 @@
 
                                 {% if key == 'stakedao_snapshot_voter' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-info  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-info text-white  {% endif%}" 
                                     href="{{ url_for('stakedao_snapshot_bp.voter', voter= actor_profile['address']) }}">
                                     sdCRV Curve Snapshot Voter</a>
                                 </li>
                                 {% elif key == 'stakedao_sdcrv_staker' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-info  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-info text-white  {% endif%}" 
                                     href="{{ url_for('stakedao_staked_sdcrv_bp.show', user= actor_profile['address']) }}">
                                     sdCRV Staker</a>
                                 </li>
                                 {% elif key == 'stakedao_vesdt_locker' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-info  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-info text-white  {% endif%}" 
                                     href="{{ url_for('stakedao_locked_vesdt_bp.show', user= actor_profile['address']) }}">
                                     veSDT Locker</a>
                                 </li>
                                 {% elif key == 'stakedao_delegator' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-info text-white {% endif%}" 
                                     href="{{ url_for('stakedao_snapshot_delegations_bp.delegator', delegator= actor_profile['address']) }}">
                                     sdCRV Delegator</a>
                                 </li>
                                 {% elif key == 'stakedao_delegate' %}
                                 <li class="nav-item">
-                                <a class="nav-link {% if key == actor_type %} active border-secondary  {% endif%}" 
+                                <a class="nav-link {% if key == actor_type %} active bg-info text-white {% endif%}" 
                                     href="{{ url_for('stakedao_snapshot_delegations_bp.delegate', delegate= actor_profile['address']) }}">
                                     sdCRV Delegate</a>
                                 </li>

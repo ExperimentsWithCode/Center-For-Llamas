@@ -86,7 +86,7 @@ def init_app():
             app.register_blueprint(stakedao_locked_vesdt_bp, url_prefix='/stakedao/locker')
             app.register_blueprint(stakedao_snapshot_delegations_bp, url_prefix='/stakedao/delegations')
 
-            app.register_blueprint(address_book_bp, url_prefix='/address_book/')
+            app.register_blueprint(address_book_bp, url_prefix='/directory')
 
         except Exception as e:
             print(e)

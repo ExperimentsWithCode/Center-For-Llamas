@@ -292,10 +292,19 @@ class ProcessContributingFactors():
         return issuance_map
     
     def apply_issuance(self, row, weekly_issuance_map):
-        if int(row['checkpoint_id']) in weekly_issuance_map and 'total_vote_percent' in row:
-            return weekly_issuance_map[int(row['checkpoint_id'])] * row['total_vote_percent']
+        # try:
+        #     int(row['checkpoint_id'])
+        # except:
+        #     return 0
+        if row['checkpoint_id'] in weekly_issuance_map and 'total_vote_percent' in row:
+            return weekly_issuance_map[row['checkpoint_id']] * row['total_vote_percent']
         else:
             return 0
+        # except Exception as e:
+        #     print(e)
+        #     print(row['checkpoint_id'])
+        #     print(row['total_vote_percent'])
+        #     print(weekly_issuance_map[row['checkpoint_id']])
 
     def process_issuance(self, df):
         annual_issuance = [

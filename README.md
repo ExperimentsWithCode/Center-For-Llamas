@@ -273,4 +273,6 @@ ___
 
 ## Delegations As Aggregates
 * /convex/delegations/delegator/0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83
-* Snapshot vote does not match delegation.
+    * Snapshot vote does not match delegation.
+* /stakedao/delegations/delegator/0x34a0da8d21af0f6caeec2c25ad07c88cfe483b54
+    * Can't find info, not present on delegate page, is found on index.

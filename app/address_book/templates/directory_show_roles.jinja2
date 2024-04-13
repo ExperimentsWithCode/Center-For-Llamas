@@ -1,0 +1,23 @@
+{% extends "layout.jinja2" %}
+
+
+{% block content %}
+  {% set active_category = "directory" -%}
+  {% set active_page = "show_roles" -%}
+  {% set sub_active_page = 'home' -%}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+    {% with actor_type = 'directory'%}
+        {# {% with action_tag = 'Voter'%} #}
+
+        {% include 'actors_widget.jinja2' %} 
+      {# {% endwith %} #}
+    {% endwith %}
+
+
+
+{% endblock %}

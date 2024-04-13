@@ -388,7 +388,7 @@ Checkpoints
 def generate_checkpoints(start_time = '2020-08-20 00:06:58.919591+00:00'):
     week =  7 * 86400 
     start_date = get_datetime_obj(start_time)
-    print(start_date)
+    print_mode(start_date)
     #
     i = 0
     checkpoints = []

@@ -135,7 +135,10 @@ class Oracle():
             'has_price_x',
             'price_x',
             'price_y',
+            'amount_x',
+            'amount_y',
             'exchange_rate_y_over_x' ,
+            'pool_addr'
             # 'calc_price_x'
             ]]
         df_y = df[[
@@ -147,8 +150,10 @@ class Oracle():
             'has_price_y',
             'price_y',
             'price_x',
+            'amount_y',
+            'amount_x',
             'exchange_rate_x_over_y' ,
-            # 'calc_price_y'
+            'pool_addr'
             ]]
 
         df_x = df_x.rename(columns={
@@ -160,8 +165,10 @@ class Oracle():
             "has_price_x": 'has_price',
             'price_x': 'price',
             'price_y': 'comp_price',
+            'amount_x': 'amount',
+            'amount_y': 'comp_amount',
             'exchange_rate_y_over_x': 'exchange_rate',
-            # 'calc_price_x': 'calc_price'           
+            'pool_addr': 'pool_addr'           
             })
         df_y = df_y.rename(columns={
             "block_timestamp_x": 'block_timestamp',
@@ -172,9 +179,10 @@ class Oracle():
             "has_price_y": 'has_price',
             'price_y': 'price',
             'price_x': 'comp_price',
-
+            'amount_y': 'amount',
+            'amount_x': 'comp_amount',
             'exchange_rate_x_over_y': 'exchange_rate',
-            # 'calc_price_y': 'calc_price'           
+            'pool_addr': 'pool_addr'           
             })
         return concat_all([df_x, df_y],['block_timestamp'])
 
@@ -295,7 +303,7 @@ class Liquidity():
         df = df[df['balance'] > 0]
         # additive
         df['checkpoint_id'] = df.apply(
-            lambda x: get_checkpoint_id(x['block_timestamp']), 
+            lambda x: get_checkpoint_id(x['block_timestamp']) - 1, 
             axis=1)
         
         df['gauge_addr'] = df.apply(
@@ -395,7 +403,7 @@ def process_and_save():
 
     write_dataframe_csv(filename_curve_liquidity, df_curve_liquidity, 'processed')
     write_dataframe_csv(filename_curve_liquidity_aggregate, df_curve_liquidity_aggregates, 'processed')
-    write_dataframe_csv(filename_curve_liquidity_swaps, df_curve_liquidity, 'processed')
+    write_dataframe_csv(filename_curve_liquidity_swaps, df_curve_swaps, 'processed')
     write_dataframe_csv(filename_curve_liquidity_oracle_aggregate, df_curve_oracles_agg, 'processed')
     try:
         # app.config['df_active_votes'] = df_active_votes

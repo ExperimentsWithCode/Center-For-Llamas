@@ -1,0 +1,77 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% set active_category = "directory" -%}
+  {% set active_page = "roles" -%}
+  {% set sub_active_page = 'home' -%}
+  {% include "navigation.jinja2" %}
+
+    <div class="row">
+      <h1>{{ title }}</h1>
+    </div>
+
+    {# <div class="row">
+        <div class="card border-info mb-3"  >
+
+          <div class="card-header">Notes:</div>
+          <div class="card-body">
+              <p class="card-text">Currently uses "N/A" for gauges which were sourced from scraping the website vs onchain. 
+              Mostly refered to as "Core". These pools do not show on the table below due to lack of creation blocktime.
+              </p>
+              <p class="card-text">Currently there is not a record of all deployments.
+              </p>
+              <p class="card-text">Rows with a <strong>Vote Timestamp</strong> have been whitelisted by governance to recieve CRV issuance as determined by gauge vote.
+              </p>
+          </div>
+        </div>
+
+    </div> #}
+
+ <div class="row">
+    <p></p>
+    <h4 class="text-info">Role Registry</h4>
+    {# <p class="text-{{table_tag}}">Not all gauge factories are currently covered, so this data is incomplete</p> #}
+
+    <div id='table_1' ></div>
+</div>
+
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'known_as', name: 'Known As' ,            
+            },
+            { id: 'address', name: 'Address' ,
+                formatter: (_, row) => gridjs.html(
+                `${row.cells[1].data.toString()}`
+                )               
+            }
+        ],
+        data: [
+          {% for index, row in df_actors.iterrows() %}
+            {
+                'known_as': '{{ row['known_as'] }}',
+                'address': `<a href={{ url_for('address_book_bp.show_roles', actor_addr = row['address']) }}>{{row['address']}}</a>`
+              
+
+            },
+          {% endfor %}
+        ],
+        {% with max_size = 10 %}
+            {% include 'table_format_helper.jinja2' %}
+        {% endwith %}
+      }).render(document.getElementById('table_1'));
+</script>
+
+
+
+{% endblock %}

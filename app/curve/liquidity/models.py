@@ -57,7 +57,12 @@ def format_df(df):
         df['price']= df.apply(
             lambda x: nullify_amount(x['price']), 
             axis=1)
-         
+        
+    if 'amount' in key_list:
+        df['amount']= df.apply(
+            lambda x: nullify_amount(x['amount']), 
+            axis=1)
+        
     if 'total_balance' in key_list:
         df['total_balance']  = df['total_balance'].astype(float)
 

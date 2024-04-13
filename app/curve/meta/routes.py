@@ -175,6 +175,16 @@ def contributing_factors():
     pcf = ProcessContributingFactors()
     df = pcf.process_all(target_gauge, compare_back)
 
+    if len(df) == 0:
+        return render_template(
+            'contributing_factors.jinja2',
+            title='Curve Meta: Contributing Factors',
+            template='contributing_factors',
+            body="Gauge not found",
+            form=form,
+            df_approved_gauges = df_approved_gauges
+            )
+    
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == target_gauge]
 

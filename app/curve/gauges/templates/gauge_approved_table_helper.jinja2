@@ -4,9 +4,8 @@
 
 
  <div class="row">
-    <p></p>
     <h4 class="text-{{table_tag}} ">Gauges Approved</h4>
-    <p class="text-{{table_tag}}">Not all gauge factories are currently covered, so some source tags are incomplete</p></div>
+    <p class="text-{{table_tag}}">Not all gauge factories are currently covered, so some source tags are incomplete</p>
 
 
     <div id='{{ id }}' ></div>
@@ -31,9 +30,6 @@
           { id: 'type_name', name: 'Type Name' },
           { id: 'type_weight_adj', name: 'Type Weight',
           {% include 'utility_sort_float.jinja2'%}
-          },
-          { id: 'type_total_weight_adj', name: 'Type Weight',
-          {% include 'utility_sort_float.jinja2'%}
           }
 
         ],
@@ -49,8 +45,7 @@
              
               'type_id': '{{ row['type_id'] }}',
               'type_name': '{{ row['type_name'] }}',
-              'type_weight_adj': '{{ row['type_weight_adj'] }}',
-              'type_total_weight_adj': '{{ row['type_total_weight_adj'] }}'
+              'type_weight_adj': '{{ row['type_weight_adj'] }}'
 
             },
           {% endfor %}

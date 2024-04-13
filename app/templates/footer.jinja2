@@ -1,0 +1,83 @@
+{% block content %}
+
+
+<div class = 'row'>
+
+
+<div class="row" >
+<div class = "col-sm" >
+    <div class="card border-secondary mb-3"  >
+    <div class="card-body ">
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+                <p class="card-text">
+
+                This site is mostly powered by 
+                <a 
+                    href="https://flipsidecrypto.xyz/">
+                    Flipside
+                    </a> data.
+                <br/>I'm very greatful for their service and support.
+                </p>
+            <span class="badge">
+            <img src= {{ url_for('static', filename = 'images/flipside_logo.png') }}  alt="Flipside Logo" height="75">
+            </span>
+        </li>
+    </ul>
+    </div>
+    </div>
+</div>
+<div class = "col-sm" >
+    <div class="card border-primary mb-3"  >
+    <div class="card-body ">
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <p class="card-text ">
+            Center For Llamas is an <strong>Experimental Beta</strong>.
+            <br/>It is a passion project made possible by 
+            <a 
+                href="https://reserve.org/">
+                Reserve
+                </a>.
+            </p>
+
+            
+            <span class="badge">
+            <img src= {{ url_for('static', filename = 'images/reserve_logo.png') }}  alt="Reserve Logo" height="75">
+            
+            </span>
+        </li>
+    </ul>
+    </div>
+    </div>
+
+</div>
+<div class = "col-sm" >
+    <div class="card border-info mb-3"  >
+    <div class="card-body ">
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <p class="card-text">
+
+            You can find me on
+            <a 
+                href="https://twitter.com/CoordinateStuff">
+                Twitter
+                </a>.
+            <br/>Please reach out with any questions.
+            </p>
+            <span class="badge">
+            <img src= {{ url_for('static', filename = 'images/pfp.jpg') }}  alt="PFP" height="75">
+            </span>
+        </li>
+    </ul>
+    </div>
+    </div>
+
+</div>
+</div>
+</div>
+
+{% endblock %}
+
+

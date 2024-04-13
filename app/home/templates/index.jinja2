@@ -9,58 +9,102 @@
 #}
 
 {% block content %}
-
+  {% with is_homepage = True %}
   {% include "navigation.jinja2" %}
+  {% endwith %}
+  
   <div class="row">
-
-       <div class="card border-info mb-3" >
+    <div class="'col">
+      <div class="card border-info mb-3" >
         <div class="card-body">
           <h1 class="card-title">{{ title }}</h1>
           <h4 class="card-title">{{ subtitle }}</h4>
 
         </div>
       </div>  
-
+      
+    </div>
   </div>
+
+
   <div class="row">
 
-    <div class="card border-info mb-3" style="max-width: 50%;">
-      <div class="card-header">made w/ <3 </div>
-      <div class="card-body">
-        <h4 class="card-title">A Curve Governance Explorer</h4>
-        <p class="card-text">This site is intended to act as a Curve governance explorer. 
-          To act as a granular view of the intracacies of the most active governance in DeFi.</p>
+  <div class="col-sm">
+      <div class="card border-info mb-3" style="height:97%">
+        <div class="card-header">made w/ <3 </div>
+        <div class="card-body">
+          <h4 class="card-title">A Curve Governance Explorer</h4>
+          <p class="card-text">This site is intended to act as a Curve governance explorer. 
+            To act as a granular view of the intracacies of the most active governance in DeFi.</p>
+        </div>
       </div>
-    </div>
+  </div>
 
-    <div class="card border-primary mb-3" style="max-width: 50%;">
-      <div class="card-header">Philosophy</div>
-      <div class="card-body">
-        <h4 class="card-title">A collection of parts create a whole</h4>
-        <p class="card-text">Curve governance is continuous. Actions persist. As such this project aims to isolate specific parts, and then combine them.</p>
-        <p class="card-text">Locks are independent of votes, are independent of rounds.</p>
-        <p class="card-text">As this project develops it will spawn more meta dashboards which combine aspects</p>
+  <div class="col-sm">
+
+      <div class="card border-info mb-3" >
+        {# <div class="card-header">Philosophy</div> #}
+        <div class="card-body text-center">
+        <img src= {{ url_for('static', filename = 'images/peaveful_llama.png') }}  alt="veLlama" height="500rem">
+        </div>
       </div>
-    </div>
 
   </div>
 
+  <div class="col-sm">
+      <div class="card border-primary mb-3" style="height:97%">
+        <div class="card-header">Philosophy</div>
+        <div class="card-body">
+          <h4 class="card-title">A collection of parts create a whole</h4>
+          <p class="card-text">Curve governance is continuous. Actions persist. As such this project aims to isolate specific parts, and then combine them.</p>
+          <p class="card-text">Locks are independent of votes, are independent of rounds.</p>
+          <p class="card-text">As this project develops it will spawn more meta dashboards which combine aspects</p>
+        </div>
+      </div>
   </div>
+
+  </div>
+
+
   <div class="row">
-    <div class="card border-secondary mb-3" style="max-width: 30%;" ></div>
+  
+  <div class="col-sm">
 
-    <div class="card border-info mb-3" style="max-width: 40%;">
-      <div class="card-header">Passion</div>
-      <div class="card-body">
-        <h4 class="card-title">It needs to be at least 3 times explainier</h4>
-        <img src="static/images/what_is_this.gif" alt="Zoolander">
-
+      <div class="card border-info mb-3"  >
+        {# <div class="card-header">Philosophy</div> #}
+        <div class="card-body text-center">
+        <img src= {{ url_for('static', filename = 'images/hidden_hand.png') }}  alt="veLlama" height="500rem">
+        </div>
       </div>
-    </div>
-
-    <div class="card border-secondary mb-3" style="max-width: 30%;" ></div>
 
   </div>
+
+  <div class="col-sm">
+
+      <div class="card border-info mb-3" style="height:97%">
+        <div class="card-header">Passion</div>
+        <div class="card-body text-center">
+          <h4 class="card-title">It needs to be at least 3 times explainier</h4>
+          <img style="float-left" src="static/images/what_is_this.gif" alt="Zoolander" width="100%">
+
+        </div>
+      </div>
+
+  </div>
+
+  <div class="col-sm">
+
+      <div class="card border-info mb-3" >
+        {# <div class="card-header">Philosophy</div> #}
+        <div class="card-body text-center">
+        <img src= {{ url_for('static', filename = 'images/waterfalls.png') }}  alt="veLlama" height="500rem">
+        </div>
+      </div>
+
+  </div>
+
+  </div>
+
 
     {# <div class="resource-links">
       <p class="resource-link">Github repo found <a href="https://github.com/BlockEnthusiast/Treasury_Management/tree/main/app">here.</a></p>
@@ -123,6 +167,5 @@
             </div>
         {# </div> #}
     </div>
-
 
 {% endblock %}
