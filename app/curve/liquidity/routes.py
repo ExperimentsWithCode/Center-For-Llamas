@@ -17,17 +17,19 @@ import pandas as pd
 import numpy as np
 from app.utilities.utility import get_now, format_plotly_figure
 
-from app.curve.liquidity.models import df_curve_liquidity, df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
 from .forms import FilterLiquidityForm
 
-try:
-    # curve_gauge_registry = app.config['df_curve_gauge_registry']
-    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
-    gauge_registry = app.config['gauge_registry']
+# try:
+#     # curve_gauge_registry = app.config['df_curve_gauge_registry']
+#     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+#     gauge_registry = app.config['gauge_registry']
+#     df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
+#     df_curve_liquidity = app.config['df_curve_liquidity']
 
-except: 
-    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
-    from app.curve.gauges.models import df_curve_gauge_registry, gauge_registry
+# except: 
+#     # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+#     from app.curve.gauges.models import df_curve_gauge_registry, gauge_registry
+#     from app.curve.liquidity.models import df_curve_liquidity, df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
 
 
 # Blueprint Configuration
@@ -42,6 +44,11 @@ curve_liquidity_bp = Blueprint(
 @curve_liquidity_bp.route('/', methods=['GET'])
 # @login_required
 def index():
+    try:
+        df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
+    except: 
+        from app.curve.liquidity.models import df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
+
     # now = get_now()
     local_df_curve_liquidity_aggregates = df_curve_liquidity_aggregates.groupby(['pool_addr', 'gauge_addr'], as_index=False).last()
     local_df_curve_liquidity_aggregates = local_df_curve_liquidity_aggregates.sort_values('total_vote_power', ascending=False)
@@ -66,7 +73,19 @@ def index():
 @curve_liquidity_bp.route('/show/<string:gauge_addr>', methods=['GET'])
 # @login_required
 def show(gauge_addr):
-    now = get_now()
+    try:
+        # curve_gauge_registry = app.config['df_curve_gauge_registry']
+        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+        # gauge_registry = app.config['gauge_registry']
+        df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
+        df_curve_liquidity = app.config['df_curve_liquidity']
+
+    except: 
+        # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+        from app.curve.gauges.models import df_curve_gauge_registry, gauge_registry
+        from app.curve.liquidity.models import df_curve_liquidity, df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
+
+    # now = get_now()
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
 
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
@@ -324,6 +343,17 @@ def show(gauge_addr):
 @curve_liquidity_bp.route('/filter_by_asset/', methods=['GET', 'POST'])
 # @login_required
 def filter_by_asset():
+    try:
+        # curve_gauge_registry = app.config['df_curve_gauge_registry']
+        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+        gauge_registry = app.config['gauge_registry']
+        df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
+        # df_curve_liquidity = app.config['df_curve_liquidity']
+    except: 
+        # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+        from app.curve.gauges.models import df_curve_gauge_registry, gauge_registry
+        from app.curve.liquidity.models import df_curve_liquidity_aggregates
+
     form = FilterLiquidityForm()
     address_list = []
     placeholder_list = [{'gauge_addr': '', 'delete': False}] *5
@@ -354,17 +384,20 @@ def filter_by_asset():
                        'days_back': days_back
                        })
 
-    checkpoint_id_list = df_curve_liquidity_aggregates.checkpoint_id.unique()
-    checkpoint_id_list.sort()
-    compare_checkpoints = checkpoint_id_list[-1 -(days_back)]
+    block_timestamp_list = df_curve_liquidity_aggregates.block_timestamp.unique()
+    compare_point = block_timestamp_list[-1 -(days_back)]
 
     # Filter to current date
-    local_df = df_curve_liquidity_aggregates[df_curve_liquidity_aggregates['checkpoint_id'] == compare_checkpoints]
+    local_df = df_curve_liquidity_aggregates[df_curve_liquidity_aggregates['block_timestamp'] == compare_point]
 
     # filter by asset 
     if filter_asset:
         local_df = local_df[local_df['token_symbol'].str.contains(filter_asset)]
 
+        selection = [filter_asset]
+        mask = local_df.tradable_assets.apply(lambda x: any(item for item in selection if item in x))
+        local_df = local_df[mask]    
+        
     # filter by source
     if source:
         local_registry =  df_curve_gauge_registry[df_curve_gauge_registry['source'] == source]
@@ -378,15 +411,16 @@ def filter_by_asset():
             local_df['gauge_addr'].isin(address_list)
             ]
 
-    local_df = local_df.sort_values(['date', 'liquidity'], axis = 0, ascending = False )
-
+    local_df = local_df.sort_values(['block_timestamp', 'total_balance_usd'], axis = 0, ascending = False )
+    local_df['display_symbol'] = local_df.gauge_addr.apply(gauge_registry.get_gauge_display_name)
     # filter head & tail
     local_df_curve_liquidity = local_df.head(head).tail(tail)
 
     df_tradeable_assets = df_curve_liquidity_aggregates[
-            ['display_name', 'token_symbol', 'gauge_addr', 'liquidity']
-        ].groupby('display_name').tail(1)
-    df_tradeable_assets.sort_values('liquidity', axis=0, ascending = False)
+            ['tradable_assets', 'gauge_addr', 'gauge_name', 'gauge_symbol', 'total_balance_usd']
+        ].groupby('gauge_addr').tail(1)
+    
+    df_tradeable_assets.sort_values('total_balance_usd', axis=0, ascending = False)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     # fig = go.Figure()
@@ -490,7 +524,6 @@ def filter_by_asset():
 
     )
 
-
 def chart_liquidity_and_vote_aggs(df, head, tail, back_track ):
     # local_df = last_4_top_20.sort_values('liquidity_usd_over_votes', ascending=False)
     local_df = df.sort_values('total_vote_power', ascending=False)
@@ -557,8 +590,8 @@ def chart_liquidity_and_vote_aggs(df, head, tail, back_track ):
 
 def gen_top_figs(df, max_size, interval, back_track=8, convert_to_json=True):
     # Get current Votes
-    current_votes = df_curve_liquidity_aggregates[
-        df_curve_liquidity_aggregates['checkpoint_id'] == df_curve_liquidity_aggregates.checkpoint_id.max()
+    current_votes = df[
+        df['checkpoint_id'] == df.checkpoint_id.max()
         ].sort_values(['total_vote_power','checkpoint_id', 'gauge_addr'], ascending = False)
     # Collapse to single vote power per gauge
     ranked_voters = current_votes.groupby(
@@ -570,8 +603,8 @@ def gen_top_figs(df, max_size, interval, back_track=8, convert_to_json=True):
     # Rank
     ranked_voters['vote_ranking'] = ranked_voters.groupby(['checkpoint_id'])['total_vote_power'].rank('average')
     ranked_voters = ranked_voters.sort_values('vote_ranking', ascending=False)
-    back_tracked_data = df_curve_liquidity_aggregates[
-        df_curve_liquidity_aggregates['checkpoint_id'] == df_curve_liquidity_aggregates.checkpoint_id.max() - back_track
+    back_tracked_data = df[
+        df['checkpoint_id'] == df.checkpoint_id.max() - back_track
         ].sort_values(['total_vote_power','checkpoint_id', 'gauge_addr'], ascending = False)
     
     figs = []

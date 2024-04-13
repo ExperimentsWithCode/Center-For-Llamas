@@ -197,7 +197,7 @@
 
     <div class="row">
 
-        <div class="card text-white bg-primary mb-3" style="max-width: 50%;"  >
+        <div class="card text-white bg-primary mb-3"  >
           <div class="card-header">Pool vs Total Votes (USD) </div>
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
@@ -205,9 +205,11 @@
               <div id="chart" class="chart"></div>
           </div>
         </div>
+    </div>
 
 
-        <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
+    <div class="row">
+      <div class="card text-white bg-secondary mb-3"  >
           <div class="card-header">Pool vs Total Votes (Native) </div>
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
@@ -231,22 +233,19 @@
             { id: 'date', name: 'Date' },
             {# { id: 'pool_name', name: 'Pool Name' }, #}
             { id: 'display_symbol', name: 'Symbol' },
-            { id: 'liquidity_native', name: 'Liquidity Native',
+            { id: 'total_balance', name: 'Liquidity Native',
                 formatter: (_, row) =>  `${row.cells[2].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
 
                 
             },
-            { id: 'liquidity', name: 'Liquidity USD',
+            { id: 'total_balance_usd', name: 'Liquidity USD',
                 formatter: (_, row) =>  `$${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
-            { id: 'total_votes', name: 'Total Votes',
+            { id: 'total_vote_power', name: 'Total Votes',
                 formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
-            },
-            { id: 'percent', name: 'Percent' ,
-            {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'token_symbol', name: 'Token Symbol',
             },
@@ -255,7 +254,7 @@
             { id: 'source', name: 'Source'},
             { id: 'gauge_addr', name: 'Gauge Address',              
                 formatter: (_, row) => gridjs.html(
-                  `${row.cells[9].data.toString()}`
+                  `${row.cells[8].data.toString()}`
                 )
             },
 
@@ -267,10 +266,9 @@
                 'date': '{{ row['date'] }}',
                 {# 'pool_name': '{{ row['pool_name'] }}', #}
                 'display_symbol': '{{ row['display_symbol'] }}',
-                'liquidity_native': '{{ row['liquidity_native']|round(2) }}',
-                'liquidity': '{{ row['liquidity']|round(2) }}',
-                'total_votes': '{{ row['total_votes']|round(2) }}',
-                'percent': '{{ row['percent'] |round(3) }}',
+                'total_balance': '{{ row['total_balance']|round(2) }}',
+                'total_balance_usd': '{{ row['total_balance_usd']|round(2) }}',
+                'total_vote_power': '{{ row['total_vote_power']|round(2) }}',
                 'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
                 'has_price': '{{ row['has_price'] }}',
                 'source': '{{ gauge_registry.get_gauge(row['gauge_addr']).source }}',
