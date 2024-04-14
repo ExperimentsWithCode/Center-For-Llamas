@@ -42,28 +42,8 @@
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        autoWidth: true,
-
-        pagination: {
-          limit: 20,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-secondary',
-          table: 'table table-hover' 
-        },
-          style: {
-
-            td: {
-              'max-width': '120px',
-              'overflow': 'hidden',
-              'text-overflow': 'ellipsis',
-              'white-space': 'nowrap',
-            }
-
-          }   
+        {% with table_type = 'secondary' %}
+            {% include 'table_format_helper.jinja2' %}
+        {% endwith %}
       }).render(document.getElementById('locked_vecrv_table'));
 </script>

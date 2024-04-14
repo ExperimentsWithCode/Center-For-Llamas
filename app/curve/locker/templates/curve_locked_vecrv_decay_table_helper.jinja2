@@ -13,7 +13,7 @@
           { id: 'known_as', name: 'Known As' },
           { id: 'provider', name: 'Staker' ,
             formatter: (_, row) => gridjs.html(
-                `${row.cells[2].data.toString()}`
+                `${row.cells[3].data.toString()}`
             )
           },
           
@@ -45,28 +45,7 @@
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        autoWidth: true,
-
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        },
-          style: {
-
-            td: {
-              'max-width': '120px',
-              'overflow': 'hidden',
-              'text-overflow': 'ellipsis',
-              'white-space': 'nowrap',
-            }
-
-          }   
+        {% include 'table_format_helper.jinja2' %}
+  
       }).render(document.getElementById('locked_vecrv_decay_table'));
 </script>
