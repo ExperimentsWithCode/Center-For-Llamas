@@ -252,7 +252,7 @@ def show(user):
     # Build chart
     fig = make_subplots()
     fig.update_layout(
-        title=f"Convex: vlCVX Locks Per Epoch",
+        title=f"Convex: vlCVX Current Locked Per Epoch",
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",
@@ -288,7 +288,7 @@ def show(user):
 
     fig = make_subplots()
     fig.update_layout(
-        title=f"Convex: vlCVX Current Locked Per Epoch",
+        title=f"Convex: vlCVX Locks Per Epoch",
         #     xaxis_title="X Axis Title",
         #     yaxis_title="Y Axis Title",
         #     legend_title="Legend Title",

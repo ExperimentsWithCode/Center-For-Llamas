@@ -47,7 +47,7 @@ known_large_curve_holders = {
 
 known_large_market_actors = {
     '0xaac0aa431c237c2c0b5f041c8e59b3f1a43ac78f' : 'c2tp.eth',
-    '0xb1748c79709f4ba2dd82834b8c82d4a505003f27' : 'Frax (2)',
+    '0xb1748c79709f4ba2dd82834b8c82d4a505003f27' : 'Frax (Convex/StakeDAO)',
     '0x272b065a43ef59ea470fbfd9be76ad1b43aab651' : 'some chad',
     '0xfd05d3c7fe2924020620a8be4961bbaa747e6305' : 'BadgerDAO',
     '0x51c2cef9efa48e08557a361b52db34061c025a1b' : 'JPEGD',
@@ -103,7 +103,7 @@ known_large_market_actors = {
     '0xa52fd396891e7a74b641a2cb1a6999fcf56b077e' : 'Redacted?',
     '0xa0fb1b11cca5871fb0225b64308e249b97804e99' : 'Aladin',
     '0x989aeb4d175e16225e39e87d0d97a3360524ad80' : 'Convex (cvxCRV)',
-    '0x847fa1a5337c7f24d7066e467f2e2a0f969ca79f' : 'Frax',
+    '0x847fa1a5337c7f24d7066e467f2e2a0f969ca79f' : 'Frax (Curve)',
     '0xf06016d822943c42e3cb7fc3a6a3b1889c1045f8' : 'Liquity',
     '0x7a16ff8270133f063aab6c9977183d9e72835428' : 'CRV Founder',
     '0x52f737774c470e38b4f0109a2c852b129df14302': 'Wintermute(?)',
