@@ -79,7 +79,7 @@
                 'choice_percent': '{{ (row['choice_percent'] * 100) |round(2) }} %',
                 {% endif %}
                 {% if snapshot_space == "stakedao"  %}
-                'available_power': '{{ row['staked_balance']|round(2) }}',
+                'available_power': '{{ row['available_power']|round(2) }}',
                 {% else %}
                 'available_power': '{{ row['available_power']|round(2) }}',
                 {% endif %}

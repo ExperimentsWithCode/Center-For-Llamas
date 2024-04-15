@@ -1,5 +1,6 @@
 from app.data.flipside_api_helper import fetch_and_save_data
 from app.data.reference import filename_stakedao_staked_sdcrv 
+from app.utilities.utility import print_mode
 
 def generate_query(min_block_timestamp=None):
     cxv_locker = '0x72a19342e8F1838460eBFCCEf09F6585e32db86E'

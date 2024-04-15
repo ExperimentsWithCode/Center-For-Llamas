@@ -19,6 +19,7 @@
     </div>
 
     <div class="row">
+      <div class="col-lg">
 
         <div class="card text-white bg-info mb-3" >
             <div class="card-header">Total sdCRV Staked </div>
@@ -29,6 +30,7 @@
 
             </div>
         </div>
+      </div>
     </div>
 
     {# {% with sum_current_votes=sum_current_votes %}
@@ -40,26 +42,28 @@
 
 
     <div class="row">
-        <div class="card text-white bg-secondary mb-3" style="max-width: 50%;" >
+      <div class="col-md">
+        <div class="card text-white bg-secondary mb-3"  >
             <div class="card-header">Daily Staked sdCRV Balance Changes</div>
-            <div class="card-body">
+            <div class="card-body" style="width:99%">
                 {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart2" class="chart2"></div>
 
             </div>
         </div>
-
-        <div class="card text-white bg-primary mb-3" style="max-width: 50%;"  >
+      </div>
+      <div class=" col-md">
+        <div class="card text-white bg-primary mb-3" >
             <div class="card-header">Known Staked sdCRV Balances</div>
-            <div class="card-body">
+            <div class="card-body"style="width:99%" >
                 {# <h4 class="card-title">Gauge Checkpoints By Gauge</h4> #}
                 {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
                 <div id="chart3" class="chart3"></div>
 
             </div>
         </div>
-
+      </div>
     </div>
 
 
@@ -134,17 +138,7 @@
             },
           {% endfor %}
         ],
-        search: true,
-        sort: true,
-        pagination: {
-          limit: 50,
-          summary: true
-        },
-        className: {
-          {# td: 'my-td-class', #}
-          th: 'table-primary',
-          table: 'table table-hover' 
-        }
+        {% include 'table_format_helper.jinja2' %}
       }).render(document.getElementById('staked_sdcrv_table'));
 </script>
 

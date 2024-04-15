@@ -141,7 +141,7 @@ def delegate(delegate):
                     x=local_df_stakedao_delegate_agg['proposal_start'],
                     y=local_df_stakedao_delegate_agg['total_delegated'],
                     color='delegators_count',
-                    title='vlCVX Delegated Power by Delegate',
+                    title='sdCRV Delegated Power by Delegate',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
@@ -183,7 +183,7 @@ def delegate(delegate):
     #                 x=local_df_locker_user_epoch['proposal_start'],
     #                 y=local_df_locker_user_epoch['staked_balance'],
     #                 color='delegate',
-    #                 title='Locked vlCVX by Delegate',
+    #                 title='Locked sdCRV by Delegate',
     #                 # facet_row=facet_row,
     #                 # facet_col_wrap=facet_col_wrap
     #                 )
@@ -282,7 +282,7 @@ def delegator(delegator):
                     x=local_df_vote_choice['checkpoint_timestamp'],
                     y=local_df_vote_choice['available_power'],
                     # color='choice',
-                    title='vlCVX Available To Delegate',
+                    title='sdCRV Available To Delegate',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
@@ -314,7 +314,7 @@ def delegator(delegator):
                     x=local_df_stakedao_delegation_locks_per_proposal['proposal_start'],
                     y=local_df_stakedao_delegation_locks_per_proposal['staked_balance'],
                     color=local_df_stakedao_delegation_locks_per_proposal['delegate_known_as'] + ' ('+local_df_stakedao_delegation_locks_per_proposal['delegate']+')' ,
-                    title='Delegator Locked vlCVX by Delegate',
+                    title='Delegator Locked sdCRV by Delegate',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
@@ -329,7 +329,7 @@ def delegator(delegator):
                     x=local_df_vote_choice_adj['checkpoint_timestamp'],
                     y=local_df_vote_choice_adj['choice_power_adj'],
                     color='choice',
-                    title='vlCVX Total Delegator Vote Power by Choice',
+                    title='sdCRV Total Delegator Vote Power by Choice',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
                     )
