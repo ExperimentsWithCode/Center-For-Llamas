@@ -392,7 +392,7 @@ def filter_by_asset():
 
     # filter by asset 
     if filter_asset:
-        local_df = local_df[local_df['token_symbol'].str.contains(filter_asset)]
+        local_df = local_df[local_df['tradable_assets'].str.contains(filter_asset)]
 
         selection = [filter_asset]
         mask = local_df.tradable_assets.apply(lambda x: any(item for item in selection if item in x))

@@ -230,7 +230,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'date', name: 'Date' },
+            { id: 'block_timestamp', name: 'Date' },
             {# { id: 'pool_name', name: 'Pool Name' }, #}
             { id: 'display_symbol', name: 'Symbol' },
             { id: 'total_balance', name: 'Liquidity Native',
@@ -247,14 +247,13 @@
                 formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
-            { id: 'token_symbol', name: 'Token Symbol',
+            { id: 'tradable_assets', name: 'Tradeable Assets',
             },
-            { id: 'has_price', name: 'Has Price',
-            },
+
             { id: 'source', name: 'Source'},
             { id: 'gauge_addr', name: 'Gauge Address',              
                 formatter: (_, row) => gridjs.html(
-                  `${row.cells[8].data.toString()}`
+                  `${row.cells[7].data.toString()}`
                 )
             },
 
@@ -263,14 +262,13 @@
         data: [
           {% for index, row in df_curve_liquidity.iterrows() %}
             {
-                'date': '{{ row['date'] }}',
+                'block_timestamp': '{{ row['block_timestamp'] }}',
                 {# 'pool_name': '{{ row['pool_name'] }}', #}
                 'display_symbol': '{{ row['display_symbol'] }}',
                 'total_balance': '{{ row['total_balance']|round(2) }}',
                 'total_balance_usd': '{{ row['total_balance_usd']|round(2) }}',
                 'total_vote_power': '{{ row['total_vote_power']|round(2) }}',
-                'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
-                'has_price': '{{ row['has_price'] }}',
+                'tradable_assets': '{{ row['tradable_assets'] |  replace("'", "")  }}',
                 'source': '{{ gauge_registry.get_gauge(row['gauge_addr']).source }}',
                 'gauge_addr':  `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
 
@@ -295,10 +293,10 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'display_name', name: 'Display Name' },
-            { id: 'token_symbol', name: 'Token Symbols',},
+            { id: 'display_name', name: 'Gauge Name' },
+            { id: 'tradable_assets', name: 'Token Symbols',},
             { id: 'gauge_addr', name: 'Gauge Address'},
-            { id: 'liquidity', name: 'Liquidity',
+            { id: 'total_balance_usd', name: 'Balance (USD)',
               formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
               {% include 'utility_sort_float.jinja2' %} 
             },
@@ -309,10 +307,10 @@
         data: [
           {% for index, row in df_tradeable_assets.iterrows() %}
             {
-              'display_name': '{{ row['display_name'] }}',
-              'token_symbol': '{{ row['token_symbol'] |  replace("'", "")  }}',
+              'display_name': '{{ row['gauge_name'] }}',
+              'tradable_assets': '{{ row['tradable_assets'] |  replace("'", "")  }}',
               'gauge_addr': '{{ row['gauge_addr'] }}',
-              'liquidity': '{{ row['liquidity'] }}',
+              'total_balance_usd': '{{ row['total_balance_usd'] }}',
               'source': '{{ gauge_registry.get_gauge(row['gauge_addr']).source }}',
 
 

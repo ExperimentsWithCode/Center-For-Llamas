@@ -5,6 +5,8 @@ from flask import Blueprint, render_template, redirect, url_for
 from flask import Response
 from flask import request
 
+import random
+
 from datetime import datetime
 import json
 import plotly
@@ -249,3 +251,12 @@ def show(gauge_addr):
         graphJSON4 = graphJSON4,
         pool_shorthand = gauge_registry.get_shorthand_pool(gauge_addr)
     )
+
+
+@gauge_checkpoints_bp.route('/random_gauge/', methods=['GET'])
+def random_gauges():
+    """Shows a random Gauge"""
+    unique_addresses = df_checkpoints.gauge_addr.unique()
+    random_index = random.randint(0,len(unique_addresses)-1)
+    gauge_addr = list(unique_addresses)[random_index]
+    return redirect(url_for('gauge_checkpoints_bp.show', gauge_addr=gauge_addr))

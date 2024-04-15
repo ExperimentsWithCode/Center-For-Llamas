@@ -1,6 +1,8 @@
 from flask import current_app as app
 from flask import Blueprint, render_template, redirect, url_for
 
+import random
+
 from app.address_book.actors.models import df_actors
 from app.utilities.utility import get_address_profile
 
@@ -33,7 +35,7 @@ def index():
 
 @address_book_bp.route('/show/<string:actor_addr>', methods=['GET'])
 def show_roles(actor_addr):
-    """Homepage."""
+    """Shows An Address's role's"""
 
     return render_template(
         'directory_show_roles.jinja2',
@@ -42,3 +44,11 @@ def show_roles(actor_addr):
         body="",
         actor_profile = get_address_profile(app.config['df_actors'], actor_addr)
     )
+
+@address_book_bp.route('/random_roles/', methods=['GET'])
+def random_roles():
+    """Shows a random Address"""
+    unique_addresses = df_actors.address.unique()
+    random_index = random.randint(0,len(unique_addresses)-1)
+    actor_addr = list(unique_addresses)[random_index]
+    return redirect(url_for('address_book_bp.show_roles', actor_addr=actor_addr))

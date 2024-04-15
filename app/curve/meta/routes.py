@@ -188,6 +188,7 @@ def contributing_factors():
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == target_gauge]
 
+    graph_list = []
     # Build chart
     fig = go.Figure()
 
@@ -280,8 +281,7 @@ def contributing_factors():
             position=0.99
         )
     )
-
-    # Update layout properties
+        # Update layout properties
     fig.update_layout(
         title_text=f"Curve Incentives: {df.iloc[0]['gauge_symbol']}",
         height=600,
@@ -292,111 +292,112 @@ def contributing_factors():
     fig.update_layout(autotypenumbers='convert types')
 
     # Build Plotly object
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
 
-    # Build chart
-    fig = go.Figure()
+    if len(df.votium_round.unique()) > 1:
 
-    fig.add_trace(go.Bar(
-        x=df.votium_round,
-        y=df.total_bounty_value,
-        name="Bounty Value"
-    ))
+        # Build chart
+        fig = go.Figure()
 
-
-    fig.add_trace(go.Bar(
-        x=df.votium_round,
-        y=df.issuance_value,
-        name="Issuance Value",
-        # yaxis="y2"
-    ))
-
-    fig.add_trace(go.Box(
-        x=df.votium_round,
-        y=df.avg_crv_price,
-        name="Avg CRV Price",
-        yaxis="y2"
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=df.votium_round,
-        y=df.total_vote_percent,
-        name="veCRV Vote Percent",
-        yaxis="y3"
-    ))
-
-    fig.add_trace(go.Box(
-        x=df.votium_round,
-        y=df.total_balance_usd,
-        name="Pool Balance",
-        yaxis="y4"
-    ))
+        fig.add_trace(go.Bar(
+            x=df.votium_round,
+            y=df.total_bounty_value,
+            name="Bounty Value"
+        ))
 
 
-    # Create axis objects
-    fig.update_layout(
-        xaxis=dict(
-            domain=[0.1, 0.9]
-        ),
-        yaxis=dict(
-            title="Bounty or Issuance Value (USD)",
-            titlefont=dict(
-                color="#1f77b4"
+        fig.add_trace(go.Bar(
+            x=df.votium_round,
+            y=df.issuance_value,
+            name="Issuance Value",
+            # yaxis="y2"
+        ))
+
+        fig.add_trace(go.Box(
+            x=df.votium_round,
+            y=df.avg_crv_price,
+            name="Avg CRV Price",
+            yaxis="y2"
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=df.votium_round,
+            y=df.total_vote_percent,
+            name="veCRV Vote Percent",
+            yaxis="y3"
+        ))
+
+        fig.add_trace(go.Box(
+            x=df.votium_round,
+            y=df.total_balance_usd,
+            name="Pool Balance",
+            yaxis="y4"
+        ))
+
+
+        # Create axis objects
+        fig.update_layout(
+            xaxis=dict(
+                domain=[0.1, 0.9]
             ),
-            tickfont=dict(
-                color="#1f77b4"
+            yaxis=dict(
+                title="Bounty or Issuance Value (USD)",
+                titlefont=dict(
+                    color="#1f77b4"
+                ),
+                tickfont=dict(
+                    color="#1f77b4"
+                )
+            ),
+            yaxis2=dict(
+                title="Avg. CRV Price (USD)",
+                titlefont=dict(
+                    color="#ff7f0e"
+                ),
+                tickfont=dict(
+                    color="#ff7f0e"
+                ),
+                anchor="free",
+                overlaying="y",
+                side="left",
+                position=0.01
+            ),
+            yaxis3=dict(
+                title="Total veCRV Vote Percent",
+                titlefont=dict(
+                    color="#9467bd"
+                ),
+                tickfont=dict(
+                    color="#9467bd"
+                ),
+                anchor="x",
+                overlaying="y",
+                side="right"
+            ),
+            yaxis4=dict(
+                title="Pool Balance (USD)",
+                titlefont=dict(
+                    color="#ff7f0e"
+                ),
+                tickfont=dict(
+                    color="#ff7f0e"
+                ),
+                anchor="free",
+                overlaying="y",
+                side="right",
+                position=0.99
             )
-        ),
-        yaxis2=dict(
-            title="Avg. CRV Price (USD)",
-            titlefont=dict(
-                color="#ff7f0e"
-            ),
-            tickfont=dict(
-                color="#ff7f0e"
-            ),
-            anchor="free",
-            overlaying="y",
-            side="left",
-            position=0.01
-        ),
-        yaxis3=dict(
-            title="Total veCRV Vote Percent",
-            titlefont=dict(
-                color="#9467bd"
-            ),
-            tickfont=dict(
-                color="#9467bd"
-            ),
-            anchor="x",
-            overlaying="y",
-            side="right"
-        ),
-        yaxis4=dict(
-            title="Pool Balance (USD)",
-            titlefont=dict(
-                color="#ff7f0e"
-            ),
-            tickfont=dict(
-                color="#ff7f0e"
-            ),
-            anchor="free",
-            overlaying="y",
-            side="right",
-            position=0.99
         )
-    )
-    fig.update_layout(
-        title_text=f"Curve Incentives: {df.iloc[0]['gauge_symbol']}",
-        height=600,
-    )
-    fig.update_yaxes(rangemode="tozero")
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
+        fig.update_layout(
+            title_text=f"Curve Incentives: {df.iloc[0]['gauge_symbol']}",
+            height=600,
+        )
+        fig.update_yaxes(rangemode="tozero")
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
 
-    # Build Plotly object
-    graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
+        # Build Plotly object
+        graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
 
     return render_template(
         'contributing_factors.jinja2',
@@ -406,8 +407,7 @@ def contributing_factors():
 
         form=form,
         local_df_curve_gauge_registry = local_df_curve_gauge_registry,
-        graphJSON = graphJSON,
-        graphJSON2 = graphJSON2,
+        graph_list = graph_list,
         df = df,
         df_approved_gauges = df_approved_gauges
 

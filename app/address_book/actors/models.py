@@ -24,9 +24,6 @@ from app.utilities.utility import (
 
 )
 
-from app.convex.delegations.process_flipside import process_and_get
-
-
 
 print_mode("Loading... { address_book.actors.models }")
 

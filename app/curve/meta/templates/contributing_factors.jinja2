@@ -87,11 +87,12 @@
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
-              <div id="chart" class="chart"></div>
+              <div id="chart1" class="chart1"></div>
           </div>
         </div>
     </div>
 
+  {% if graph_list|length > 1 %}
     <div class="row">
 
         <div class="card text-white bg-secondary mb-3" >
@@ -103,8 +104,8 @@
           </div>
         </div>
     </div>
+  {% endif %}
 
-    
     <div class="row">
         <h4 class="text-primary">Top {{top_x}} Contributing Factors</h4>
         <div id="head_table"></div>
@@ -146,7 +147,7 @@
                 {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'votium_round', name: 'Votium Round',
-                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                formatter: (_, row) =>  `${row.cells[9].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
 
@@ -162,7 +163,7 @@
               'issuance_distributed': '{{ row['issuance_distributed']| round(2) }}',
               'issuance_value': '{{ row['issuance_value']|round(2)  }}',
               'yield_rate_adj': '{{ row['yield_rate_adj']|round(2) }}',
-              'total_vote_percent': '{{ row['total_vote_percent']|round(2) }}',
+              'total_vote_percent': '{{ row['total_vote_percent']|round(3) }}',
               'total_balance_usd': '{{ row['total_balance_usd']|round(2) }}',
               'total_bounty_value': '{{ row['total_bounty_value']|round(2) }}',
               'votium_round': '{{ row['votium_round']|round() }}',
@@ -179,16 +180,14 @@
 
 
 
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script type='text/javascript'>
-  var graphs = {{graphJSON | safe}};
-  Plotly.plot('chart',graphs,{});
-</script>
 
-<script type='text/javascript'>
-  var graphs2 = {{graphJSON2 | safe}};
-  Plotly.plot('chart2',graphs2,{});
-</script>
+{% for graph_json in graph_list %}
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <script type='text/javascript'>
+      var graphs = {{graph_json | safe}};
+      Plotly.plot("chart{{loop.index}}",graphs,{});
+    </script> 
+{% endfor %}
 
 {% endif %}
 <script type='text/javascript'>
