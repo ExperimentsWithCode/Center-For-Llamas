@@ -85,7 +85,7 @@ def get_date_obj(time):
 
 def get_dt_from_timestamp(timestamp):
     if type(timestamp) == str:
-        if len(timestamp) == 0:
+        if len(timestamp) <= 8:
             return None
         if '.' in timestamp:
             timestamp = timestamp[:timestamp.find('.')]

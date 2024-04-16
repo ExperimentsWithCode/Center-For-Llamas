@@ -27,7 +27,8 @@ from app.utilities.utility import (
 print_mode("Loading... { convex.locker.models }")
 
 
-def format_df(df):
+def format_df(df_in):
+    df = df_in.copy()
     key_list = df.keys()
     if 'block_timestamp' in key_list:
         df['block_timestamp'] = df['block_timestamp'].apply(get_date_obj)
@@ -50,8 +51,8 @@ def format_df(df):
         # df['epoch_end'] = df['epoch_end'].apply(get_dt_from_timestamp)
         df['this_epoch'] = pd.to_datetime(df['this_epoch'])
 
-    if 'checkpoint' in key_list:
-        df['checkpoint'] = df['checkpoint'].apply(get_dt_from_timestamp)
+    # if 'checkpoint' in key_list:
+    #     df['checkpoint'] = df['checkpoint'].apply(get_dt_from_timestamp)
 
     if 'current_locked' in key_list:
         df['current_locked'] = df.apply(
