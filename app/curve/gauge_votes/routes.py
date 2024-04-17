@@ -13,7 +13,8 @@ import plotly.graph_objects as go
 
 from app.utilities.utility import (
     format_plotly_figure,
-    get_address_profile
+    get_address_profile,
+    get_now
 )
 
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -39,8 +40,12 @@ gauge_votes_bp = Blueprint(
 @gauge_votes_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
-    df_current_gauge_votes = app.config['df_current_gauge_votes']
+    try:
+        df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
+        df_current_gauge_votes = app.config['df_current_gauge_votes']
+    except:
+        from .models import  df_gauge_votes_formatted, df_current_gauge_votes
+
     # Filter Data
     local_df_gauge_votes = df_current_gauge_votes[[
             'checkpoint_timestamp','checkpoint_id', 'voter',
@@ -111,11 +116,13 @@ def index():
 def show(user):
     try: 
         df_checkpoints = app.config['df_checkpoints']
+        df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
+        # df_current_gauge_votes = app.config['df_current_gauge_votes']
     except:
         from app.curve.gauge_checkpoints.models import df_checkpoints
-    df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
-    
-    now = dt.utcnow()
+        from .models import  df_gauge_votes_formatted
+ 
+    now = get_now()
     user = user.lower()
     # Filter Data
     if not (df_gauge_votes_formatted['user'] == user).any():
