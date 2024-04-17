@@ -236,7 +236,7 @@ def index():
 @convex_vote_locker_bp.route('/voter/<string:user>', methods=['GET'])
 # @login_required
 def show(user):
-    df_locker_user_epoch = app.config['df_convex_locker_user_epoch']
+    # df_locker_user_epoch = app.config['df_convex_locker_user_epoch']
     df_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
     df_locker = app.config['df_convex_locker']
 

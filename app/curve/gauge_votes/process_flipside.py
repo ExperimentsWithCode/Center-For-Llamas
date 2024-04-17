@@ -37,21 +37,15 @@ from app.data.reference import (
 )
 from flask import current_app as app
 
-try:
-    # curve_gauge_registry = app.config['df_curve_gauge_registry']
-    gauge_registry = app.config['gauge_registry']
-except: 
-    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
-    from app.curve.gauges.models import gauge_registry
-
 
 
 class Voter():
-    def __init__(self, address):
+    def __init__(self, address, gauge_registry):
         self.address = address
         self.votes = []
         self.active_votes = {}
         self.known_as = "_"
+        self.gauge_registry = gauge_registry
         if self.address in known_large_market_actors:
             self.known_as = known_large_market_actors[self.address]
 
@@ -64,7 +58,7 @@ class Voter():
                 time = dt.fromtimestamp(decoded_log['time'])
                 user = decoded_log['user']
                 weight = decoded_log['weight']
-                temp_name = gauge_registry.get_gauge_name(gauge_addr)
+                temp_name = self.gauge_registry.get_gauge_name(gauge_addr)
                 if temp_name:
                     name = temp_name
                 elif  gauge_addr in gauge_names:
@@ -81,7 +75,7 @@ class Voter():
                         if gauge_addr in gauge_symbols:
                             symbol = gauge_symbols[gauge_addr]
                         else:
-                            temp_symbol = gauge_registry.get_gauge_symbol(gauge_addr)
+                            temp_symbol = self.gauge_registry.get_gauge_symbol(gauge_addr)
                             symbol = temp_symbol if temp_symbol else ""
 
                 elif gauge_addr in gauge_symbols:
@@ -109,7 +103,7 @@ class Voter():
                 time = dt.fromtimestamp(int(row['decoded_log.time']))
                 user = row['decoded_log.user']
                 weight = int(row['decoded_log.weight'])
-                temp_name = gauge_registry.get_gauge_name(gauge_addr)
+                temp_name = self.gauge_registry.get_gauge_name(gauge_addr)
                 if temp_name:
                     name = temp_name
                 elif  gauge_addr in gauge_names:
@@ -127,7 +121,7 @@ class Voter():
                         if gauge_addr in gauge_symbols:
                             symbol = gauge_symbols[gauge_addr]
                         else:
-                            temp_symbol = gauge_registry.get_gauge_symbol(gauge_addr)
+                            temp_symbol = self.gauge_registry.get_gauge_symbol(gauge_addr)
                             symbol = temp_symbol if temp_symbol else ""
 
                 elif gauge_addr in gauge_symbols:
@@ -226,8 +220,9 @@ class Vote():
 
 
 class VoterRegistry():
-    def __init__(self):
+    def __init__(self, gauge_registry):
         self.voters = {}
+        self.gauge_registry = gauge_registry
 
 
     def format_active_output(self):
@@ -256,7 +251,7 @@ class VoterRegistry():
             else:
                 voter_address = row['decoded_log.user']
             if not voter_address in self.voters:
-                self.voters[voter_address] = Voter(voter_address)
+                self.voters[voter_address] = Voter(voter_address, self.gauge_registry )
             voter = self.voters[voter_address]
 
             voter.new_vote(row)
@@ -280,8 +275,8 @@ def get_df_gauge_votes():
     return df_gauge_votes
 
 # @timed
-def get_vote_registry_obj():
-    vr = VoterRegistry()
+def get_vote_registry_obj(gauge_registry):
+    vr = VoterRegistry(gauge_registry)
     vr.process(get_df_gauge_votes())
     return vr
 
@@ -300,9 +295,15 @@ def get_current_votes(df_gauge_votes_formatted):
     return df_current_gauge_votes
 
 def process_and_save():
-     
+    try:
+        # curve_gauge_registry = app.config['df_curve_gauge_registry']
+        gauge_registry = app.config['gauge_registry']
+    except: 
+        # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+        from app.curve.gauges.models import gauge_registry
+
     print_mode("Processing... { curve.gauge_votes.models }")
-    vr = get_vote_registry_obj()
+    vr = get_vote_registry_obj(gauge_registry)
 
 
     all_votes, active_votes = vr.format_active_output()

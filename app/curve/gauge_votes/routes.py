@@ -39,8 +39,8 @@ gauge_votes_bp = Blueprint(
 @gauge_votes_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    now = dt.utcnow()
-    df_current_gauge_votes
+    df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
+    df_current_gauge_votes = app.config['df_current_gauge_votes']
     # Filter Data
     local_df_gauge_votes = df_current_gauge_votes[[
             'checkpoint_timestamp','checkpoint_id', 'voter',
@@ -113,7 +113,8 @@ def show(user):
         df_checkpoints = app.config['df_checkpoints']
     except:
         from app.curve.gauge_checkpoints.models import df_checkpoints
-
+    df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
+    
     now = dt.utcnow()
     user = user.lower()
     # Filter Data

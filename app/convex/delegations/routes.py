@@ -211,7 +211,6 @@ def delegate(delegate):
 
 @convex_snapshot_delegations_bp.route('/delegator/<string:delegator>', methods=['GET'])
 def delegator(delegator):
-    df_actors  = app.config['df_actors']
     df_vote_choice = app.config['df_convex_snapshot_vote_choice']
     # df_convex_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
     df_convex_delegation_locks_per_proposal = app.config['df_convex_delegation_locks_per_proposal']

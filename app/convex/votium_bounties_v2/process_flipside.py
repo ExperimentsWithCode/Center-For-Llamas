@@ -18,20 +18,11 @@ from app.data.local_storage import (
     write_dfs_to_xlsx
     )
 
-try:
-    df_checkpoints_agg = app.config['df_checkpoints_agg']
-    # df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
-    # df_curve_liquidity = app.config['df_curve_liquidity']
-    # df_convex_snapshot_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
-
-except:
-    from app.curve.gauge_checkpoints.models import df_checkpoints_agg
-    # from app.curve.liquidity.models import df_curve_liquidity_aggregates, df_curve_liquidity
-    # from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates
 
 class ProcessVotiumV2():
-    def __init__(self, df_votium):
+    def __init__(self, df_votium, df_checkpoints_agg):
         self.df_votium = self.get_df_votium()
+        self.df_checkpoints_agg = df_checkpoints_agg
         self.bounty_checkpoint_map = self.associate_rounds_with_checkpoints()
 
     def get_df_votium(self):
@@ -96,7 +87,7 @@ class ProcessVotiumV2():
             'votium_round',
             ]]
         # convex_snapshot_temp = df_convex_snapshot_vote_aggregates[['checkpoint_id', 'checkpoint_timestamp', 'choice', 'gauge_addr', 'total_vote_power']]
-        curve_vote_temp = df_checkpoints_agg[[
+        curve_vote_temp = self.df_checkpoints_agg[[
             'checkpoint_id',
             'checkpoint_timestamp',
             'gauge_addr',
@@ -148,9 +139,13 @@ def get_df_votium():
 
 
 def process_and_save():
-     
+    try:
+        df_checkpoints_agg = app.config['df_checkpoints_agg']
+    except:
+        from app.curve.gauge_checkpoints.models import df_checkpoints_agg
+
     print_mode("Processing... { curve.liquidity.models }")
-    votium_v2 = ProcessVotiumV2(get_df_votium())
+    votium_v2 = ProcessVotiumV2(get_df_votium(), df_checkpoints_agg)
     df_votium_v2 = votium_v2.process()   
 
     write_dataframe_csv(filename_votium_v2, df_votium_v2, 'processed')

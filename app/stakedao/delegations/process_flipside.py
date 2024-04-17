@@ -13,18 +13,19 @@ from app.data.local_storage import (
 
 from app.utilities.utility import print_mode
 
-try:
-    df_stakedao_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
-    df_stakedao_sdcrv = app.config['df_stakedao_sdcrv']
-
-except:
-    from app.stakedao.snapshot.models import df_stakedao_snapshot_vote_choice as df_stakedao_vote_choice
-    from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv
-
-    
 
 
 def process_and_get(save=False):
+    try:
+        df_stakedao_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
+        df_stakedao_sdcrv = app.config['df_stakedao_sdcrv']
+
+    except:
+        from app.stakedao.snapshot.models import df_stakedao_snapshot_vote_choice as df_stakedao_vote_choice
+        from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv
+
+        
+
     print_mode("Processing... { stakedao.snapshot.delegations.models }")
     df_delegations = csv_to_df(filename_stakedao_delegations, 'raw_data')
 

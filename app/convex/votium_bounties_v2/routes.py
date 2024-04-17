@@ -30,6 +30,7 @@ votium_bounties_v2_bp = Blueprint(
 # @login_required
 def index():
     # Filter Data
+    df_votium_v2 = app.config['df_votium_v2']
     df = great_filter(df_votium_v2, 'index', None)
 
     return render_template(
@@ -48,6 +49,7 @@ def index():
 # @login_required
 def show_token(token_addr):
     # Filter Data
+    df_votium_v2 = app.config['df_votium_v2']
     df = great_filter(df_votium_v2, 'token', token_addr)
     
     return render_template(
@@ -72,6 +74,8 @@ def show(gauge_addr):
         df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     except: 
         from app.curve.gauges import df_curve_gauge_registry
+    df_votium_v2 = app.config['df_votium_v2']
+
     # Filter Data
     # df_votium_v2
 

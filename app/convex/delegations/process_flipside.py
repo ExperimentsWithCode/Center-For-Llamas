@@ -13,18 +13,15 @@ from app.data.local_storage import (
 
 from app.utilities.utility import print_mode
 
-try:
-    df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
-    df_convex_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
-
-except:
-    from app.convex.snapshot.models import df_convex_snapshot_vote_choice
-    from app.convex.locker.models import df_locker_agg_user_epoch as df_convex_locker_agg_user_epoch
-
-    
 
 def process_and_get(save=False):
+    try:
+        df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
+        df_convex_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
 
+    except:
+        from app.convex.snapshot.models import df_convex_snapshot_vote_choice
+        from app.convex.locker.models import df_locker_agg_user_epoch as df_convex_locker_agg_user_epoch
 
     print_mode("Processing... { convex.snapshot.delegations.models }")
     df_delegations = csv_to_df(filename_convex_delegations, 'raw_data')

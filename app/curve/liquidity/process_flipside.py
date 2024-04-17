@@ -25,13 +25,6 @@ from app.utilities.utility import (
     print_mode
 )
 
-try:
-    gauge_registry = app.config['gauge_registry']
-    df_checkpoints_agg = app.config['df_checkpoints_agg']
-
-except:
-    from app.curve.gauges.models import gauge_registry
-    from app.curve.gauge_checkpoints.models import df_checkpoints_agg
 
 class Oracle():
     def __init__(self, df_liquidity):
@@ -391,7 +384,14 @@ def process_checkpoint_aggs(df):
     return df_aggs
 
 def process_and_save():
+    try:
+        gauge_registry = app.config['gauge_registry']
+        df_checkpoints_agg = app.config['df_checkpoints_agg']
 
+    except:
+        from app.curve.gauges.models import gauge_registry
+        from app.curve.gauge_checkpoints.models import df_checkpoints_agg
+        
     print_mode("Processing... { curve.liquidity.models }")
     liquidity = Liquidity(get_curve_liquidity_df(), df_checkpoints_agg, gauge_registry)
 

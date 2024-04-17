@@ -22,14 +22,6 @@ from app.utilities.utility import (
     print_mode
 )
 
-try:
-    df_curve_vecrv = app.config['df_curve_vecrv']
-    df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
-
-except:
-    from app.curve.gauge_votes.models import df_gauge_votes_formatted
-    from app.curve.locker.models import df_curve_vecrv
-
 
 def process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv):
     dfs = []
@@ -176,7 +168,15 @@ def process_checkpoint_aggs(df):
 
 
 def process_and_save():
-     
+    try:
+        df_curve_vecrv = app.config['df_curve_vecrv']
+        df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
+
+    except:
+        from app.curve.gauge_votes.models import df_gauge_votes_formatted
+        from app.curve.locker.models import df_curve_vecrv
+
+
     print_mode("Processing... { curve.gauge_checkpoints.models }")
 
     df_checkpoints = process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv)
