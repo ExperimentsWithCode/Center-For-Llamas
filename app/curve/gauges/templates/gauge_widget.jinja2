@@ -168,6 +168,15 @@
 
                     {% endif %}
                 {% endif %}
+                {%if not page_type == 'contributing_factors' %}
+                <a href="{{ url_for('curve_meta_bp.contributing_factors_show', gauge_addr= gauge_info['gauge_addr']) }}">
+                    <button type="button" class="btn btn-danger">Contributing Factors</button>
+                </a>
+                {% else %}
+                <a href="#">
+                    <button type="button" class="btn btn-danger disabled">Contributing Factors</button>
+                </a>
+                {% endif %}
             </div>
 
         </div>

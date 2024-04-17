@@ -188,6 +188,67 @@ def contributing_factors():
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == target_gauge]
 
+    graph_list = get_contributing_factors_graphs(df)
+
+    return render_template(
+        'contributing_factors.jinja2',
+        title='Curve Meta: Contributing Factors',
+        template='curve-meta-show',
+        body="",
+
+        form=form,
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
+        graph_list = graph_list,
+        df = df,
+        df_approved_gauges = df_approved_gauges
+
+    )
+
+@curve_meta_bp.route('/contributing_factors/<string:gauge_addr>', methods=['GET'])
+def contributing_factors_show(gauge_addr):
+    df_approved_gauges = get_approved()
+    target_gauge = gauge_addr
+    compare_back = 16
+    
+    form = ContributingFactorsForm()
+    form.process(data={'target_gauge': target_gauge, 
+                       'compare_back':compare_back, 
+                       })
+    
+    pcf = ProcessContributingFactors()
+    df = pcf.process_all(target_gauge, compare_back)
+
+    if len(df) == 0:
+        return render_template(
+            'contributing_factors.jinja2',
+            title='Curve Meta: Contributing Factors',
+            template='contributing_factors',
+            body="Gauge not found",
+            form=form,
+            df_approved_gauges = df_approved_gauges
+            )
+    
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+    local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == target_gauge]
+
+    graph_list = get_contributing_factors_graphs(df)
+
+    return render_template(
+        'contributing_factors.jinja2',
+        title='Curve Meta: Contributing Factors',
+        template='curve-meta-show',
+        body="",
+
+        form=form,
+        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
+        graph_list = graph_list,
+        df = df,
+        df_approved_gauges = df_approved_gauges
+
+    )
+
+
+def get_contributing_factors_graphs(df):
     graph_list = []
     # Build chart
     fig = go.Figure()
@@ -398,22 +459,7 @@ def contributing_factors():
 
         # Build Plotly object
         graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
-
-    return render_template(
-        'contributing_factors.jinja2',
-        title='Curve Meta: Contributing Factors',
-        template='curve-meta-show',
-        body="",
-
-        form=form,
-        local_df_curve_gauge_registry = local_df_curve_gauge_registry,
-        graph_list = graph_list,
-        df = df,
-        df_approved_gauges = df_approved_gauges
-
-    )
-
-
+    return graph_list
 # @curve_meta_bp.route('/projections/', methods=['POST'])
 # def projections():
 #     form = PowerDiffForm()
