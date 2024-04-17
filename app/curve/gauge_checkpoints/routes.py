@@ -26,12 +26,7 @@ from .models import  df_checkpoints, df_checkpoints_agg
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
 
-try:
-    # curve_gauge_registry = app.config['df_curve_gauge_registry']
-    gauge_registry = app.config['gauge_registry']
-except: 
-    # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
-    from app.curve.gauges.models import gauge_registry
+
 
 
 
@@ -58,7 +53,7 @@ def get_checkpoint_info(df):
 @gauge_checkpoints_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    now = datetime.now()
+    # now = datetime.now()
 
     # Filter Data
     local_df_checkpoints_agg = df_checkpoints_agg[df_checkpoints_agg['total_vote_power'] > 0]
@@ -138,6 +133,13 @@ def index():
 @gauge_checkpoints_bp.route('/show/<string:gauge_addr>', methods=['GET'])
 # @login_required
 def show(gauge_addr):
+    try:
+        # curve_gauge_registry = app.config['df_curve_gauge_registry']
+        gauge_registry = app.config['gauge_registry']
+    except: 
+        # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
+        from app.curve.gauges.models import gauge_registry
+        
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
 
