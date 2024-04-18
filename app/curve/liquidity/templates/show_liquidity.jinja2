@@ -158,21 +158,24 @@
 
             {# { id: 'pool_name', name: 'Pool Name' }, #}
             { id: 'symbol', name: 'Token Symbol' },
-            { id: 'balance', name: 'Balance Native',
+            { id: 'amount', name: 'Native Delta',
                 formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
             },
+            { id: 'balance', name: 'Balance Native',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+            },
             { id: 'balance_usd', name: 'Balance USD',
-                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'total_vote_power', name: 'Total Votes',
-                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
             { id: 'total_vote_percent', name: 'Vote Percent' },
                 {# { id: 'total_vote_percent', name: 'Vote Percent' }, #}
             { id: 'liquidity_usd_over_votes', name: 'Liquidity (USD) / Votes',
-                formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
             {# { id: 'has_price', name: 'Has Price' }, #}
@@ -188,6 +191,7 @@
 
                 {# 'pool_name': '{{ row['pool_name'] }}', #}
                 'symbol': '{{ row['symbol'] }}',
+                'amount': '{{ row['amount']|round(2) }}',
                 'balance': '{{ row['balance']|round(2) }}',
                 'balance_usd': '{{ row['balance_usd']|round(2) }}',
                 'total_vote_power': '{{ row['total_vote_power']|round(2) }}',

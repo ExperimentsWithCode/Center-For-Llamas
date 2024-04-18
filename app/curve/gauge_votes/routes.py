@@ -41,7 +41,7 @@ gauge_votes_bp = Blueprint(
 # @login_required
 def index():
     try:
-        df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
+        df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
         df_current_gauge_votes = app.config['df_current_gauge_votes']
     except:
         from .models import  df_gauge_votes_formatted, df_current_gauge_votes
@@ -116,7 +116,7 @@ def index():
 def show(user):
     try: 
         df_checkpoints = app.config['df_checkpoints']
-        df_gauge_votes_formatted = app.config['df_gauge_votes_formated']
+        df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
         # df_current_gauge_votes = app.config['df_current_gauge_votes']
     except:
         from app.curve.gauge_checkpoints.models import df_checkpoints

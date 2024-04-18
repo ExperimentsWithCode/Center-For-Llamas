@@ -131,11 +131,11 @@ def show(gauge_addr):
             secondary_y=False
         )
         fig = fig.add_trace(
-            go.Box(
+            go.Scatter(
                 x = local_agg_df_curve_liquidity.checkpoint_timestamp,
                 y = local_agg_df_curve_liquidity.total_vote_power, 
                 name = "Total Votes",
-                # line_shape='hvh',
+                line_shape='hvh',
                 # line_width=3,
             ),
             # secondary_y=True

@@ -11,11 +11,11 @@ from app.utilities.utility import print_mode
 
 def monster_mash():
     try:
-        df_curve_vecrv = app.config['df_curve_gauge_registry']
+        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
 
-        df_snapshot = app.config['df_snapshot']
+        df_snapshot = app.config['df_convex_snapshot_vote_choice']
 
-        df_snapshot_stakedao = app.config['df_snapshot'] 
+        df_snapshot_stakedao = app.config['df_stakedao_snapshot_vote_choice'] 
 
         df_vote_aggregates = app.config['df_vote_aggregates']
 
@@ -41,7 +41,7 @@ def monster_mash():
     stakedao_snapshot_votes = df_snapshot_stakedao.gauge_addr.unique()
     votium_bounties = df_vote_aggregates.gauge_addr.unique()
     votium_v2_bounties = df_votium_v2.gauge_addr.unique()
-
+    df_curve_liquidity_aggregates
 
 
     all_addresses = list(curve_gauges) + list(convex_snapshot_votes)
@@ -72,7 +72,7 @@ def monster_mash():
 def process_and_save():
 
 
-    print_mode("Processing... { AddressBook.actors.models }")
+    print_mode("Processing... { AddressBook.gauges.models }")
     df = monster_mash()
 
     write_dataframe_csv(filename_actors, df, 'processed')

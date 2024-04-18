@@ -14,11 +14,11 @@ def monster_mash():
         df_curve_vecrv = app.config['df_curve_vecrv']
         df_all_votes = app.config['df_all_votes']
 
-        df_snapshot = app.config['df_snapshot']
+        df_snapshot = app.config['df_convex_snapshot_vote_choice']
         df_convex_delegations = app.config['df_convex_delegations']
         df_locker = app.config['df_locker']
 
-        df_snapshot_stakedao = app.config['df_snapshot'] 
+        df_snapshot_stakedao = app.config['df_stakedao_snapshot_vote_choice'] 
         # df_stakedao_delegations = # app.config['df_stakedao_delegations']
         df_stakedao_vesdt = app.config['df_stakedao_vesdt']
 

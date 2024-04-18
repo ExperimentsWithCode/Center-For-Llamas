@@ -295,9 +295,13 @@ class Liquidity():
         df['balance'] = df.groupby(['pool_addr', 'symbol', 'token_addr'])['amount'].transform(pd.Series.cumsum)
         df = df[df['balance'] > 0]
         # additive
-        df['checkpoint_id'] = df.apply(
-            lambda x: get_checkpoint_id(x['block_timestamp']) - 1, 
+        df['real_checkpoint_id'] = df.apply(
+            lambda x: get_checkpoint_id(x['block_timestamp']), 
             axis=1)
+        
+        df['checkpoint_id'] = df.apply(
+            lambda x: x['real_checkpoint_id']- 1, 
+            axis=1)        
         
         df['gauge_addr'] = df.apply(
             lambda x: self.gauge_registry.get_gauge_addr_from_pool(x['pool_addr']), 
@@ -362,6 +366,7 @@ def get_curve_liquidity_df():
 
 def process_checkpoint_aggs(df):
     df = df[df['balance']> 0]
+    df = df.sort_values(['checkpoint_timestamp', 'gauge_name', 'symbol'])
     # Aggregate info down to particular gauges
     df_aggs = df.groupby([
                 # 'final_lock_time',
