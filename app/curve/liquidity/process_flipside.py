@@ -32,6 +32,11 @@ class Oracle():
         self.df_exchanges = self.process_exchange_rates()
         self.df_oracles = self.process_oracle()
         self.df_oracles_agg = self.resample_aggregates()
+        self.clear_exchanges_to_free_memory()
+
+    def clear_exchanges_to_free_memory(self):
+        write_dataframe_csv(filename_curve_liquidity_swaps, self.df_exchanges, 'processed')
+        self.df_exchanges = None
 
     @timed
     def format_input(self, df):
@@ -44,8 +49,30 @@ class Oracle():
                 axis=1)
         df['block_timestamp'] = pd.to_datetime(df['block_timestamp'])
         df = self.flush_shitcoins(df)
+        df = self.create_last_record_for_ffill(df)
         return df
     
+    def create_last_record_for_ffill(self, df):
+        df = df.sort_values('block_timestamp')
+        df = df[[
+            'amount', 'amount_usd', 'pool_addr', 'symbol', 'price', 'has_price',
+            # 'origin_to_address', 'origin_from_address', 'from_address', 'to_address', 
+            'token_addr', 'block_timestamp', 'tx_hash', 'chain_id',
+            ]]
+        # Below adds a last record so forward fill caries over to most recent timestamp
+        # instead of balances and exchange rates ending at last exchange.
+        df_temp_group = df.groupby(['pool_addr', 'symbol', 'token_addr']).tail(1).copy()
+        # Bind to last timestamp
+        df_temp_group['block_timestamp'] = df_temp_group.block_timestamp.max()
+        # Reset values 
+        df_temp_group['amount'] = 0
+        df_temp_group['amount_usd'] = 0
+        # df_temp_group['price'] = np.nan
+        # df_temp_group['has_price'] = False
+        # Clear Context
+        df_temp_group['tx_hash'] = ''
+        return pd.concat([df, df_temp_group])
+
     def nullify_amount(self, value):
         if value == 'null' or value == '' or value == '-':
             return np.nan
@@ -73,6 +100,19 @@ class Oracle():
             )
         df_combo_counts = df_combo_counts[df_combo_counts['counts'] > 3]    # Magic is here
         df_combo_counts = df_combo_counts.drop(['counts'], axis=1)
+
+        # If both ETH and WETH in a pool, 
+            # typically ETH is flushed from WETH based pools, 
+            #   while WETH accumulates in ETH based pools
+            # So if ETH and WETH are present after flush shitcoins,
+                # then remove WETH
+        df_filtered_adddresses = df_combo_counts[df_combo_counts['symbol'].isin(['ETH', 'WETH'])]
+        df_combo_counts = df_combo_counts[~(
+            (df_combo_counts['symbol'] == 'WETH') &
+            df_combo_counts['pool_addr'].isin(
+                list(df_filtered_adddresses.pool_addr.unique())
+                )
+            )]
         return df_combo_counts
 
     @timed
@@ -215,7 +255,7 @@ class Oracle():
         df_exchange_rates = df2.groupby(
             ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
             ).resample('1D')['exchange_rate'].mean().ffill().reset_index()
-        df_exchange_rates
+
         # Rename for merging comps
         df_prices_reduced_comp = df_prices_reduced.rename(columns={
             "token_addr": 'comp_token_addr',
@@ -236,11 +276,13 @@ class Oracle():
             on = ['block_timestamp', 'symbol', 'token_addr'  ], 
             )
         return df_combo_oracle
+    
     # calc pricing 
     @timed
     def resample_macro(self, df):
         # Reduce Oracle
-        df2 = df.set_index(['block_timestamp'])
+        df2 = self.create_last_record_for_oracle_ffill(df)
+        df2 = df2.set_index(['block_timestamp'])
         df_combo_oracle_reduced = df2.groupby(
             ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
             ).resample('1D')['exchange_rate', 'price', 'comp_price'].mean().reset_index()
@@ -250,6 +292,28 @@ class Oracle():
         axis=1)
         return df_combo_oracle_reduced
     # reduce to single price
+    # Push Forward Price
+
+    def create_last_record_for_oracle_ffill(self, df):
+        df = df.sort_values('block_timestamp')
+        df = df[[
+            'block_timestamp', 
+            'symbol', 'token_addr', 'comp_symbol', 'comp_token_addr', 
+            'exchange_rate', 'price', 'comp_price'
+            ]]
+        
+        # Below adds a last record so forward fill caries over to most recent timestamp
+        # instead of balances and exchange rates ending at last exchange.
+        df_temp_group = df.groupby(['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']).tail(1).copy()
+        # Bind to last timestamp
+        df_temp_group['block_timestamp'] = df_temp_group.block_timestamp.max()
+        # Reset values 
+        # df_temp_group['exchange_rate'] = np.nan
+        # df_temp_group['price'] = np.nan
+        df_temp_group['comp_price'] = np.nan
+        # Concat and return
+        return pd.concat([df, df_temp_group])
+
     @timed
     def resample_aggregates(self):
         # Reduce Oracle
@@ -260,13 +324,28 @@ class Oracle():
         return df_aggregate_pricing
 
 class Liquidity():
-    def __init__(self, df_liquidity, df_checkpoints_agg, gauge_registry):
+    def __init__(self, df_liquidity):
         self.oracle = Oracle(df_liquidity)
         self.df_liquidity = self.oracle.df_liquidity
         # External Reference
+        self.df_checkpoints_agg = None
+        self.gauge_registry = None
+        self.load_requirements()
+        self.df_processed_liquidity = self.process_liquidity()
+
+    # This allows us to load additional context after we've purged swaps
+    # to reduce total memory needed at once
+    # since the below isn't used until after oracles are processed anyway.
+    def load_requirements(self):
+        try:
+            gauge_registry = app.config['gauge_registry']
+            df_checkpoints_agg = app.config['df_checkpoints_agg']
+        except:
+            from app.curve.gauges.models import gauge_registry
+            from app.curve.gauge_checkpoints.models import df_checkpoints_agg
+
         self.df_checkpoints_agg = df_checkpoints_agg
         self.gauge_registry = gauge_registry
-        self.df_processed_liquidity = self.process_liquidity()
 
     def process_liquidity(self):
         df = self.prime_context()
@@ -276,16 +355,13 @@ class Liquidity():
         df = df.sort_values(['block_timestamp', 'checkpoint_id', 'balance_usd'], ascending=True)
         return df
 
-
-    # def estimate_checkpoint(self, min_checkpoint_timestamp, target_timestamp):
-    #     diff = target_timestamp - min_checkpoint_timestamp
-    #     return round(diff.days/7)
-
     # Prep w/ gauge/checkpoint info
     @timed
     def prime_context(self):
         # resample
-        df2 = self.df_liquidity.set_index(['block_timestamp'])
+        df2 = self.df_liquidity
+        # df2 = self.create_last_record_for_ffill(self.df_liquidity)
+        df2 = df2.set_index(['block_timestamp'])
         df = df2.groupby(
             ['pool_addr', 'symbol', 'token_addr']
             ).resample('1D')['amount'].sum().ffill().reset_index()
@@ -310,9 +386,32 @@ class Liquidity():
         df['gauge_source'] = df.apply(
             lambda x: self.gauge_registry.get_gauge_source_from_pool(x['pool_addr']), 
             axis=1)
-        
 
         return df
+    
+    # def create_last_record_for_ffill(self, df):
+    #     df = df.sort_values('block_timestamp')
+    #     df = df[[
+    #         'amount', 'amount_usd', 'pool_addr', 'symbol', 'price', 'has_price',
+    #         # 'origin_to_address', 'origin_from_address', 'from_address', 'to_address', 
+    #         'token_addr', 'block_timestamp', 'tx_hash', 'chain_id',
+    #         ]]
+    #     df_temp_group = df.groupby(['pool_addr', 'symbol', 'token_addr']).tail(1).copy()
+    #     # Bind to last timestamp
+    #     df_temp_group['block_timestamp'] = df_temp_group.block_timestamp.max()
+    #     # Reset values 
+    #     df_temp_group['amount'] = 0 
+    #     df_temp_group['amount_usd'] = 0
+    #     df_temp_group['price'] = np.nan
+    #     df_temp_group['has_price'] = False
+    #     # Clear Context
+    #     df_temp_group['tx_hash'] = ''
+    #     # df_temp_group['origin_to_address'] = ''
+    #     # df_temp_group['origin_from_address'] = ''
+    #     # df_temp_group['to_address'] = ''
+    #     # df_temp_group['from_address'] = ''
+
+        return pd.concat([df, df_temp_group])
     
     #Combine liquidity and checkpoint data
     @timed
@@ -353,7 +452,7 @@ class Liquidity():
         df['liquidity_usd_over_votes'] = df['balance_usd'] / df['total_vote_power']
         return df
      
-
+@timed
 def get_curve_liquidity_df():
     filename = filename_curve_liquidity    #+ fallback_file_title
     resp_dict = read_csv(filename, 'source') # joined with 
@@ -389,32 +488,25 @@ def process_checkpoint_aggs(df):
     return df_aggs
 
 def process_and_save():
-    try:
-        gauge_registry = app.config['gauge_registry']
-        df_checkpoints_agg = app.config['df_checkpoints_agg']
 
-    except:
-        from app.curve.gauges.models import gauge_registry
-        from app.curve.gauge_checkpoints.models import df_checkpoints_agg
         
     print_mode("Processing... { curve.liquidity.models }")
-    liquidity = Liquidity(get_curve_liquidity_df(), df_checkpoints_agg, gauge_registry)
+    liquidity = Liquidity(get_curve_liquidity_df())
 
     df_curve_liquidity = liquidity.df_processed_liquidity
     df_curve_liquidity_aggregates = process_checkpoint_aggs(df_curve_liquidity)
 
-    df_curve_swaps = liquidity.oracle.df_exchanges
+    # df_curve_swaps = liquidity.oracle.df_exchanges
     df_curve_oracles_agg = liquidity.oracle.df_oracles_agg
 
     write_dataframe_csv(filename_curve_liquidity, df_curve_liquidity, 'processed')
     write_dataframe_csv(filename_curve_liquidity_aggregate, df_curve_liquidity_aggregates, 'processed')
-    write_dataframe_csv(filename_curve_liquidity_swaps, df_curve_swaps, 'processed')
     write_dataframe_csv(filename_curve_liquidity_oracle_aggregate, df_curve_oracles_agg, 'processed')
     try:
         # app.config['df_active_votes'] = df_active_votes
         app.config['df_curve_liquidity'] = df_curve_liquidity
         app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
-        app.config['df_curve_swaps'] = df_curve_swaps
+        # app.config['df_curve_swaps'] = df_curve_swaps
         app.config['df_curve_oracles_agg'] = df_curve_oracles_agg
 
     except:
@@ -423,7 +515,7 @@ def process_and_save():
         # 'df_active_votes': df_active_votes,
         'df_curve_liquidity': df_curve_liquidity,
         'df_curve_liquidity_aggregates': df_curve_liquidity_aggregates,
-        'df_curve_swaps': df_curve_swaps,
+        # 'df_curve_swaps': df_curve_swaps,
         'df_curve_oracles_agg': df_curve_oracles_agg,
     }
 

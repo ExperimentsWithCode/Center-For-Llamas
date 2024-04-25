@@ -22,17 +22,17 @@
         <div class="card bg-warning text-infomb-3" >
           <div class="card-body">
 
-          <form method="POST" action="{{ url_for('curve_meta_bp.contributing_factors') }}">
+          <form method="POST" action="{{ url_for('curve_meta_bp.contributing_factors_compare') }}">
             {{ form.csrf_token }}
             <h3 class="card-title">Select Parameters: </h3>
             <table class="table table-hover">
             <tbody>
                 <tr>
-                <th scope="row"> {{ form.target_gauge.label }}</th>
-                <td>{{ form.target_gauge(placeholder='0x90efd41e75360ffc7fd1d3c5fc0e4f43e8bcd9bc') }}</td>
+                <th scope="row"> {{ form.target_gauges.label }}</th>
+                <td >{{ form.target_gauges(placeholder='0x90efd41e75360ffc7fd1d3c5fc0e4f43e8bcd9bc', cols="42", rows="5") }}</td>
                 </tr>
-                {% if form.target_gauge.errors %}
-                  {% for error in form.target_gauge.errors %}
+                {% if form.target_gauges.errors %}
+                  {% for error in form.target_gauges.errors %}
                   <tr class="errors">
                   <th scope="row text-danger"> Error ^ </th>
                   <td>{{ error }}</td>
@@ -76,14 +76,15 @@
 
 {% if df|length > 0 %}
 
-    {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
+    {# {% with gauge_info=local_df_curve_gauge_registry.iloc[0] %}
         {% include 'gauge_widget.jinja2' %} 
-    {% endwith %}
+    {% endwith %} #}
 
     <div class="row">
+    <div class = "col-md" style="width:97%">
 
         <div class="card text-white bg-primary mb-3" >
-          <div class="card-header">By Curve Checkpoint </div>
+          <div class="card-header">Balances (USD) </div>
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -91,11 +92,10 @@
           </div>
         </div>
     </div>
-
-    <div class="row">
+    <div class = "col-md" style="width:97%">
 
         <div class="card border-info mb-3" >
-          <div class="card-header">Focused </div>
+          <div class="card-header">Issuance Value (USD) </div>
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -103,12 +103,12 @@
           </div>
         </div>
     </div>
+    </div>
 
-  {% if graph_list|length > 2 %}
     <div class="row">
-
-        <div class="card text-white bg-secondary mb-3" >
-          <div class="card-header">By Votium Round </div>
+    <div class = "col-md" style="width:97%">
+        <div class="card text-white bg-primary mb-3" >
+          <div class="card-header">Vote Percent (veCRV) </div>
           <div class="card-body">
               {# <h4 class="card-title">??}}</h4> #}
               {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
@@ -116,14 +116,51 @@
           </div>
         </div>
     </div>
+    <div class = "col-md" style="width:97%">
+
+        <div class="card border-info mb-3" >
+          <div class="card-header">Yield Rates </div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart4" class="chart4"></div>
+          </div>
+        </div>
+    </div>
+    </div>
+    <div class="row">
+    <div class = "col-md" style="width:97%">
+
+        <div class="card text-white bg-secondary mb-3" >
+          <div class="card-header">Balance (USD) / Votes (veCRV) </div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart5" class="chart5"></div>
+          </div>
+        </div>
+    </div>
+  {% if graph_list|length > 6 %}
+    <div class = "col-md" style="width:97%">
+
+        <div class="card text-white bg-secondary mb-3" >
+          <div class="card-header">Bounty Value (USD)</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart6" class="chart6"></div>
+          </div>
+        </div>
+    </div>
   {% endif %}
+    </div>
 
     <div class="row">
         <h4 class="text-primary">Top {{top_x}} Contributing Factors</h4>
         <div id="head_table"></div>
     </div>
 
-
+{{graph_list | length}}
 
 
 
@@ -200,6 +237,7 @@
       Plotly.plot("chart{{loop.index}}",graphs,{});
     </script> 
 {% endfor %}
+
 
 {% endif %}
 <script type='text/javascript'>

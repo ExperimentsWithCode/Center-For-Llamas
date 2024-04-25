@@ -19,7 +19,7 @@ manager_config = {
     'gauge_to_lp_map': default_bool,
     'curve_locker': default_bool,
     'curve_gauge_votes': default_bool,
-    'curve_gauge_rounds': default_bool,
+    'curve_gauge_checkpoints': default_bool,
 
     'curve_liquidity': default_bool, ## New Source Now
     'curve_crv_price': default_bool,
@@ -137,7 +137,7 @@ class Manager():
     
     @timed
     def curve_gauge_rounds(self):
-        if 'curve_gauge_rounds' in self.config and self.config['curve_gauge_rounds']:   
+        if 'curve_gauge_checkpoints' in self.config and self.config['curve_gauge_checkpoints']:   
             from app.curve.gauge_checkpoints.process_flipside import process_and_save 
 
             return self._helper(None, process_and_save)

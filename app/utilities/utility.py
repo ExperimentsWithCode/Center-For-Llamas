@@ -3,6 +3,7 @@ from datetime import date, timedelta, tzinfo
 import numpy as np
 from functools import wraps
 from time import time
+from app.data.local_storage import cwd
 
 from app.data.local_storage import (
     pd,
@@ -292,14 +293,14 @@ def convert_animation_to_gif(fig, fig_name, path='app/generated_images/'):
         fig.update(data=fr.data)
         fig.update(layout=fr.layout)
         # move slider to correct place
-        fig.layout.sliders[0].update(active=s)
+        fig.layout.sliders[s].update(active=s)
         # fig.layout.title[0].update(active=fr.)
         # generate image of current state
         frames.append(PIL.Image.open(io.BytesIO(fig.to_image(format="png"))))
         
     # create animated GIF
     frames[0].save(
-            f"{path}{fig_name}.gif",
+            f"{cwd}/{path}{fig_name}.gif",
             save_all=True,
             append_images=frames[1:],
             optimize=True,

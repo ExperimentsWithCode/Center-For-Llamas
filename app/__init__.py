@@ -4,6 +4,7 @@ from flask import Flask
 # from flask_login import LoginManager
 from flask_redis import FlaskRedis
 import traceback
+from flask_wtf.csrf import CSRFProtect
 
     
 # from config import ADDRESS, API_ETHERSCAN, ALCHEMY, API_COINGECKO, API_LIQUIDITYFOLIO
@@ -18,15 +19,21 @@ import traceback
 r = FlaskRedis()
 # migrate = Migrate()
 # login_manager = LoginManager()
+csrf = CSRFProtect()
 
 def init_app():
     """Initialize the core application."""
+    
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object('config.DevConfig')
     app.app_context()
+    
+    # app.config['WTF_CSRF_TIME_LIMIT'] = 20* 60
     # Initialize Plugins
     # db.init_app(app)
     r.init_app(app)
+    csrf.init_app(app)
+
     # migrate.init_app(app, db)
     # login_manager.init_app(app)
 
@@ -58,7 +65,6 @@ def init_app():
             from .stakedao.locker.routes import stakedao_locked_vesdt_bp
 
             from .stakedao.delegations.routes import stakedao_snapshot_delegations_bp
-
             from .address_book.routes import address_book_bp
 
         
@@ -102,5 +108,5 @@ def init_app():
 
         # Compile static assets
         # compile_static_assets(assets)  # Execute logic
-
+        
         return app

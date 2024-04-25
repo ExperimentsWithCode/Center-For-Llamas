@@ -54,7 +54,8 @@ def get_checkpoint_info(df):
 # @login_required
 def index():
     # now = datetime.now()
-
+    # df_checkpoints = app.config['df_checkpoints']
+    df_checkpoints_agg = app.config['df_checkpoints_agg']
     # Filter Data
     local_df_checkpoints_agg = df_checkpoints_agg[df_checkpoints_agg['total_vote_power'] > 0]
     local_df_checkpoints_agg = local_df_checkpoints_agg.sort_values(['checkpoint_id', 'total_vote_power'], ascending=False)
@@ -138,11 +139,12 @@ def show(gauge_addr):
         gauge_registry = app.config['gauge_registry']
     except: 
         # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
-        from app.curve.gauges.models import gauge_registry
-        
+        from app.curve.gauges.models import gauge_registry 
     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
 
+    df_checkpoints = app.config['df_checkpoints']
+    df_checkpoints_agg = app.config['df_checkpoints_agg']
     # Filter Data
     # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
@@ -258,6 +260,7 @@ def show(gauge_addr):
 @gauge_checkpoints_bp.route('/random_gauge/', methods=['GET'])
 def random_gauges():
     """Shows a random Gauge"""
+    df_checkpoints = app.config['df_checkpoints']
     unique_addresses = df_checkpoints.gauge_addr.unique()
     random_index = random.randint(0,len(unique_addresses)-1)
     gauge_addr = list(unique_addresses)[random_index]

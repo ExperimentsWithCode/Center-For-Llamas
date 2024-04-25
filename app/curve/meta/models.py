@@ -164,6 +164,8 @@ def get_meta(round=0, top_x = 20, compare_round=1):
     return df_head, df_tail
 
 
+
+
 class ProcessContributingFactors():
     def __init__(self):
         pass
@@ -175,13 +177,15 @@ class ProcessContributingFactors():
         return df2.sort_values(['checkpoint_timestamp', 'issuance_value'], ascending=False)
 
     def process(self, target_gauge, compare_back):
-        df_checkpoints_local = df_checkpoints_agg[df_checkpoints_agg['gauge_addr'] == target_gauge]
+        if type(target_gauge) == str:
+            target_gauge = [target_gauge]
+        df_checkpoints_local = df_checkpoints_agg[df_checkpoints_agg['gauge_addr'].isin(target_gauge)]
         df_checkpoints_local = df_checkpoints_local[df_checkpoints_local['checkpoint_id'] > df_checkpoints_local.checkpoint_id.max() - compare_back]
         
-        df_votium_v2_local = df_votium_v2[df_votium_v2['gauge_addr'] == target_gauge]
+        df_votium_v2_local = df_votium_v2[df_votium_v2['gauge_addr'].isin(target_gauge)]
         df_votium_v2_local = df_votium_v2_local[df_votium_v2_local['checkpoint_id'] > df_votium_v2_local.checkpoint_id.max() - compare_back]
 
-        df_curve_liquidity_local = df_curve_liquidity_aggregates[df_curve_liquidity_aggregates['gauge_addr'] == target_gauge]
+        df_curve_liquidity_local = df_curve_liquidity_aggregates[df_curve_liquidity_aggregates['gauge_addr'].isin(target_gauge)]
         df_curve_liquidity_local = df_curve_liquidity_local[df_curve_liquidity_local['checkpoint_id'] > df_curve_liquidity_local.checkpoint_id.max() - compare_back]
 
         df_checkpoints_local = df_checkpoints_local[[
@@ -200,7 +204,7 @@ class ProcessContributingFactors():
             # 'price',
             # 'depositor',
             # 'excluded',
-            # 'gauge_addr',
+            'gauge_addr',
             'votium_round',
             'token',
             'token_name',
@@ -223,7 +227,7 @@ class ProcessContributingFactors():
             # 'total_vote_power',
             # 'total_bounty_value',
             # 'gauge_name',
-            # 'gauge_addr',
+            'gauge_addr',
             # 'total_vote_power'
             ]).agg(
             total_bounty_value=pd.NamedAgg(column='bounty_value', aggfunc='sum'),
@@ -240,7 +244,7 @@ class ProcessContributingFactors():
         df_curve_liquidity_local = df_curve_liquidity_local.groupby([
                 # 'final_lock_time',
             'checkpoint_id',
-            'pool_addr',
+            'gauge_addr',
             # 'total_vote_power',
             'tradable_assets',
             ]).agg(
@@ -255,16 +259,16 @@ class ProcessContributingFactors():
             df_checkpoints_local, 
             df_votium_v2_local, 
             how='left', 
-            on = ['checkpoint_id'], 
+            on = ['checkpoint_id', 'gauge_addr'], 
             )
 
         df_combo[['votium_round']] = df_combo[['votium_round']].ffill()
             
         df_combo = pd.merge(
             df_combo, 
-            df_curve_liquidity_local[0:-1], 
+            df_curve_liquidity_local, 
             how='left', 
-            on = ['checkpoint_id'], 
+            on = ['checkpoint_id', 'gauge_addr'], 
             )
         
         return df_combo
@@ -320,10 +324,13 @@ class ProcessContributingFactors():
         df['issuance_distributed'] = df.apply(lambda x: self.apply_issuance(x, weekly_issuance_map), axis=1)
         return df
 
+    def get_adjusted_checkpoint_id(self, x):
+        return get_checkpoint_id(x) - 1
+
     def get_oracle_checkpoint_aggs(self, df):
         df = df.copy()
 
-        df['checkpoint_id'] = df['block_timestamp'].apply(get_checkpoint_id)
+        df['checkpoint_id'] = df['block_timestamp'].apply(self.get_adjusted_checkpoint_id)
         df['checkpoint_timestamp'] = df['checkpoint_id'].apply(get_checkpoint_timestamp_from_id)
         processed_agg = df[['checkpoint_id', 'calc_price']].groupby([
             'checkpoint_id',
