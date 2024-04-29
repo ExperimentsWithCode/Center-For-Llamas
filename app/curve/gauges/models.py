@@ -78,7 +78,7 @@ def get_gauge_registry(is_already_borked=False):
     return df
 
 gauge_registry = process_and_get()
-df_curve_gauge_registry = get_gauge_registry()
+df_curve_gauge_registry = pd.json_normalize(gauge_registry.format_output())
 
 try:
     app.config['df_curve_gauge_registry'] = df_curve_gauge_registry

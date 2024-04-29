@@ -6,7 +6,26 @@ from flask_redis import FlaskRedis
 import traceback
 from flask_wtf.csrf import CSRFProtect
 
-    
+from flask_basicauth import BasicAuth
+
+try:
+    from config import use_local_files
+except:
+    use_local_files = True
+
+try:
+    from config import basic_auth_username, basic_auth_password
+except:
+    basic_auth_username = 'admin'
+    basic_auth_password = 'YouWouldntUseTheDefaultPasswordWouldYou'
+
+app = Flask(__name__)
+
+app.config['BASIC_AUTH_USERNAME'] = basic_auth_username
+app.config['BASIC_AUTH_PASSWORD'] = basic_auth_password
+
+
+basic_auth = BasicAuth(app)
 # from config import ADDRESS, API_ETHERSCAN, ALCHEMY, API_COINGECKO, API_LIQUIDITYFOLIO
 
 # Globally accessible libraries
@@ -33,6 +52,7 @@ def init_app():
     # db.init_app(app)
     r.init_app(app)
     csrf.init_app(app)
+    basic_auth = BasicAuth(app)
 
     # migrate.init_app(app, db)
     # login_manager.init_app(app)
@@ -66,6 +86,7 @@ def init_app():
 
             from .stakedao.delegations.routes import stakedao_snapshot_delegations_bp
             from .address_book.routes import address_book_bp
+            from .data.interface.routes import data_bp
 
         
 
@@ -94,12 +115,18 @@ def init_app():
 
             app.register_blueprint(address_book_bp, url_prefix='/directory')
 
+            app.register_blueprint(data_bp, url_prefix='/data')
+
         except Exception as e:
+            # Only load necessary blueprints to load site and upload data
             print(e)
             print(traceback.format_exc())
             # this allows us to load data from the website directly
             from .home.routes import home_bp
+            from .data.interface.routes import data_bp
+
             app.register_blueprint(home_bp)
+            app.register_blueprint(data_bp, url_prefix='/data')
 
 
 

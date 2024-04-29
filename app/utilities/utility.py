@@ -499,7 +499,7 @@ def get_checkpoint_timestamp_from_date(input_date, df_checkpoints = df_default_c
 def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint):
 
     # 4 years forward date
-    max_lock_diff = round(365 * 4 / 7)
+    max_lock_diff = int(365 * 4 / 7) - 1
     checkpoint_diff = final_lock_checkpoint - action_checkpoint
     if checkpoint_diff < 0:
         return 0

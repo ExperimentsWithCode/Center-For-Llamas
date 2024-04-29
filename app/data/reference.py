@@ -154,11 +154,11 @@ filename_curve_gauge_votes_current = 'curve_gauge_votes_current'
 filename_curve_gauge_rounds_by_user = 'curve_gauge_rounds_by_user'
 filename_curve_gauge_rounds_by_aggregate = 'curve_gauge_rounds_by_aggregate'
 
-filename_curve_liquidity = 'curve_liquidity_v2'
-filename_curve_liquidity_cutoff = 'curve_liquidity_cutoff_v2'
-filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate_v2'
-filename_curve_liquidity_swaps = 'curve_liquidity_swaps_v2'
-filename_curve_liquidity_oracle_aggregate = 'curve_liquidity_oracle_aggregate_v2'
+filename_curve_liquidity = 'curve_liquidity_v3'
+filename_curve_liquidity_cutoff = 'curve_liquidity_cutoff_v3'
+filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate_v3'
+filename_curve_liquidity_swaps = 'curve_liquidity_swaps_v3'
+filename_curve_liquidity_oracle_aggregate = 'curve_liquidity_oracle_aggregate_v3'
 
 filename_curve_crv_pricing = 'curve_crv_pricing'
 

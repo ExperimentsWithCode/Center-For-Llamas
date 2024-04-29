@@ -58,6 +58,7 @@ class Manager():
                 # Curve Liquidity Focus
                 load_cutoff = False,   
                 cutoff_value = None,
+                should_loop_liquidity = False,
                 human_management = False,
                 ):
         # print(manager_config)
@@ -67,6 +68,7 @@ class Manager():
         self.load_initial = load_initial
         self.load_liquidity_cutoff = load_cutoff
         self.liquidity_cutoff_value = cutoff_value
+        self.should_loop_liquidity = should_loop_liquidity
         self.human_management = human_management
 
     def update_settings(self, new_settings):
@@ -76,6 +78,7 @@ class Manager():
         self.load_initial = new_settings['load_initial'] if 'load_initial' in new_settings else False
         self.load_liquidity_cutoff = new_settings['load_cutoff'] if 'load_cutoff' in new_settings else False
         self.liquidity_cutoff_value = new_settings['cutoff_value'] if 'cutoff_value' in new_settings else None
+        self.should_loop_liquidity = new_settings['should_loop_liquidity'] if 'should_loop_liquidity' in new_settings else False
         self.human_management = new_settings['human_management'] if 'human_management' in new_settings else False
 
     def manage(self):
@@ -152,6 +155,7 @@ class Manager():
                 self.load_initial, 
                 self.load_liquidity_cutoff,
                 self.liquidity_cutoff_value,
+                self.should_loop_liquidity,
                 self.human_management)
             liquidity_manager.manage()
             return self._helper(None, process_and_save)

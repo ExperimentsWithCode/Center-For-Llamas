@@ -8,10 +8,17 @@ from app.utilities.utility import shift_time_days
 
 
 def generate_query(min_block_timestamp=None, max_block_timestamp = None):
-    temp_list = df_curve_gauge_registry.pool_addr.unique()
-    temp_list = temp_list[temp_list != '']
-    pool_addresses = str(temp_list).replace('\n', ',')[1:-1]
-    filter_secondary_line = f"AND BLOCK_TIMESTAMP <= '{shift_time_days(min_block_timestamp, 7*8) }'"
+    temp_list = df_curve_gauge_registry.dropna(
+        subset=['vote_timestamp']
+        ).sort_values(
+            ['vote_timestamp'], 
+            ascending=False
+            )[['gauge_addr', 'vote_timestamp', 'pool_addr']].pool_addr.unique()
+    temp_list_2 = temp_list[temp_list != '']
+    temp_list_2 = temp_list_2[temp_list_2 != None]
+
+    pool_addresses = str(temp_list_2).replace('\n', ',\n')[1:-1]
+    # filter_secondary_line = f"AND BLOCK_TIMESTAMP <= '{shift_time_days(min_block_timestamp, 7*8) }'"
 
     if min_block_timestamp:
         if not max_block_timestamp:
@@ -19,6 +26,7 @@ def generate_query(min_block_timestamp=None, max_block_timestamp = None):
         filter_line = f"AND BLOCK_TIMESTAMP > '{min_block_timestamp}' AND BLOCK_TIMESTAMP < '{max_block_timestamp}'"
     else:
         filter_line = ""
+
 
     # temp_loader = True
     # if temp_loader:

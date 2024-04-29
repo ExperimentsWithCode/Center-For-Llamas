@@ -639,20 +639,20 @@ def get_core_pools(temp_core_pools):
                 staking_rewards_addr = address.lower()
 
         data_out.append({
-            'GAUGE_ADDR': gauge_addr,
-            'GAUGE_NAME': pool_symbol + ' Curve Gauge',
-            'GAUGE_SYMBOL': pool_symbol + '-gauge',
+            'gauge_addr': gauge_addr,
+            'gauge_name': pool_symbol + ' Curve Gauge',
+            'gauge_symbol': pool_symbol + '-gauge',
 
-            'POOL_ADDR': pool_addr,
-            'POOL_NAME': pool_symbol + ' Curve Swap',
-            'POOL_SYMBOL': pool_symbol + 'CRV',
+            'pool_addr': pool_addr,
+            'pool_name': pool_symbol + ' Curve Swap',
+            'pool_symbol': pool_symbol + 'CRV',
 
 
-            'TOKEN_ADDR': token_addr,
-            'TOKEN_NAME': pool_symbol  + ' Curve Token',
-            'TOKEN_SYMBOL': pool_symbol + 'CRV',
+            'token_addr': token_addr,
+            'token_name': pool_symbol  + ' Curve Token',
+            'token_symbol': pool_symbol + 'CRV',
 
-            'SOURCE': 'core'
+            'source': 'core'
         })
     return data_out
 

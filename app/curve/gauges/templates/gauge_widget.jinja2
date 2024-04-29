@@ -12,6 +12,11 @@
                             {{gauge_info['gauge_symbol']}}
                     </h4>
                     <p class="card-text">Address: {{gauge_info['gauge_addr']}}</p>
+                {% elif gauge_info['display_name'] %}
+                    <h4 class="card-title text-primary">
+                            {{gauge_info['display_name']}}
+                    </h4>
+                    <p class="card-text">Address: {{gauge_info['gauge_addr']}}</p>
                 {% else %}
                     <h5 class="card-title text-primary">
                             {{gauge_info['gauge_addr']}}
@@ -78,9 +83,13 @@
                                         {% endif %}
 
                                         {%if gauge_info['token_addr'] %}
-                                            <p class="card-text">Token Name: {{gauge_info['token_name']}}</p>
                                             <p class="card-text">Token Address: {{gauge_info['token_addr']}}</p>
+                                            <p class="card-text">Token Name: {{gauge_info['token_name']}}</p>
                                             <p class="card-text">Token Symbol: {{gauge_info['token_symbol']}}</p>
+                                        {% endif %}
+                                        {%if gauge_info['lending_vault_addr'] %}
+
+                                            <p class="card-text">Lending Vault Address: {{gauge_info['lending_vault_addr']}}</p>
                                         {% endif %}
 
                                     </div>
@@ -99,6 +108,15 @@
                                             <p class="card-text">Vote Timestamp: {{gauge_info['vote_timestamp']}}</p>
                                         {% endif %}
 
+                                        {%if gauge_info['is_killed'] %}
+                                            <p class="card-text">Is Killed: {{gauge_info['is_killed']}}</p>
+                                        {% endif %}
+                                        {%if gauge_info['is_factory'] %}
+                                            <p class="card-text">Is Factory: {{gauge_info['is_factory']}}</p>
+                                        {% endif %}
+                                        {%if gauge_info['is_sidechain'] %}
+                                            <p class="card-text">Is Side Chain: {{gauge_info['is_sidechain']}}</p>
+                                        {% endif %}
                                     </div>
                                 </div> 
                             </div>

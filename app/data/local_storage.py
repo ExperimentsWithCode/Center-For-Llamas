@@ -20,6 +20,8 @@ def get_cwd():
         cwd += '/center-for-llamas'   
     if temp_split[-1] == 'analysis':
         cwd = cwd[: - len('/analysis')]   
+    if temp_split[-1] == 'opperations':
+        cwd = cwd[: - len('/opperations')]   
     return cwd
 
 
@@ -110,3 +112,7 @@ def df_to_csv(df, filename, path='output'):
     cwd = get_cwd()
     full_filename = f"{cwd}/app/data/{path}/{filename}.csv"
     df.to_csv(full_filename) 
+
+def save_file(file, filename, path='imported_processed'):
+    full_filename = f"{cwd}/app/data/{path}/{filename}"
+    file.save(full_filename)

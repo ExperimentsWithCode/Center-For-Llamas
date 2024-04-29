@@ -8,9 +8,16 @@ from app.curve.gauges.models import df_curve_gauge_registry
 
 
 def generate_query(block_timestamp_cutoff='2023-01-01 00:00:01T00:00:35.000Z'):
-    temp_list = df_curve_gauge_registry.pool_addr.unique()
-    temp_list = temp_list[temp_list != '']
-    pool_addresses = str(temp_list).replace('\n', ',')[1:-1]
+    temp_list = df_curve_gauge_registry.dropna(
+        subset=['vote_timestamp']
+        ).sort_values(
+            ['vote_timestamp'], 
+            ascending=False
+            )[['gauge_addr', 'vote_timestamp', 'pool_addr']].pool_addr.unique()
+    temp_list_2 = temp_list[temp_list != '']
+    temp_list_2 = temp_list_2[temp_list_2 != None]
+
+    pool_addresses = str(temp_list_2).replace('\n', ',')[1:-1]
 
     if block_timestamp_cutoff:
         filter_line = f"AND BLOCK_TIMESTAMP < '{block_timestamp_cutoff}'"

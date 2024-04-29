@@ -14,8 +14,6 @@ from app.utilities.utility import (
 )
 
 from app.data.reference import known_large_market_actors
-from app.curve.gauges.models import gauge_registry
-
 from app.data.snapshot_api import get_space, get_proposals, get_votes
 
 from app.data.local_storage import (
@@ -27,7 +25,10 @@ from app.data.local_storage import (
 
 from app.data.reference import filename_convex_curve_snapshot_origin, filename_stakedao_curve_snapshot_origin
 
-
+try:
+    gauge_registry = app.config['gauge_registry']
+except:
+    from app.curve.gauges.models import gauge_registry
 
  
 print_mode("Loading... { snapshot.alt_models }")

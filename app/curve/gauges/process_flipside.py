@@ -1,6 +1,9 @@
 from flask import current_app as app
 from app.data.reference import filename_curve_gauges
 
+import math
+# import numpy as np 
+
 from app.data.local_storage import (
     pd,
     read_json,
@@ -43,7 +46,7 @@ class GaugeRegistry():
 
         self.process_list(core_pools)
         self.process_df(df)
-
+        self.process_curve_api()
 
     def process_df(self, df):
         for i, row in df.iterrows():
@@ -52,6 +55,53 @@ class GaugeRegistry():
     def process_list(self, core_pools):
         for row in core_pools:
             self.process_row(row)
+
+    def process_curve_api(self):
+        data = read_json('get_all_gauges', 'source')
+        d = data['data']
+        df_gauges = pd.DataFrame.from_dict(d, orient='index')
+        for i, row in df_gauges.iterrows():
+            self.process_curve_info(row)
+
+    def nan_helper(self, value):
+        if type(value) == float:
+            return math.isnan(value) 
+        return not bool(value)
+    
+    def process_curve_info(self, row):
+        new_row = {}
+        new_row['is_pool'] = row['isPool']
+        # new_row[''] = row['poolUrls']
+        new_row['pool_addr'] = None if self.nan_helper(row['swap']) else row['swap']
+        new_row['token_addr'] = None if self.nan_helper(row['swap_token']) else row['swap_token']
+        new_row['gauge_name'] = None if self.nan_helper(row['name']) else row['name']
+
+
+        new_row['gauge_addr'] = None if self.nan_helper(row['gauge']) else row['gauge']
+        # Unique Data
+        new_row['display_name'] = None if self.nan_helper(row['shortName']) else row['shortName']
+        new_row['gauge_crv_apy'] = None if self.nan_helper(row['gaugeCrvApy']) else row['gaugeCrvApy']
+        new_row['gauge_crv_future_apy'] = None if self.nan_helper(row['gaugeFutureCrvApy']) else row['gaugeFutureCrvApy']
+        new_row['is_factory'] = None if self.nan_helper(row['factory']) else row['factory']
+        new_row['is_sidechain'] = None if self.nan_helper(row['side_chain']) else row['side_chain']
+        new_row['is_killed'] = None if self.nan_helper(row['is_killed']) else row['is_killed']
+        new_row['crv_type'] = None if self.nan_helper(row['type']) else row['type']
+        new_row['lending_vault_addr'] = None if self.nan_helper(row['lendingVaultAddress']) else row['lendingVaultAddress']
+        new_row['vote_timestamp'] = None
+        new_row['deployed_timestamp'] = None
+        new_row['type_id'] = ''
+        new_row['type_name'] = ''
+        new_row['name'] = ''
+        new_row['symbol'] = ''
+        new_row['weight'] = ''
+        new_row['type_weight'] = ''
+        new_row['type_total_weight'] = ''
+        new_row['type_weight_time'] = ''
+        new_row['tx_hash'] = ''
+        new_row['chain_id'] = ''
+        
+        self.process_row(new_row)
+
 
     def process_row(self, row):
         if 'gauge_addr' in row:
@@ -68,9 +118,11 @@ class GaugeRegistry():
         if gs.gauge_addr:
             self.gauges[gs.gauge_addr.lower()] = gs
             self.shorthand_gauges[gs.gauge_addr[:6].lower()] = gs
-        if gs.pool_addr:
+            
+        if gs.pool_addr and gs.pool_addr:
             self.pools[gs.pool_addr.lower()] = gs
             self.shorthand_pools[gs.pool_addr[:6].lower()] = gs
+
         if gs.token_addr:
             self.tokens[gs.token_addr.lower()] = gs
             self.shorthand_tokens[gs.token_addr[:6].lower()] = gs
@@ -182,52 +234,41 @@ class Gauge_Set():
         except:
             pass
         # print(row.keys())
-        try:
-            self.gauge_addr = row['GAUGE_ADDR']
-            self.gauge_name = row['GAUGE_NAME']
-            self.gauge_symbol = row['GAUGE_SYMBOL']
+        self.display_name = None
+        self.gauge_crv_apy = None # Added by process curve api
+        self.gauge_crv_future_apy = None # Added by process curve api
+        self.is_factory = None # Added by process curve api
+        self.is_sidechain = None # Added by process curve api
+        self.is_killed = None # Added by process curve api
+        self.crv_type = None # Added by process curve api
+        self.lending_vault_addr = None # Added by process curve api
 
-            self.pool_addr = row['POOL_ADDR']
-            self.pool_name = row['POOL_NAME']
-            self.pool_symbol = row['POOL_SYMBOL']
-            if self.pool_addr:
-                self.pool_partial = self.pool_addr[:6]
-            else:
-                self.pool_partial = None
-            self.token_addr = row['TOKEN_ADDR']
-            self.token_name = row['TOKEN_NAME']
-            self.token_symbol = row['TOKEN_SYMBOL']
+        self.gauge_addr = row['gauge_addr']
+        self.gauge_name = row['gauge_name'] if 'gauge_name' in row else None
+        self.gauge_symbol = row['gauge_symbol'] if 'gauge_symbol' in row else None
 
-            self.source = row['SOURCE']
+        self.pool_addr = row['pool_addr'] if 'pool_addr' in row else None
+        self.pool_name = row['pool_name'] if 'pool_name' in row else None
+        self.pool_symbol = row['pool_symbol'] if 'pool_symbol' in row else None
 
-            # self.deployed_timestamp = row['BLOCK_TIMESTAMP'] if 'BLOCK_TIMESTAMP' in row else None
-        except:
-            # print(row.keys())
-            self.gauge_addr = row['gauge_addr']
-            self.gauge_name = row['gauge_name']
-            self.gauge_symbol = row['gauge_symbol']
+        if self.pool_addr and len(self.pool_addr) > 0:
+            self.pool_partial = self.pool_addr[:6]
+        else:
+            self.pool_partial = None
+        self.token_addr = row['token_addr'] if 'token_addr' in row else None
+        self.token_name = row['token_name'] if 'token_name' in row else None
+        self.token_symbol = row['token_symbol'] if 'token_symbol' in row else None
 
-            self.pool_addr = row['pool_addr']
-            self.pool_name = row['pool_name']
-            self.pool_symbol = row['pool_symbol']
-            if self.pool_addr:
-                self.pool_partial = self.pool_addr[:6]
-            else:
-                self.pool_partial = None
-            self.token_addr = row['token_addr']
-            self.token_name = row['token_name']
-            self.token_symbol = row['token_symbol']
+        self.source = row['source'] if 'source' in row else ''
 
-            self.source = row['source']
-
-            self.deployed_timestamp = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
-
-        # Pass names up stack if available
-        if not self.gauge_name and self.pool_name:
-            self.gauge_name = self.pool_name
-        if not self.gauge_symbol and self.pool_symbol:
-            self.gauge_symbol = self.pool_symbol
-
+        self.deployed_timestamp = row['deployed_timestamp'] if 'deployed_timestamp' in row else None
+        self.vote_timestamp = row['vote_timestamp'] if 'vote_timestamp' in row else None
+        
+        if not self.deployed_timestamp:
+            self.deployed_timestamp = None
+        if not self.vote_timestamp:
+            self.vote_timestamp = None
+        # For deployments
         try:
             self.deployed_period = get_checkpoint_id(row['deployed_timestamp'])
             self.deployed_period_end_date = get_checkpoint_timestamp_from_id(self.deployed_period)
@@ -235,6 +276,7 @@ class Gauge_Set():
             self.deployed_period = None   
             self.deployed_period_end_date = None
 
+        # For Approvals
         try:
             self.first_period = get_checkpoint_id(row['vote_timestamp'])
             self.first_period_end_date = get_checkpoint_timestamp_from_id(self.first_period)
@@ -252,8 +294,7 @@ class Gauge_Set():
             self.type_total_weight      = row['type_total_weight']
             self.type_weight_time       = row['type_weight_time']
             self.tx_hash                = row['tx_hash']
-            self.vote_timestamp         = row['vote_timestamp']
-            self.chain_id               = row['chain_id']
+            self.chain_id               = int(row['chain_id']) if bool(row['chain_id']) else ''
             self.chain_name             = None
 
         except:
@@ -266,12 +307,8 @@ class Gauge_Set():
             self.type_total_weight      = None
             self.type_weight_time       = None
             self.tx_hash                = None
-            self.vote_timestamp         = None
             self.chain_id               = None
             self.chain_name             = None
-
-        self.type_weight_adj = convert_units(self.type_weight)
-        self.type_total_weight_adj = convert_units(self.type_total_weight, 18+26)
 
         if self.chain_id:
             try:
@@ -280,16 +317,39 @@ class Gauge_Set():
             except:
                 pass
 
+        self.type_weight_adj = convert_units(self.type_weight)
+        self.type_total_weight_adj = convert_units(self.type_total_weight, 18+26)
+
         if not self.gauge_name:
             if self.name:
                 self.gauge_name = self.name
         if not self.gauge_symbol:
             if self.symbol:
                 self.gauge_symbol = self.symbol
+
+        self.process_curve_api(row)
         self.process_old(prior_record)
+        self.process_names()
+
+    def process_names(self):
+        # Pass names up stack if available
+        if not self.gauge_name and self.pool_name:
+            self.gauge_name = self.pool_name
+        if not self.gauge_symbol and self.pool_symbol:
+            self.gauge_symbol = self.pool_symbol
+        if not self.gauge_name and self.display_name:
+            self.gauge_name = self.display_name
+        if not self.gauge_symbol and self.display_name:
+            self.gauge_symbol = self.display_name
 
     def process_old(self, prior_record):
         if prior_record:
+            if not self.gauge_name and prior_record.gauge_name:
+                self.gauge_name = prior_record.gauge_name
+
+            if not self.gauge_symbol and prior_record.gauge_symbol:
+                self.gauge_symbol = prior_record.gauge_symbol
+
             # Pool
             if not self.pool_addr and prior_record.pool_addr:
                 self.pool_addr = prior_record.pool_addr
@@ -309,24 +369,91 @@ class Gauge_Set():
 
             if not self.token_symbol and prior_record.token_symbol:
                 self.token_symbol = prior_record.token_symbol
+#
+            if not self.type_id and prior_record.type_id:
+                self.type_id = prior_record.type_id
+
+            if not self.type_name and prior_record.type_name:
+                self.type_name = prior_record.type_name
+            # Token
+            if not self.name and prior_record.name:
+                self.name = prior_record.name
+
+            if not self.symbol and prior_record.symbol:
+                self.symbol = prior_record.symbol
+
+            if not self.type_weight and prior_record.type_weight:
+                self.type_weight = prior_record.type_weight
+                self.type_weight_adj = prior_record.type_weight_adj
+
+            if not self.type_total_weight and prior_record.type_total_weight:
+                self.type_total_weight = prior_record.type_total_weight
+                self.type_total_weight_adj = prior_record.type_total_weight_adj
+
+            if not self.type_weight_time and prior_record.type_weight_time:
+                self.type_weight_time = prior_record.type_weight_time
+
+            if not self.tx_hash and prior_record.tx_hash:
+                self.tx_hash = prior_record.tx_hash
+            # Token
+            if not self.vote_timestamp and prior_record.vote_timestamp:
+                self.vote_timestamp = prior_record.vote_timestamp
+
+            if prior_record.chain_id and prior_record.chain_id > 1:
+                self.chain_id = prior_record.chain_id
+
+            if not self.chain_name and prior_record.chain_name:
+                self.chain_name = prior_record.chain_name
+
+            if not self.first_period and prior_record.first_period:
+                self.first_period = prior_record.first_period
+
+            if not self.first_period_end_date and prior_record.first_period_end_date:
+                self.first_period_end_date = prior_record.first_period_end_date
+
+            if not self.deployed_period and prior_record.deployed_period:
+                self.deployed_period = prior_record.deployed_period
+
+            if not self.deployed_period_end_date and prior_record.deployed_period_end_date:
+                self.deployed_period_end_date = prior_record.deployed_period_end_date
+
+            if not self.deployed_timestamp and prior_record.deployed_timestamp:
+                self.deployed_timestamp = prior_record.deployed_timestamp
+
+            if len(self.source) == 0 and len(prior_record.source) > 0:
+                self.source = prior_record.source
+
+
+    def process_curve_api(self, row):
+        if 'gauge_crv_apy' in row:
+            self.display_name = row['display_name']
+            self.gauge_crv_apy = row['gauge_crv_apy']
+            self.gauge_crv_future_apy = row['gauge_crv_future_apy']
+            self.is_factory = row['is_factory']
+            self.is_sidechain = row['is_sidechain']
+            self.is_killed = row['is_killed']
+            self.crv_type = row['crv_type']
+            self.lending_vault_addr = row['lending_vault_addr']
+        return None
+
 
     def format_output(self):
         return {
-            'gauge_addr' : self.gauge_addr,
-            'gauge_name' : self.gauge_name,
-            'gauge_symbol' : self.gauge_symbol,
-            'pool_addr' : self.pool_addr,
-            'pool_name' : self.pool_name,
-            'pool_symbol' : self.pool_symbol,
-            'pool_partial': self.pool_partial,
-            'token_addr' : self.token_addr,
-            'token_name' : self.token_name,
-            'token_symbol' : self.token_symbol,
-            'source' : self.source,
+            'gauge_addr'        : self.gauge_addr,
+            'gauge_name'        : self.gauge_name,
+            'gauge_symbol'      : self.gauge_symbol,
+            'pool_addr'         : self.pool_addr,
+            'pool_name'         : self.pool_name,
+            'pool_symbol'       : self.pool_symbol,
+            'pool_partial'      : self.pool_partial,
+            'token_addr'        : self.token_addr,
+            'token_name'        : self.token_name,
+            'token_symbol'      : self.token_symbol,
+            'source'            : self.source,
             'deployed_timestamp' : self.deployed_timestamp,
-            'first_period': self.first_period,
+            'first_period'      : self.first_period,
             'first_period_end_date': self.first_period_end_date,
-            'deployed_period' : self.deployed_period,
+            'deployed_period'   : self.deployed_period,
             'deployed_period_end_date' : self.deployed_period_end_date,
 
             'type_id'           : self.type_id,
@@ -343,8 +470,16 @@ class Gauge_Set():
             'tx_hash'           : self.tx_hash,
             'vote_timestamp'    : self.vote_timestamp,
             'chain_id'          : self.chain_id,
-            'chain_name'        : self.chain_name
+            'chain_name'        : self.chain_name,
 
+            'display_name'      : self.display_name,
+            'gauge_crv_apy'     : self.gauge_crv_apy,
+            'gauge_crv_future_apy' : self.gauge_crv_future_apy,
+            'is_factory'        : self.is_factory,
+            'is_sidechain'      : self.is_sidechain,
+            'is_killed'         : self.is_killed,
+            'crv_type'          : self.crv_type,
+            'lending_vault_addr' : self.lending_vault_addr,
         }
 
 

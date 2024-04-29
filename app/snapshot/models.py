@@ -740,6 +740,7 @@ class Choice():
             return gauge_addr
         else:
             return "0xNotFound"
+        
     def choice_power(self):
         return float( self.choice_percent() * self.available_power)
 

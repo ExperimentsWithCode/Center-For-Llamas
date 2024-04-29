@@ -16,7 +16,9 @@ from app.data.local_storage import (
     df_to_csv,
     )
 from app.utilities.utility import (
-    get_datetime_obj
+    get_datetime_obj,
+    get_now,
+    shift_time_days,
     )
 from app.data.reference import (
     filename_curve_liquidity, 
@@ -37,12 +39,14 @@ class LiquidityManager():
                  load_initial = False,
                  load_cutoff = False,
                  cutoff_value = None,
+                 should_loop_liquidity = False,
                  human_management = False,
                  ):
         self.load_initial = load_initial
         self.should_fetch = should_fetch
         self.load_cutoff = load_cutoff
         self.cutoff_value = cutoff_value
+        self.should_loop_liquidity = should_loop_liquidity
         self.human_management = human_management
 
 
@@ -109,6 +113,33 @@ class LiquidityManager():
             })   
         return df_cutoff
 
+    def forward_filler(self):
+        """
+        Specifically doesn't fetch forward if also fetching initial to prevent timeouts
+        """
+        if self.should_loop_liquidity:
+            self.forward_filler_loop()
+        elif self.should_fetch:
+            if not self.load_initial:
+                fetch(False)
+        return get_df_from_file(filename_curve_liquidity)
+
+    def forward_filler_loop(self):
+        """
+        Specifically doesn't fetch forward if also fetching initial to prevent timeouts
+        """
+        if self.should_fetch:
+            if not self.load_initial:
+                df = fetch(False)
+                while get_datetime_obj(df.block_timestamp.max()) < shift_time_days(get_now(), 7, False):
+                    df = fetch(False)
+                    if self.human_management:
+                        user_input = self.user_control_check(df.block_timestamp.max())
+                        if len(user_input) > 0:
+                            break
+        return
+
+    
     """
     Since remote hosting has limits on how long processes can run
     no longer fully backfilling, but still merging first query
@@ -153,12 +184,12 @@ class LiquidityManager():
 
         return df
 
-    def user_control_check(self, start_time, end_time):
+    def user_control_check(self, start_time):
         # Begin true sequence
         print("="*50)
         print("="*50)
-        print("GO BACK")
-        print(f"Time Bounds: {start_time} --> {end_time}")
+        print("Loop")
+        print(f"Time Bounds: {start_time} --> ")
         # If things go off the rails, allow user to abort
         #   * Provides time to check in on api provider
         print("^^^ Look Up ^^^ User Input Requested ^^^")
