@@ -15,6 +15,7 @@ from app.utilities.utility import (
     print_mode
 )
 
+from app.curve.gauge_checkpoints.aggregators import get_curve_checkpoint_aggs
 
 # filename = 'crv_locker_logs'
 
@@ -31,27 +32,19 @@ from app.data.reference import (
 )
 from flask import current_app as app
 
-try:
-    # df_curve_locker_history = app.config['df_curve_locker_history']
-    # df_gauge_votes_formatted = app.config['df_gauge_votes_formatted']
-    df_checkpoints_agg = app.config['df_checkpoints_agg']
-    df_votium_v2 = app.config['df_votium_v2']
-    df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
-    # df_curve_liquidity = app.config['df_curve_liquidity']
-    df_curve_oracles_agg = app.config['df_curve_oracles_agg']
+from app.curve.liquidity.aggregators import get_curve_liquidity_aggs
+from app.curve.gauge_checkpoints.aggregators import get_curve_checkpoint_aggs
 
-except:
-    # from app.curve.gauge_votes.models import df_gauge_votes_formatted
-    # from app.curve.locker.models import df_curve_locker_history
-    from app.curve.gauge_checkpoints.models import df_checkpoints_agg
-    from app.convex.votium_bounties_v2.models import df_votium_v2
-    from app.curve.liquidity.models import df_curve_liquidity_aggregates
-    from app.curve.liquidity.models import df_curve_oracles_agg
+print_mode("Loading... { curve.meta.models }")
 
+df_checkpoints = app.config['df_checkpoints']
+df_votium_v2 = app.config['df_votium_v2']
+df_curve_oracles_agg = app.config['df_curve_oracles_agg']
+df_curve_liquidity = app.config['df_curve_liquidity']
 
-
+df_curve_liquidity_aggregates = get_curve_liquidity_aggs(df_curve_liquidity)
+df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
  
-    print_mode("Loading... { curve.meta.models }")
 
 
 def generate_round_differences(df, current_round = 0, compare_round=1):
@@ -276,13 +269,20 @@ class ProcessContributingFactors():
     def format_list(self, string_in):
         out = []
         try:
-            for n in string_in.split(','):
-                n2 = n.strip().strip('[').strip(']')
-                # print(n2)
-                out.append(n2)
+            if type(string_in) == list:
+                # idk if this is bad or not
+                # if list returns sorted list,
+                # but if string returns sorted string. 
+                return string_in.sort() 
+            else:
+                for n in string_in.split(','):
+                    n2 = n.strip().strip('[').strip(']')
+                    # print(n2)
+                    out.append(n2)
             out.sort()
-        except:
+        except Exception as e:
             print_mode(string_in)
+            print_mode(e)
         return str(out).replace("'", "")
 
     def generate_issuance_map(self, annual_issuance):

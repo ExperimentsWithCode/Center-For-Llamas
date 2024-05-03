@@ -3,10 +3,7 @@ from flask import current_app as app
 # from ... import db
 from app.data.local_storage import (
     pd,
-    read_json, 
-    read_csv,  
-    write_dataframe_csv,
-    write_dfs_to_xlsx
+    csv_to_df,
     )
 
 
@@ -268,26 +265,26 @@ class BClaimed():
 
 def get_df_bounty_created():
     filename = 'stake_dao_bounty_created_' + current_file_title
-    resp_dict = read_csv(filename, 'source')
+    resp_dict = csv_to_df(filename, 'source')
     df_stakedao_events_created = pd.json_normalize(resp_dict)
     return df_stakedao_events_created.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
 
 def get_df_bounty_duration_increased():
     filename = 'stake_dao_bounty_duration_increased_' + current_file_title
-    resp_dict = read_csv(filename, 'source')
+    resp_dict = csv_to_df(filename, 'source')
     df_stakedao_events_duration_increase = pd.json_normalize(resp_dict)
     return df_stakedao_events_duration_increase.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
 
 
 def get_df_bounty_claimed():
     filename = 'stake_dao_bounty_claimed_' + current_file_title
-    resp_dict = read_csv(filename, 'source')
+    resp_dict = csv_to_df(filename, 'source')
     df_stakedao_events_claimed = pd.json_normalize(resp_dict)
     return df_stakedao_events_claimed.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
 
 def get_df_bounty_closed():
     filename = 'stake_dao_bounty_closed_' + current_file_title
-    resp_dict = read_csv(filename, 'source')
+    resp_dict = csv_to_df(filename, 'source')
     df_stakedao_events_closed = pd.json_normalize(resp_dict)
     return df_stakedao_events_closed.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
 

@@ -54,14 +54,36 @@
                 formatter: (_, row) => gridjs.html(
                 `${row.cells[1].data.toString()}`
                 )               
-            }
+            },
+            { id: 'curve_vecrv_locker', name: 'veCRV Locker' } ,   
+            { id: 'curve_voters', name: 'veCRV Voter' } ,   
+            { id: 'convex_snapshot_voter', name: 'vlCVX Voter' } ,   
+            { id: 'convex_delegate', name: 'vlCVX Delegate' } ,   
+            { id: 'convex_delegator', name: 'vlCVX Delegator' } ,   
+            { id: 'convex_vlcvx_locker', name: 'vlCVX Locker' } ,   
+            { id: 'stakedao_snapshot_voter', name: 'sdCRV Voter' } ,   
+            { id: 'stakedao_delegate', name: 'sdCRV Delegate' } ,   
+            { id: 'stakedao_delegator', name: 'sdCRV Delegator' } , 
+            { id: 'stakedao_sdcrv_staker', name: 'sdCRV Staker' } ,   
+            { id: 'stakedao_vesdt_locker', name: 'veSDT Locker' } ,
         ],
         data: [
-          {% for index, row in df_actors.iterrows() %}
+          {% for index, row in df_roles.iterrows() %}
             {
                 'known_as': '{{ row['known_as'] }}',
-                'address': `<a href={{ url_for('address_book_bp.show_roles', actor_addr = row['address']) }}>{{row['address']}}</a>`
-              
+                'address': `<a href={{ url_for('address_book_bp.show_roles', actor_addr = row['address']) }}>{{row['address']}}</a>`,
+                'curve_vecrv_locker': '{{ row['curve_vecrv_locker']| string }}',
+                'curve_voters': '{{ row['curve_voters']| string }}',
+                'convex_snapshot_voter': '{{ row['convex_snapshot_voter']| string }}',
+                'convex_delegate': '{{ row['convex_delegate']| string }}',
+                'convex_delegator': '{{ row['convex_delegator']| string }}',
+                'convex_vlcvx_locker': '{{ row['convex_vlcvx_locker']| string }}',
+                'stakedao_snapshot_voter': '{{ row['stakedao_snapshot_voter']| string }}',
+                'stakedao_delegate': '{{ row['stakedao_delegate']| string }}',
+                'stakedao_delegator': '{{ row['stakedao_delegator']| string }}',
+                'stakedao_sdcrv_staker': '{{ row['stakedao_sdcrv_staker']| string }}',
+                'stakedao_vesdt_locker': '{{ row['stakedao_vesdt_locker']| string }}',
+
 
             },
           {% endfor %}

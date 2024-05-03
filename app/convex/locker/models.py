@@ -1,25 +1,22 @@
 from flask import current_app as app
-from app.data.reference import filename_convex_locker
+from app import MODELS_FOLDER_PATH
+
+from app.data.reference import filename_convex_locker, filename_convex_locker_user_epoch
 
 from app.data.local_storage import (
     pd,
-    # read_json,
-    # read_csv,
-    # write_dataframe_csv,
-    # write_dfs_to_xlsx,
     csv_to_df
     )
 
 
 from app.utilities.utility import (
-    # get_period_direct, 
-    # get_period_end_date, 
+ 
     get_date_obj, 
     get_dt_from_timestamp,
     nullify_amount,
-    print_mode
-    # shift_time_days,
-    # df_remove_nan
+    print_mode,
+    get_now
+
 )
 
 
@@ -75,23 +72,55 @@ def get_df(filename, location):
     df = format_df(df)
     return df
 
-df_locker = get_df(filename_convex_locker, 'processed')
-df_locker_user_epoch = get_df(filename_convex_locker+"_user_epoch", 'processed')
-df_locker_agg_user_epoch = get_df(filename_convex_locker+"_agg_user_epoch", 'processed')
-df_locker_agg_system = get_df(filename_convex_locker+"_agg_system", 'processed')
-df_locker_agg_epoch = get_df(filename_convex_locker+"_agg_epoch", 'processed')
-df_locker_agg_current = get_df(filename_convex_locker+"_agg_current", 'processed')
-
+df_locker = get_df(filename_convex_locker, MODELS_FOLDER_PATH)
+df_locker_user_epoch = get_df(filename_convex_locker_user_epoch, MODELS_FOLDER_PATH)
 
 try:
     app.config['df_convex_locker'] = df_locker
     app.config['df_convex_locker_user_epoch'] = df_locker_user_epoch
-    app.config['df_convex_locker_agg_user_epoch'] = df_locker_agg_user_epoch
-    app.config['df_convex_locker_agg_system'] = df_locker_agg_system
-    app.config['df_convex_locker_agg_epoch'] = df_locker_agg_epoch
-    app.config['df_convex_locker_agg_current'] = df_locker_agg_current
+    # app.config['df_convex_locker_agg_user_epoch'] = df_locker_agg_user_epoch
+    # app.config['df_convex_locker_agg_system'] = df_locker_agg_system
+    # app.config['df_convex_locker_agg_epoch'] = df_locker_agg_epoch
+    # app.config['df_convex_locker_agg_current'] = df_locker_agg_current
 except:
     print_mode("could not register in app.config\n\tConvex Locker")
 
 
+# Calculate total balance of locks at each epoch per user
+def get_convex_locker_agg_user_epoch(df_locker_user_epoch):
+    return df_locker_user_epoch.groupby([
+            'this_epoch', 'user', 'known_as', 'display_name'
+        ]).agg(
+        current_locked=pd.NamedAgg(column='current_locked', aggfunc=sum),
+        lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum)
+        ).reset_index()
 
+# Calculate total locked per epoch (sum all locks within an epoch)
+# And create filter for only currently locked epochs
+def get_convex_locker_agg_epoch(df_locker):
+    return df_locker.groupby([
+            'epoch_start',
+            'epoch_end',
+        ]).agg(
+        locked_amount=pd.NamedAgg(column='locked_amount', aggfunc=sum),
+        lock_count=pd.NamedAgg(column='tx_hash', aggfunc=lambda x: len(x.unique())
+
+        )).reset_index()
+
+# Calculate total locked each epoch (sum all currently active epochs) 
+def get_convex_locker_agg_system(df_aggregate_user_epoch=[]):
+    if len(df_aggregate_user_epoch) == 0:
+        df_aggregate_user_epoch = get_convex_locker_agg_user_epoch()
+    return df_aggregate_user_epoch.groupby([
+            'this_epoch',
+        ]).agg(
+        total_locked=pd.NamedAgg(column='current_locked', aggfunc=sum),
+        lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
+        user_count=pd.NamedAgg(column='user', aggfunc=lambda x: len(x.unique()))
+        ).reset_index()
+
+def get_convex_locker_agg_current(df_locker_agg_epoch=[]):
+    if len(df_locker_agg_epoch) == 0:
+        df_locker_agg_epoch = get_convex_locker_agg_epoch()
+    now_epoch = df_locker_agg_epoch[df_locker_agg_epoch['epoch_start'] <= get_now()].epoch_start.max()
+    return df_locker_agg_epoch[df_locker_agg_epoch['epoch_end'] >= now_epoch]

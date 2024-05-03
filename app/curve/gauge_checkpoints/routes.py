@@ -21,13 +21,13 @@ from app.utilities.utility import timed
 
 
 # from .forms import AMMForm
-from .models import  df_checkpoints, df_checkpoints_agg
+from .aggregators import  get_curve_checkpoint_aggs
 # from ..utility.api import get_proposals, get_proposal
 # from ..address.routes import new_address
 # from ..choice.routes import new_choice_list
 
 
-
+from .models import format_df
 
 
 # Blueprint Configuration
@@ -54,8 +54,8 @@ def get_checkpoint_info(df):
 # @login_required
 def index():
     # now = datetime.now()
-    # df_checkpoints = app.config['df_checkpoints']
-    df_checkpoints_agg = app.config['df_checkpoints_agg']
+    df_checkpoints = app.config['df_checkpoints']
+    df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
     # Filter Data
     local_df_checkpoints_agg = df_checkpoints_agg[df_checkpoints_agg['total_vote_power'] > 0]
     local_df_checkpoints_agg = local_df_checkpoints_agg.sort_values(['checkpoint_id', 'total_vote_power'], ascending=False)
@@ -144,7 +144,7 @@ def show(gauge_addr):
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
 
     df_checkpoints = app.config['df_checkpoints']
-    df_checkpoints_agg = app.config['df_checkpoints_agg']
+    df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
     # Filter Data
     # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]

@@ -1,5 +1,6 @@
 from flask import current_app as app
 from app.data.reference import filename_votium_v2
+from app import MODELS_FOLDER_PATH, RAW_FOLDER_PATH
 
 from datetime import datetime, timedelta
 from app.utilities.utility import (
@@ -12,10 +13,8 @@ from app.utilities.utility import (
 )
 from app.data.local_storage import (
     pd,
-    read_json, 
-    read_csv,  
-    write_dataframe_csv,
-    write_dfs_to_xlsx
+    csv_to_df,  
+    df_to_csv
     )
 
 
@@ -27,8 +26,7 @@ class ProcessVotiumV2():
 
     def get_df_votium(self):
         filename = filename_votium_v2    #+ fallback_file_title
-        resp_dict = read_csv(filename, 'raw_data')
-        df = pd.json_normalize(resp_dict)
+        df = csv_to_df(filename, RAW_FOLDER_PATH)
         df = self.format(df)
         df = df.sort_values("block_timestamp", axis = 0, ascending = True)
         return df   
@@ -131,8 +129,7 @@ class ProcessVotiumV2():
 
 def get_df_votium():
     filename = filename_votium_v2    #+ fallback_file_title
-    resp_dict = read_csv(filename, 'raw_data')
-    df = pd.json_normalize(resp_dict)
+    df = csv_to_df(filename, RAW_FOLDER_PATH)
     df = df.sort_values("block_timestamp", axis = 0, ascending = True)
     return df   
 
@@ -140,15 +137,16 @@ def get_df_votium():
 
 def process_and_save():
     try:
-        df_checkpoints_agg = app.config['df_checkpoints_agg']
-    except:
-        from app.curve.gauge_checkpoints.models import df_checkpoints_agg
-
+        df_checkpoints = app.config['df_checkpoints']
+    except Exception as e:
+        from app.curve.gauge_checkpoints.models import df_checkpoints
+    from app.curve.gauge_checkpoints.aggregators import get_curve_checkpoint_aggs
+    df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
     print_mode("Processing... { curve.liquidity.models }")
     votium_v2 = ProcessVotiumV2(get_df_votium(), df_checkpoints_agg)
     df_votium_v2 = votium_v2.process()   
 
-    write_dataframe_csv(filename_votium_v2, df_votium_v2, 'processed')
+    df_to_csv(df_votium_v2, filename_votium_v2, MODELS_FOLDER_PATH)
 
     try:
         # app.config['df_active_votes'] = df_active_votes

@@ -145,9 +145,9 @@ gauge_symbols = {
 filename_curve_gauges = 'gauge_to_lp_map'
 
 filename_curve_locker = 'curve_locker'
+filename_curve_locker_decay = 'curve_locker_decay'
 
 filename_curve_gauge_votes = 'curve_gauge_votes'
-filename_curve_gauge_votes_all = 'curve_gauge_votes_all'
 filename_curve_gauge_votes_formatted = 'curve_gauge_votes_formatted'
 filename_curve_gauge_votes_current = 'curve_gauge_votes_current'
 
@@ -159,22 +159,31 @@ filename_curve_liquidity_cutoff = 'curve_liquidity_cutoff_v3'
 filename_curve_liquidity_aggregate = 'curve_liquidity_aggregate_v3'
 filename_curve_liquidity_swaps = 'curve_liquidity_swaps_v3'
 filename_curve_liquidity_oracle_aggregate = 'curve_liquidity_oracle_aggregate_v3'
+filename_curve_liquidity_oracle = 'curve_liquidity_oracle_v3'
 
 filename_curve_crv_pricing = 'curve_crv_pricing'
 
 # Convex Data
-filename_convex_delegations = 'convex_delegations'
 filename_convex_locker = 'convex_locker'
+filename_convex_locker_user_epoch = 'convex_locker_user_epoch'
+
 filename_convex_curve_snapshot = 'convex_snapshot_votes'
 filename_convex_curve_snapshot_origin = 'convex_snapshot_votes_origin'
 
+filename_convex_delegations = 'convex_delegations'
+filename_convex_delegated_locks = 'convex_delegated_locks'
 
 # StakeDao Data
-filename_stakedao_delegations = 'stakedao_delegations'
 filename_stakedao_staked_sdcrv = 'stakedao_staked_sdcrv'
+
 filename_stakedao_locker = 'stakedao_locker'
+filename_stakedao_locker_decay = 'stakedao_locker_decay'
+
 filename_stakedao_curve_snapshot = 'stakedao_snapshot_votes'
 filename_stakedao_curve_snapshot_origin = 'stakedao_snapshot_votes_origin'
+
+filename_stakedao_delegations = 'stakedao_delegations'
+filename_stakedao_delegated_locks = 'stakedao_delegated_locks'
 
 # Votium
 filename_votium_v2 = 'votium_v2'
@@ -225,7 +234,6 @@ filename_list = [
     filename_curve_locker,
 
     filename_curve_gauge_votes,
-    filename_curve_gauge_votes_all,
     filename_curve_gauge_votes_formatted,
     filename_curve_gauge_votes_current,
 
@@ -264,3 +272,11 @@ filename_list = [
     # filename_actors,
     
 ]
+
+models_split_into_folders = [
+    filename_curve_gauge_rounds_by_user,
+    filename_curve_locker_decay,
+    filename_curve_liquidity,
+    filename_convex_locker_user_epoch,
+
+    ]

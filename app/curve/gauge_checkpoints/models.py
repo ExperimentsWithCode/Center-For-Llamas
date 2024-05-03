@@ -1,4 +1,6 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH
+
 from app.data.reference import (
     filename_curve_gauge_rounds_by_user,
     filename_curve_gauge_rounds_by_aggregate, 
@@ -7,10 +9,6 @@ from app.data.reference import (
 from app.utilities.utility import print_mode
 from app.data.local_storage import (
     pd,
-    read_json,
-    read_csv,
-    write_dataframe_csv,
-    write_dfs_to_xlsx,
     csv_to_df
     )
 
@@ -116,21 +114,19 @@ def format_df(df):
 
 
 def get_df(filename):
-    df = csv_to_df(filename, 'processed')
+    df = csv_to_df(filename, MODELS_FOLDER_PATH)
     df = format_df(df)
     return df
 
-df_checkpoints = get_df(filename_curve_gauge_rounds_by_user)
-df_checkpoints_agg = get_df(filename_curve_gauge_rounds_by_aggregate) 
 
+df_checkpoints = get_df(filename_curve_gauge_rounds_by_user)
+# df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
 
 try:
     app.config['df_checkpoints'] = df_checkpoints
-    app.config['df_checkpoints_agg'] = df_checkpoints_agg
+    # app.config['df_checkpoints_agg'] = df_checkpoints_agg
 except:
     print_mode("could not register in app.config\n\tGauge Rounds")
-
-
 
 
 # Index(['known_as_x', 

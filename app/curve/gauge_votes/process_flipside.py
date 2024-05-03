@@ -1,7 +1,9 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH, RAW_FOLDER_PATH
+
 from app.data.reference import (
     filename_curve_gauge_votes,
-    filename_curve_gauge_votes_all,
+    filename_curve_gauge_votes,
     filename_curve_gauge_votes_formatted,
     filename_curve_gauge_votes_current
 )
@@ -11,10 +13,8 @@ from app.data.reference import (
 
 from app.data.local_storage import (
     pd,
-    read_json,
-    read_csv,
-    write_dataframe_csv,
-    write_dfs_to_xlsx
+    csv_to_df,
+    df_to_csv
     )
 
 import ast
@@ -260,18 +260,9 @@ class VoterRegistry():
 
 # @timed
 def get_df_gauge_votes():
-    try:
-        filename = filename_curve_gauge_votes    #+ current_file_title
-        resp_dict = read_csv(filename, 'raw_data')
-        df_gauge_votes = pd.json_normalize(resp_dict)
-        df_gauge_votes = df_gauge_votes.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
-
-    except:
-        filename = filename_curve_gauge_votes    #+ fallback_file_title
-        resp_dict = read_csv(filename, 'raw_data')
-        df_gauge_votes = pd.json_normalize(resp_dict)
-        df_gauge_votes = df_gauge_votes.sort_values("block_timestamp", axis = 0, ascending = True)
-
+    filename = filename_curve_gauge_votes    #+ fallback_file_title
+    df_gauge_votes = csv_to_df(filename, RAW_FOLDER_PATH)
+    df_gauge_votes = df_gauge_votes.sort_values("block_timestamp", axis = 0, ascending = True)
     return df_gauge_votes
 
 # @timed
@@ -288,11 +279,11 @@ def get_votes_formatted(vr):
     return df_gauge_votes_formatted
 
 # @timed
-def get_current_votes(df_gauge_votes_formatted):
-    df_current_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
-    df_current_gauge_votes = df_current_gauge_votes[df_current_gauge_votes['weight'] > 0]
-    df_current_gauge_votes = df_current_gauge_votes.sort_values("time", axis = 0, ascending = False)
-    return df_current_gauge_votes
+# def get_current_votes(df_gauge_votes_formatted):
+#     df_current_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
+#     df_current_gauge_votes = df_current_gauge_votes[df_current_gauge_votes['weight'] > 0]
+#     df_current_gauge_votes = df_current_gauge_votes.sort_values("time", axis = 0, ascending = False)
+#     return df_current_gauge_votes
 
 def process_and_save():
     try:
@@ -309,25 +300,19 @@ def process_and_save():
     all_votes, active_votes = vr.format_active_output()
     # df_active_votes = pd.json_normalize(active_votes)
     df_all_votes = pd.json_normalize(all_votes)
-    write_dataframe_csv(filename_curve_gauge_votes_all, df_all_votes, 'processed')
+    df_to_csv(df_all_votes, filename_curve_gauge_votes, MODELS_FOLDER_PATH)
 
     df_gauge_votes_formatted = get_votes_formatted(vr)
-    write_dataframe_csv(filename_curve_gauge_votes_formatted, df_gauge_votes_formatted, 'processed')
+    df_to_csv(df_gauge_votes_formatted, filename_curve_gauge_votes_formatted, MODELS_FOLDER_PATH)
 
-    df_current_gauge_votes = get_current_votes(df_gauge_votes_formatted)
-    write_dataframe_csv(filename_curve_gauge_votes_current, df_current_gauge_votes, 'processed')
+    # df_current_gauge_votes = get_current_votes(df_gauge_votes_formatted)
+    # write_dataframe_csv(filename_curve_gauge_votes_current, df_current_gauge_votes, MODELS_FOLDER_PATH)
 
-    try:
-        # app.config['df_active_votes'] = df_active_votes
-        app.config['df_all_votes'] = df_all_votes
-        app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
-        app.config['df_current_gauge_votes'] = df_current_gauge_votes
-    except:
-        print_mode("could not register in app.config\n\tGauge Votes")
+
     return {
         # 'df_active_votes': df_active_votes,
         'df_all_votes': df_all_votes,
         'df_gauge_votes_formatted': df_gauge_votes_formatted,
-        'df_current_gauge_votes': df_current_gauge_votes
+        # 'df_current_gauge_votes': df_current_gauge_votes
     }
 

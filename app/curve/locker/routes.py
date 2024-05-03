@@ -25,9 +25,9 @@ from app.utilities.utility import (
 # from matplotlib.figure import Figure
 # import io
 
-from app.curve.locker.models import df_curve_vecrv
+from app.curve.locker.aggregators import get_ve_locker_decay_agg, get_ve_locker_agg, get_ve_locker_agg_known
 
-
+from app.curve.locker.models import get_lock_diffs 
 
 # Blueprint Configuration
 curve_locker_vecrv_bp = Blueprint(
@@ -44,9 +44,9 @@ curve_locker_vecrv_bp = Blueprint(
 def index():
     df_curve_vecrv = app.config['df_curve_vecrv']
     # df_curve_vecrv_known = app.config['df_curve_vecrv_known']
-    df_curve_vecrv_agg = app.config['df_curve_vecrv_agg']
+    df_curve_vecrv_agg = get_ve_locker_agg(df_curve_vecrv)
     df_curve_vecrv_decay = app.config['df_curve_vecrv_decay']
-    df_curve_vecrv_decay_agg = app.config['df_curve_vecrv_decay_agg']
+    df_curve_vecrv_decay_agg = get_ve_locker_decay_agg(df_curve_vecrv_decay)
 
 
     # Filter Data
@@ -327,7 +327,7 @@ def show(user):
         title='Curve - Locked veCRV - User',
         template='stakedao-staked-vecrv-show',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], user),
+        actor_profile = get_address_profile(app.config['df_roles'], user),
 
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),

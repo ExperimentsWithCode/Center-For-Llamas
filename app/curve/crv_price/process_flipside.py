@@ -1,4 +1,6 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH, RAW_FOLDER_PATH
+
 from app.data.reference import filename_curve_crv_pricing
 
 from app.data.local_storage import (
@@ -53,7 +55,7 @@ def get_aggs(df):
 
 def get_df():
     filename = filename_curve_crv_pricing    # _'+ current_file_title
-    df_gauge_pool_map = csv_to_df(filename, 'raw_data')
+    df_gauge_pool_map = csv_to_df(filename, RAW_FOLDER_PATH)
     # df_gauge_pool_map = df_gauge_pool_map.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df_gauge_pool_map
 
@@ -64,7 +66,7 @@ def process_and_save():
     crv_pricing = get_aggs(get_df())
 
     df = pd.json_normalize(crv_pricing.format_output())
-    write_dataframe_csv(filename_curve_crv_pricing, df, 'processed')
+    write_dataframe_csv(filename_curve_crv_pricing, df, MODELS_FOLDER_PATH)
     try:
         app.config['df_curve_crv_pricing'] = df
         app.config['crv_pricing'] = crv_pricing

@@ -20,7 +20,7 @@ from app.data.local_storage import pd
 # from matplotlib.figure import Figure
 # import io
 
-from app.stakedao.delegations.models import df_stakedao_delegations
+from app.stakedao.delegations.models import get_stakedao_delegate_agg
 
 from app.utilities.utility import (
     format_plotly_figure,
@@ -47,10 +47,9 @@ stakedao_snapshot_delegations_bp = Blueprint(
 # @login_required
 def index():
 
-    df_stakedao_delegations_agg = app.config['df_stakedao_delegations_agg']
     df_stakedao_delegations = app.config['df_stakedao_delegations']
-
-    
+    df_stakedao_delegated_locks_per_proposal = app.config['df_stakedao_delegated_locks_per_proposal']
+    df_stakedao_delegations_agg = get_stakedao_delegate_agg(df_stakedao_delegated_locks_per_proposal)
     # Filter Data
 
 
@@ -111,8 +110,9 @@ def index():
 @stakedao_snapshot_delegations_bp.route('/delegate/<string:delegate>', methods=['GET'])
 def delegate(delegate):
     # df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
-    df_stakedao_delegation_locks_per_proposal = app.config['df_stakedao_delegation_locks_per_proposal']
+    df_stakedao_delegated_locks_per_proposal = app.config['df_stakedao_delegated_locks_per_proposal']
     df_stakedao_delegations_agg = app.config['df_stakedao_delegations_agg']
+    df_stakedao_delegations_agg = get_stakedao_delegate_agg(app.config['df_stakedao_delegations'])
 
     # Filter Data
 
@@ -121,16 +121,16 @@ def delegate(delegate):
     local_df_stakedao_delegate_agg = local_df_stakedao_delegate_agg.sort_values(["proposal_start", 'total_delegated'], axis = 0, ascending = False)
 
 
-    local_df_stakedao_delegation_locks_per_proposal = df_stakedao_delegation_locks_per_proposal[
-        df_stakedao_delegation_locks_per_proposal['delegate'] == delegate
+    local_df_stakedao_delegated_locks_per_proposal = df_stakedao_delegated_locks_per_proposal[
+        df_stakedao_delegated_locks_per_proposal['delegate'] == delegate
         ]   
-    local_df_stakedao_delegation_locks_per_proposal = local_df_stakedao_delegation_locks_per_proposal.sort_values(["proposal_start", 'staked_balance'], axis = 0, ascending = False)
+    local_df_stakedao_delegated_locks_per_proposal = local_df_stakedao_delegated_locks_per_proposal.sort_values(["proposal_start", 'staked_balance'], axis = 0, ascending = False)
 
-    local_df_current_delegate_locks = local_df_stakedao_delegation_locks_per_proposal[
-        local_df_stakedao_delegation_locks_per_proposal['proposal_start'] == local_df_stakedao_delegation_locks_per_proposal.proposal_start.max()
+    local_df_current_delegate_locks = local_df_stakedao_delegated_locks_per_proposal[
+        local_df_stakedao_delegated_locks_per_proposal['proposal_start'] == local_df_stakedao_delegated_locks_per_proposal.proposal_start.max()
     ]
 
-    local_delegations = local_df_stakedao_delegation_locks_per_proposal[
+    local_delegations = local_df_stakedao_delegated_locks_per_proposal[
             ['delegator', 'delegator_known_as', 'proposal_start', 'proposal_title', 'staked_balance']
         ].groupby(['delegator']).head(1)
     
@@ -199,7 +199,7 @@ def delegate(delegate):
         title='stakedao Delegate Lock Profile',
         template='show_stakedao_snapshot_delegate',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], delegate),
+        actor_profile = get_address_profile(app.config['df_roles'], delegate),
         df_locker = local_df_stakedao_delegate_agg,
         # current_votes = local_df_current_delegate_locks.iloc[0]['staked_balance'].sum(),
         local_delegations = local_delegations,
@@ -211,10 +211,9 @@ def delegate(delegate):
 
 @stakedao_snapshot_delegations_bp.route('/delegator/<string:delegator>', methods=['GET'])
 def delegator(delegator):
-    df_actors  = app.config['df_actors']
     df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
     # df_stakedao_locker_agg_user_epoch = app.config['df_stakedao_locker_agg_user_epoch']
-    df_stakedao_delegation_locks_per_proposal = app.config['df_stakedao_delegation_locks_per_proposal']
+    df_stakedao_delegated_locks_per_proposal = app.config['df_stakedao_delegated_locks_per_proposal']
 
     # Filter Data
     ## Votes
@@ -241,25 +240,25 @@ def delegator(delegator):
     # local_df_locker_user_epoch = df_stakedao_locker_agg_user_epoch[df_stakedao_locker_agg_user_epoch['user'] == delegator]
     
     # Locks per proposal
-    local_df_stakedao_delegation_locks_per_proposal = df_stakedao_delegation_locks_per_proposal[
-        df_stakedao_delegation_locks_per_proposal['delegator'] == delegator
+    local_df_stakedao_delegated_locks_per_proposal = df_stakedao_delegated_locks_per_proposal[
+        df_stakedao_delegated_locks_per_proposal['delegator'] == delegator
         ]
-    local_df_stakedao_delegation_locks_per_proposal = local_df_stakedao_delegation_locks_per_proposal.sort_values(['proposal_start'], ascending=False)
+    local_df_stakedao_delegated_locks_per_proposal = local_df_stakedao_delegated_locks_per_proposal.sort_values(['proposal_start'], ascending=False)
 
-    if not len(local_df_stakedao_delegation_locks_per_proposal) > 0:
+    if not len(local_df_stakedao_delegated_locks_per_proposal) > 0:
         return render_template(
             'delegated_staked_sdcrv_not_found.jinja2',
-            title='stakedao Delegated Vote Profile',
+            title='Stakedao Delegated Vote Profile',
             template='delegated_locks_not_found',
             body="",
             delegator = delegator,
-            actor_profile = get_address_profile(app.config['df_actors'], delegator),
+            actor_profile = get_address_profile(app.config['df_roles'], delegator),
             )
     
-    local_df_vote_choice_adj = adjust_delegators_votes(local_df_vote_choice, local_df_stakedao_delegation_locks_per_proposal)
+    local_df_vote_choice_adj = adjust_delegators_votes(local_df_vote_choice, local_df_stakedao_delegated_locks_per_proposal)
     
     # Get last delegation per delegate
-    local_delegations = local_df_stakedao_delegation_locks_per_proposal[
+    local_delegations = local_df_stakedao_delegated_locks_per_proposal[
         ['delegate', 'delegate_known_as', 'proposal_start', 'proposal_title']
         ].groupby('delegate').tail(1)
     
@@ -310,10 +309,10 @@ def delegator(delegator):
 
     
     # # Build chart
-    fig = px.bar(local_df_stakedao_delegation_locks_per_proposal,
-                    x=local_df_stakedao_delegation_locks_per_proposal['proposal_start'],
-                    y=local_df_stakedao_delegation_locks_per_proposal['staked_balance'],
-                    color=local_df_stakedao_delegation_locks_per_proposal['delegate_known_as'] + ' ('+local_df_stakedao_delegation_locks_per_proposal['delegate']+')' ,
+    fig = px.bar(local_df_stakedao_delegated_locks_per_proposal,
+                    x=local_df_stakedao_delegated_locks_per_proposal['proposal_start'],
+                    y=local_df_stakedao_delegated_locks_per_proposal['staked_balance'],
+                    color=local_df_stakedao_delegated_locks_per_proposal['delegate_known_as'] + ' ('+local_df_stakedao_delegated_locks_per_proposal['delegate']+')' ,
                     title='Delegator Locked sdCRV by Delegate',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
@@ -342,10 +341,10 @@ def delegator(delegator):
 
     return render_template(
         'show_stakedao_snapshot_delegator.jinja2',
-        title='stakedao Delegated Vote Profile',
+        title='Stakedao Delegated Vote Profile',
         template='snapshot-voter-show',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], delegator),
+        actor_profile = get_address_profile(app.config['df_roles'], delegator),
         delegator=delegator,
         df_snapshot_user = local_df_vote_choice,
         df_snapshot_user_adj = local_df_vote_choice_adj,

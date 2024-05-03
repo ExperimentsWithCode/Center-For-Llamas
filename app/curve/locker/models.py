@@ -1,6 +1,8 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH
 from app.data.reference import (
     filename_curve_locker,
+    filename_curve_locker_decay,
 )
 
 from datetime import datetime as dt
@@ -8,24 +10,21 @@ from datetime import timedelta
 
 from app.data.local_storage import (
     pd,
-    read_json,
-    read_csv,
-    write_dataframe_csv,
-    write_dfs_to_xlsx,
     csv_to_df
     )
 
 from app.utilities.utility import (
     get_date_obj, 
     timed,
-    print_mode
+    print_mode,
+    get_now,
     # nullify_amount,
 )
  
 print_mode("Loading... { curve.locker.models }")
 
 def get_lock_diffs(final_lock_time, df = []):
-    now = dt.utcnow()
+    now = get_now()
     # Calc remaining lock
     now = now.date()
     ## Weeks until lock expires
@@ -43,24 +42,6 @@ def get_lock_diffs(final_lock_time, df = []):
 
 def format_df(df):
     key_list = df.keys()
-    # df['gauge_addr']            = df['gauge_addr'].astype(str)
-    # df['gauge_name']            = df['gauge_name'].astype(str)
-    # df['gauge_symbol']          = df['gauge_symbol'].astype(str)
-    # df['pool_addr']             = df['pool_addr'].astype(str)
-    # df['pool_name']             = df['pool_name'].astype(str)
-    # df['pool_symbol']           = df['pool_symbol'].astype(str)
-    # df['pool_partial']          = df['pool_partial'].astype(str)
-    # df['token_addr']            = df['token_addr'].astype(str)
-    # df['token_name']            = df['token_name'].astype(str)
-    # df['token_symbol']          = df['token_symbol'].astype(str)
-    # df['source']                = df['source'].astype(str)
-    # df['deployed_timestamp']    = df['deployed_timestamp'].astype(str)
-    # df['first_period']          = df['first_period'].astype(str)
-    # df['first_period_end_date'] = df['first_period_end_date'].astype(str)
-
-    # All
-    # if 'block_number' in key_list:
-    #     df['block_number']          = df['block_number'].astype(int)
 
     if 'block_timetamp' in key_list:
         df['block_timestamp']       = df['block_timestamp'].apply(get_date_obj)
@@ -107,7 +88,7 @@ def format_df(df):
 
 
 def get_df(filename):
-    df = csv_to_df(filename, 'processed')
+    df = csv_to_df(filename, MODELS_FOLDER_PATH)
     df = format_df(df)
     return df
 
@@ -119,19 +100,19 @@ def get_df(filename):
 # df_curve_vecrv_decay_agg = process_decay_agg(df_curve_vecrv_decay)
 
 df_curve_vecrv = get_df(filename_curve_locker)
-df_curve_vecrv_known = get_df(filename_curve_locker + '_known') 
-df_curve_vecrv_agg = get_df(filename_curve_locker + '_agg')
-df_curve_vecrv_decay = get_df(filename_curve_locker + '_decay')
-df_curve_vecrv_decay_agg = get_df(filename_curve_locker + '_decay_agg')
+# df_curve_vecrv_known = get_df(filename_curve_locker + '_known') 
+# df_curve_vecrv_agg = get_df(filename_curve_locker + '_agg')
+df_curve_vecrv_decay = get_df(filename_curve_locker_decay)
+# df_curve_vecrv_decay_agg = get_df(filename_curve_locker_decay + '_agg')
 
 platform = 'curve'
 asset = 'vecrv'
 name_prefix = f"df_{platform}_{asset}"
 try:
     app.config[f"{name_prefix}"] = df_curve_vecrv
-    app.config[f"{name_prefix}_known"] = df_curve_vecrv_known
-    app.config[f"{name_prefix}_agg"] = df_curve_vecrv_agg
+    # app.config[f"{name_prefix}_known"] = df_curve_vecrv_known
+    # app.config[f"{name_prefix}_agg"] = df_curve_vecrv_agg
     app.config[f"{name_prefix}_decay"] = df_curve_vecrv_decay
-    app.config[f"{name_prefix}_decay_agg"] = df_curve_vecrv_decay_agg
+    # app.config[f"{name_prefix}_decay_agg"] = df_curve_vecrv_decay_agg
 except:
     print_mode("could not register in app.config\n\Curve Locked veCRV")

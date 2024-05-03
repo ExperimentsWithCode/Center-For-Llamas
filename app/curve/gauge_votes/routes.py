@@ -251,7 +251,7 @@ def show(user):
         title='Curve Gauge Votes',
         template='gauge-votes-show',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], user),
+        actor_profile = get_address_profile(app.config['df_roles'], user),
 
         votes = local_df_gauge_votes,
         inactive_votes = local_df_gauge_votes_inactive,

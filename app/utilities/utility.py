@@ -3,11 +3,11 @@ from datetime import date, timedelta, tzinfo
 import numpy as np
 from functools import wraps
 from time import time
-from app.data.local_storage import cwd
-
 from app.data.local_storage import (
     pd,
+    cwd
     )
+from app.data.reference import models_split_into_folders
 
 try:
     from config import activate_print_mode
@@ -386,7 +386,7 @@ def convert_units(value, decimals=18):
 Checkpoints
 """
 # Needs more dynamic generation
-def generate_checkpoints(start_time = '2020-08-20 00:06:58.919591+00:00'):
+def generate_checkpoints(start_time = '2020-08-12 10:33:20+00:00'):
     week =  7 * 86400 
     start_date = get_datetime_obj(start_time)
     print_mode(start_date)
@@ -467,10 +467,10 @@ def get_checkpoint_id(timestamp, df_checkpoints = df_default_checkpoints):
         this_id = int((date_diff.days + seconds_diff_as_days ) / 7)
     except Exception as e:
         print(e)
-        print_mode(timestamp)
-        print_mode(time_obj)
-        print_mode(df_checkpoints.checkpoint_timestamp.min())
-        print_mode(date_diff)
+        print('\t @ app/utility/utilitie > get_checkpoint_id')
+        print_mode(f"Timestamp: {timestamp}")
+        print_mode(f"Min Checkpoint: {df_checkpoints.checkpoint_timestamp.min()}")
+        print_mode(f"Date Diff: {date_diff}")
         this_id = 0
     if this_id < 1:
         this_id = 0

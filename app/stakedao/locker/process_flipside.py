@@ -110,7 +110,7 @@ def process_and_save():
 #         self.processed_known = processed_known
 
 # def get_df(filename):
-#     df = csv_to_df(filename, 'raw_data')
+#     df = csv_to_df(filename, RAW_FOLDER_PATH)
 
 #     # df_gauge_pool_map = df_gauge_pool_map.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
 #     return df
@@ -122,9 +122,9 @@ def process_and_save():
 #     vesdt_base = vesdt.processed_df
 #     vesdt_known = vesdt.processed_known
 #     vesdt_agg = vesdt.processed_agg
-#     write_dataframe_csv(filename_stakedao_locker, vesdt_base, 'processed')
-#     write_dataframe_csv(filename_stakedao_locker+"_known", vesdt_known, 'processed')
-#     write_dataframe_csv(filename_stakedao_locker+"_agg", vesdt_agg, 'processed')
+#     write_dataframe_csv(filename_stakedao_locker, vesdt_base, MODELS_FOLDER_PATH)
+#     write_dataframe_csv(filename_stakedao_locker+"_known", vesdt_known, MODELS_FOLDER_PATH)
+#     write_dataframe_csv(filename_stakedao_locker+"_agg", vesdt_agg, MODELS_FOLDER_PATH)
 
 #     try:
 #         app.config['df_stakedao_vesdt'] = vesdt_base

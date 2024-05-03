@@ -91,15 +91,15 @@ class Manager():
 
         # Convex
         self.convex_locker()
-        self.convex_snapshot_curve()
-        self.convex_snapshot_curve_from_snapshot()
+        # self.convex_snapshot_curve_from_snapshot()  # Do First
+        self.convex_snapshot_curve()                # Do Second
         self.convex_delegations()
         
         # StakeDAO
         self.stakedao_staked_sdcrv()
         self.stakedao_locker()
-        self.stakedao_snapshot_curve()
-        self.stakedao_snapshot_curve_from_snapshot()
+        # self.stakedao_snapshot_curve_from_snapshot()    # Do First
+        self.stakedao_snapshot_curve()                  # Do Second
         self.stakedao_delegations()
 
         # Votium
@@ -178,22 +178,31 @@ class Manager():
     def convex_snapshot_curve(self):
         if 'convex_snapshot_curve' in self.config and self.config['convex_snapshot_curve']:   
             from app.convex.snapshot.fetch import fetch 
-            # from app.convex.locker.process_flipside import process_and_save
-
-            return self._helper(fetch, None)
+            from app.snapshot.votes.process import process_and_save_helper
+            from app.data.reference import (
+                filename_convex_curve_snapshot, 
+                filename_convex_curve_snapshot_origin
+                )
+            self._helper(fetch, None)
+            if self.should_process:
+                process_and_save_helper(
+                    filename_convex_curve_snapshot, 
+                    filename_convex_curve_snapshot_origin
+                    )
+            return 
         
-    @timed
-    def convex_snapshot_curve_from_snapshot(self):
-        if 'convex_snapshot_curve' in self.config and self.config['convex_snapshot_curve']: 
-            from app.snapshot.alt_models import SnapshotAsSource
+    # @timed
+    # def convex_snapshot_curve_from_snapshot(self):
+    #     if 'convex_snapshot_curve' in self.config and self.config['convex_snapshot_curve']: 
+    #         from app.snapshot.alt_models import SnapshotAsSource
 
-            if self.should_fetch:
-                space_address = 'cvx.eth'
-                first = 200
-                skip = 0
-                target = None
-                snapshot = SnapshotAsSource(space_address, first, skip, target )
-                snapshot.save_files('convex')
+    #         if self.should_fetch:
+    #             space_address = 'cvx.eth'
+    #             first = 200
+    #             skip = 0
+    #             target = None
+    #             snapshot = SnapshotAsSource(space_address, first, skip, target )
+    #             snapshot.save_files('convex')
 
             # from app.convex.snapshot.fetch import fetch 
             # from app.convex.locker.process_flipside import process_and_save
@@ -203,9 +212,9 @@ class Manager():
     def convex_delegations(self):
         if 'convex_delegations' in self.config and self.config['convex_delegations']:   
             from app.convex.delegations.fetch import fetch 
-            from app.convex.delegations.process_flipside import process_and_get
+            from app.convex.delegations.process_flipside import process_and_save
 
-            return self._helper(fetch, process_and_get)
+            return self._helper(fetch, process_and_save)
 
        
     """
@@ -240,30 +249,37 @@ class Manager():
     def stakedao_snapshot_curve(self):
         if 'stakedao_snapshot_curve' in self.config and self.config['stakedao_snapshot_curve']:   
             from app.stakedao.snapshot.fetch import fetch 
-            # from app.convex.locker.process_flipside import process_and_save
-
-            return self._helper(fetch, None)
-
-    @timed
-    def stakedao_snapshot_curve_from_snapshot(self):
-        if 'stakedao_snapshot_curve' in self.config and self.config['stakedao_snapshot_curve']:  
-            from app.snapshot.alt_models import SnapshotAsSource
+            from app.snapshot.votes.process import process_and_save_helper
+            from app.data.reference import (
+                filename_convex_curve_snapshot, 
+                filename_convex_curve_snapshot_origin
+                )
+            self._helper(fetch, None)
+            if self.should_process:
+                process_and_save_helper(
+                    filename_convex_curve_snapshot, 
+                    filename_convex_curve_snapshot_origin
+                    )
+    # @timed
+    # def stakedao_snapshot_curve_from_snapshot(self):
+    #     if 'stakedao_snapshot_curve' in self.config and self.config['stakedao_snapshot_curve']:  
+    #         from app.snapshot.alt_models import SnapshotAsSource
  
-            if self.should_fetch:
-                space_address = 'sdcrv.eth'
-                first = 1000
-                skip = 0
-                target = None
-                snapshot = SnapshotAsSource(space_address, first, skip, target )
-                snapshot.save_files('stakedao')
+    #         if self.should_fetch:
+    #             space_address = 'sdcrv.eth'
+    #             first = 1000
+    #             skip = 0
+    #             target = None
+    #             snapshot = SnapshotAsSource(space_address, first, skip, target )
+    #             snapshot.save_files('stakedao')
 
     @timed
     def stakedao_delegations(self):
         if 'stakedao_delegations' in self.config and self.config['stakedao_delegations']:   
             from app.stakedao.delegations.fetch import fetch 
-            from app.stakedao.delegations.process_flipside import process_and_get
+            from app.stakedao.delegations.process_flipside import process_and_save
 
-            return self._helper(fetch, process_and_get)
+            return self._helper(fetch, process_and_save)
 
     """
     Votium

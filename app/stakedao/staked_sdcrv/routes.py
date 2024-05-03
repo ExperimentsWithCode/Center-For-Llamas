@@ -19,9 +19,9 @@ from app.utilities.utility import get_address_profile
 # from matplotlib.figure import Figure
 # import io
 
-from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv, df_stakedao_sdcrv_known, df_stakedao_sdcrv_agg
+from app.stakedao.staked_sdcrv.models import format_df
 
-
+from app.stakedao.staked_sdcrv.aggregators import get_stakedao_sdcrv_agg, get_stakedao_sdcrv_agg_known
 
 # Blueprint Configuration
 stakedao_staked_sdcrv_bp = Blueprint(
@@ -38,8 +38,8 @@ stakedao_staked_sdcrv_bp = Blueprint(
 # @login_required
 def index():
     df_stakedao_sdcrv = app.config['df_stakedao_sdcrv']
-    df_stakedao_sdcrv_known = app.config['df_stakedao_sdcrv_known']
-    df_stakedao_sdcrv_agg = app.config['df_stakedao_sdcrv_agg']
+    df_stakedao_sdcrv_known = get_stakedao_sdcrv_agg_known(df_stakedao_sdcrv)
+    df_stakedao_sdcrv_agg = get_stakedao_sdcrv_agg(df_stakedao_sdcrv)
 
     # Filter Data
     local_df_stakedao_sdcrv = df_stakedao_sdcrv.sort_values('date').groupby(['provider']).tail(1)
@@ -220,7 +220,7 @@ def show(user):
         title='StakeDAO Staked sdCRV',
         template='stakedao-staked-sdcrv-show',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], user),
+        actor_profile = get_address_profile(app.config['df_roles'], user),
 
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),

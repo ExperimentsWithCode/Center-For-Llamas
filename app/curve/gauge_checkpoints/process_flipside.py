@@ -1,4 +1,6 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH
+
 from app.data.reference import filename_curve_gauge_rounds_by_user, filename_curve_gauge_rounds_by_aggregate
 
 from datetime import datetime, timedelta
@@ -6,11 +8,8 @@ from app.utilities.utility import timed
 
 
 from app.data.local_storage import (
-    pd,
-    read_json, 
-    read_csv,  
-    write_dataframe_csv,
-    write_dfs_to_xlsx
+    pd, 
+    df_to_csv,
     )
 from app.utilities.utility import (
     get_period,
@@ -148,23 +147,6 @@ def process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv):
     ]]
     return df_concat
 
-def process_checkpoint_aggs(df):
-    # Aggregate info down to particular gauges
-    df_vote_aggs = df.groupby([
-                # 'final_lock_time',
-                'checkpoint_timestamp',
-                'checkpoint_id',
-                'gauge_addr',
-                'gauge_name',
-                'gauge_symbol',
-            ]).agg(
-            total_vote_power=pd.NamedAgg(column='vote_power', aggfunc=sum),
-            total_raw_vote_power=pd.NamedAgg(column='locked_crv', aggfunc=sum),
-            total_vote_percent=pd.NamedAgg(column='vote_percent', aggfunc=sum),
-
-            ).reset_index()
-    df_vote_aggs = df_vote_aggs.sort_values(['checkpoint_timestamp', 'total_vote_power'])
-    return df_vote_aggs
 
 
 def process_and_save():
@@ -180,19 +162,10 @@ def process_and_save():
     print_mode("Processing... { curve.gauge_checkpoints.models }")
 
     df_checkpoints = process_checkpoints(df_gauge_votes_formatted, df_curve_vecrv)
-    df_checkpoints_aggs = process_checkpoint_aggs(df_checkpoints)
 
-    write_dataframe_csv(filename_curve_gauge_rounds_by_user, df_checkpoints, 'processed')
+    df_to_csv(df_checkpoints, filename_curve_gauge_rounds_by_user, MODELS_FOLDER_PATH)
 
-    write_dataframe_csv(filename_curve_gauge_rounds_by_aggregate, df_checkpoints_aggs, 'processed')
-
-    try:
-        app.config['df_checkpoints'] = df_checkpoints
-        app.config['df_checkpoints_aggs'] = df_checkpoints_aggs
-    except:
-        print_mode("could not register in app.config\n\tGauge Rounds")
     return {
         'df_checkpoints': df_checkpoints,
-        'df_checkpoints_aggs': df_checkpoints_aggs
-    }
+        }
 

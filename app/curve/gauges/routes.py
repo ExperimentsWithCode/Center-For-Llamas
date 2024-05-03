@@ -10,7 +10,7 @@ import json
 import plotly
 import plotly.express as px
 
-from .models import df_curve_gauge_registry
+from .models import format_df
 
 # Blueprint Configuration
 gauges_bp = Blueprint(
@@ -124,6 +124,7 @@ def index():
 @gauges_bp.route('/show/<string:gauge_addr>', methods=['GET'])
 # @login_required
 def show(gauge_addr):
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     local_df_curve_gauge_registry = df_curve_gauge_registry[df_curve_gauge_registry['gauge_addr'] == gauge_addr]
     return render_template(
         'gauge_show.jinja2',
@@ -138,9 +139,11 @@ def show(gauge_addr):
 
 
 def get_approved():
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     return df_curve_gauge_registry.dropna(subset=['vote_timestamp']).sort_values(['vote_timestamp'], ascending=False)
 
 def get_deployed():
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     return df_curve_gauge_registry.dropna(subset=['deployed_timestamp']).sort_values(['deployed_timestamp'], ascending=False)
 
 def get_checkpoint_counts(df, is_approved=False):

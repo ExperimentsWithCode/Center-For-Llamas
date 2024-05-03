@@ -1,3 +1,5 @@
+from app import RAW_FOLDER_PATH
+
 from flipside import Flipside
 from config import flipside_api_key
 from app.data.reference import filename_file_meta
@@ -79,7 +81,7 @@ def query_and_save(_query, _filename, _df_base = [], _page_size = 5000):
                     keep_going = False
                 i += 1
         # Save
-        write_dataframe_csv(_filename, df_output, 'raw_data')
+        df_to_csv(df_output, _filename, RAW_FOLDER_PATH)
         print_mode('complete')
     except Exception as e:
         print(e)
@@ -93,7 +95,7 @@ def query_and_save(_query, _filename, _df_base = [], _page_size = 5000):
 
 def get_df_and_target(filename, target = 'block_timestamp'):
     # gets dataframe and max value of target intended for time values
-    resp_dict = read_csv(filename, 'raw_data')
+    resp_dict = read_csv(filename, RAW_FOLDER_PATH)
     df = pd.json_normalize(resp_dict)
     print_mode(df.keys())
 

@@ -19,7 +19,8 @@ from app.data.local_storage import pd
 # from matplotlib.figure import Figure
 # import io
 
-from app.stakedao.locker.models import df_stakedao_vesdt, df_stakedao_vesdt_known, df_stakedao_vesdt_agg
+from app.stakedao.locker.models import format_df
+from app.curve.locker.aggregators import get_ve_locker_decay_agg, get_ve_locker_agg, get_ve_locker_agg_known
 
 
 from app.utilities.utility import (
@@ -42,10 +43,11 @@ stakedao_locked_vesdt_bp = Blueprint(
 # @login_required
 def index():
     df_stakedao_vesdt = app.config['df_stakedao_vesdt']
-    # df_stakedao_vesdt_known = app.config['df_stakedao_vesdt_known']
-    df_stakedao_vesdt_agg = app.config['df_stakedao_vesdt_agg']
-    df_stakedao_vesdt_decay_agg = app.config['df_stakedao_vesdt_decay_agg']
     df_stakedao_vesdt_decay = app.config['df_stakedao_vesdt_decay']
+
+    # df_stakedao_vesdt_known = app.config['df_stakedao_vesdt_known']
+    df_stakedao_vesdt_agg = get_ve_locker_agg(df_stakedao_vesdt)
+    df_stakedao_vesdt_decay_agg = get_ve_locker_decay_agg(df_stakedao_vesdt_decay)
 
     # Filter Data
     local_df_stakedao_vesdt = df_stakedao_vesdt.sort_values('block_timestamp').groupby(['provider']).tail(1)
@@ -313,7 +315,7 @@ def show(user):
         title='StakeDAO Locked veSDT',
         template='stakedao-staked-vesdt-show',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], user),
+        actor_profile = get_address_profile(app.config['df_roles'], user),
 
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),

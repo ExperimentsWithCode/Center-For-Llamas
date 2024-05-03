@@ -144,48 +144,58 @@
                 </a>
                 {% endif %}
 
-                {%if not page_type == 'convex' %}
-                <a href="{{ url_for('convex_snapshot_bp.show', choice= gauge_info['gauge_addr']) }}">
-                    <button type="button" class="btn btn-secondary">Convex Snapshot</button>
-                </a>
-                {% else %}
-                <a href="#">
-                    <button type="button" class="btn btn-secondary disabled">Convex Snapshot</button>
-                </a>
-                {% endif %}
-
-                {%if not page_type == 'stakedao' %}
-                <a href="{{ url_for('stakedao_snapshot_bp.show', choice= gauge_info['gauge_addr']) }}">
-                    <button type="button" class="btn btn-info">StakeDAO Snapshot</button>
-                </a>
-                {% else %}
-                <a href="#">
-                    <button type="button" class="btn btn-info disabled">StakeDAO Snapshot</button>
-                </a>
-                {% endif %}
-                {%if not page_type == 'liquidity' %}
-                    {%if gauge_info['pool_addr'] %}
-                    <a href="{{ url_for('curve_liquidity_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
-                        <button type="button" class="btn btn-warning">Liqudity</button>
+                {%if gauge_info['convex_snapshot']  %}
+                    {%if not page_type == 'convex' %}
+                    <a href="{{ url_for('convex_snapshot_bp.show', choice= gauge_info['gauge_addr']) }}">
+                        <button type="button" class="btn btn-secondary">Convex Snapshot</button>
                     </a>
                     {% else %}
                     <a href="#">
-                    <button type="button" class="btn btn-danger" disabled >Liqudity (Unavailable)</button>
+                        <button type="button" class="btn btn-secondary disabled">Convex Snapshot</button>
                     </a>
-
                     {% endif %}
-                {% else %}
-                    {%if gauge_info['pool_addr'] %}
-                    <a href="#">
-                        <button type="button" class="btn btn-warning disabled">Liqudity</button>
+                {% endif %}
+
+                {%if gauge_info['stakedao_snapshot']  %}
+                    {%if not page_type == 'stakedao' %}
+                    <a href="{{ url_for('stakedao_snapshot_bp.show', choice= gauge_info['gauge_addr']) }}">
+                        <button type="button" class="btn btn-info">StakeDAO Snapshot</button>
                     </a>
                     {% else %}
                     <a href="#">
-                    <button type="button" class="btn btn-danger" disabled >Liqudity (Unavailable)</button>
+                        <button type="button" class="btn btn-info disabled">StakeDAO Snapshot</button>
                     </a>
-
                     {% endif %}
                 {% endif %}
+
+                {%if gauge_info['curve_liquidity']  %}
+                    {%if not page_type == 'liquidity' %}
+                        {%if gauge_info['pool_addr'] %}
+                        <a href="{{ url_for('curve_liquidity_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
+                            <button type="button" class="btn btn-warning">Liqudity</button>
+                        </a>
+                        {% else %}
+                        <a href="#">
+                        <button type="button" class="btn btn-danger" disabled >Liqudity (Unavailable)</button>
+                        </a>
+
+                        {% endif %}
+                    {% else %}
+                        {%if gauge_info['pool_addr'] %}
+                        <a href="#">
+                            <button type="button" class="btn btn-warning disabled">Liqudity</button>
+                        </a>
+                        {% else %}
+                        <a href="#">
+                        <button type="button" class="btn btn-danger" disabled >Liqudity (Unavailable)</button>
+                        </a>
+
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+
+
                 {%if not page_type == 'contributing_factors' %}
                 <a href="{{ url_for('curve_meta_bp.contributing_factors_show', gauge_addr= gauge_info['gauge_addr']) }}">
                     <button type="button" class="btn btn-danger">Contributing Factors</button>

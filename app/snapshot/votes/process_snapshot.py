@@ -1,3 +1,5 @@
+from app import RAW_FOLDER_PATH
+
 import pandas as pd
 # import os
 from datetime import datetime as dt
@@ -162,7 +164,7 @@ class SnapshotAsSource():
             filename_1 = filename_stakedao_curve_snapshot_origin
         else:
             return
-        df_to_csv(self.get_vote_df(), filename_1, 'raw_data')
+        df_to_csv(self.get_vote_df(), filename_1, RAW_FOLDER_PATH)
         # df_to_csv(self.get_proposal_choice_map_df(), filename_2, "raw_data")
         
 
@@ -186,7 +188,7 @@ def get_df_snapshot_from_snapshot(target):
     elif target == 'stakedao':
         filename = filename_stakedao_curve_snapshot_origin
     try:
-        temp = csv_to_df(filename, 'raw_data')
+        temp = csv_to_df(filename, RAW_FOLDER_PATH)
         temp = format_df_snapshot_from_snapshot(temp)
         return temp
     except:

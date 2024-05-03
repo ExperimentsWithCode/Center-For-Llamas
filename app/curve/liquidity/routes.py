@@ -19,6 +19,8 @@ from app.utilities.utility import get_now, format_plotly_figure
 
 from .forms import FilterLiquidityForm
 
+from .models import format_df
+from app.curve.liquidity.aggregators import get_curve_liquidity_aggs
 # try:
 #     # curve_gauge_registry = app.config['df_curve_gauge_registry']
 #     df_curve_gauge_registry = app.config['df_curve_gauge_registry']
@@ -44,11 +46,8 @@ curve_liquidity_bp = Blueprint(
 @curve_liquidity_bp.route('/', methods=['GET'])
 # @login_required
 def index():
-    try:
-        df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
-    except: 
-        from app.curve.liquidity.models import df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
-
+    df_curve_liquidity = app.config['df_curve_liquidity']
+    df_curve_liquidity_aggregates = get_curve_liquidity_aggs(df_curve_liquidity)
     # now = get_now()
     local_df_curve_liquidity_aggregates = df_curve_liquidity_aggregates.groupby(['pool_addr', 'gauge_addr'], as_index=False).last()
     local_df_curve_liquidity_aggregates = local_df_curve_liquidity_aggregates.sort_values('total_vote_power', ascending=False)
@@ -73,17 +72,9 @@ def index():
 @curve_liquidity_bp.route('/show/<string:gauge_addr>', methods=['GET'])
 # @login_required
 def show(gauge_addr):
-    try:
-        # curve_gauge_registry = app.config['df_curve_gauge_registry']
-        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
-        # gauge_registry = app.config['gauge_registry']
-        df_curve_liquidity_aggregates = app.config['df_curve_liquidity_aggregates']
-        df_curve_liquidity = app.config['df_curve_liquidity']
-
-    except: 
-        # from app.curve.gauges import df_curve_gauge_registry as curve_gauge_registry
-        from app.curve.gauges.models import df_curve_gauge_registry, gauge_registry
-        from app.curve.liquidity.models import df_curve_liquidity, df_curve_liquidity_aggregates#, df_curve_rebased_liquidity
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+    df_curve_liquidity = app.config['df_curve_liquidity']
+    df_curve_liquidity_aggregates = get_curve_liquidity_aggs(df_curve_liquidity)
 
     # now = get_now()
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
@@ -192,8 +183,13 @@ def show(gauge_addr):
         graphJSON4 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     else:
-        graphJSON = None
-        graphJSON2 = None
+        fig = go.Figure(go.Indicator(
+            title = {'text': "No Liquidity For This Pool 8/"},
+            ))
+        graphJSON = fig
+        graphJSON2 = fig
+        graphJSON3 = fig,
+        graphJSON4 = fig
 
     return render_template(
         'show_liquidity.jinja2',

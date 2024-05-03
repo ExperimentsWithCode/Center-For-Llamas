@@ -1,3 +1,5 @@
+from app import RAW_FOLDER_PATH, MODELS_FOLDER_PATH
+
 from datetime import timedelta
 
 from app.curve.liquidity.fetch import generate_query, fetch
@@ -29,7 +31,7 @@ from app.data.reference import (
 
 
 def get_df_from_file(filename):
-    resp_dict = read_csv(filename, 'raw_data')
+    resp_dict = read_csv(filename, RAW_FOLDER_PATH)
     df = pd.json_normalize(resp_dict)
     return df
 
@@ -72,7 +74,7 @@ class LiquidityManager():
                     df_cutoff = fetch_cutoff(self.cutoff_value)
                 else:
                     df_cutoff = fetch_cutoff()
-                df_to_csv(df_cutoff, filename_curve_liquidity_cutoff, 'raw_data') 
+                df_to_csv(df_cutoff, filename_curve_liquidity_cutoff, RAW_FOLDER_PATH) 
         return get_df_from_file(filename_curve_liquidity_cutoff)
 
     def backfill(self, df_cutoff):

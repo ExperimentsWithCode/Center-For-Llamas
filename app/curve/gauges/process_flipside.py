@@ -1,4 +1,5 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH, RAW_FOLDER_PATH
 from app.data.reference import filename_curve_gauges
 
 import math
@@ -8,10 +9,10 @@ from app.data.local_storage import (
     pd,
     read_json,
     read_csv,
-    write_dataframe_csv,
+    df_to_csv,
     write_dfs_to_xlsx,
     csv_to_df,
-    write_dataframe_csv
+    df_to_csv
     )
 
 # filename = 'crv_locker_logs'
@@ -485,7 +486,7 @@ class Gauge_Set():
 
 def get_df_gauge_pool_map():
     filename = filename_curve_gauges    # _'+ current_file_title
-    df_gauge_pool_map = csv_to_df(filename, 'raw_data')
+    df_gauge_pool_map = csv_to_df(filename, RAW_FOLDER_PATH)
 
     # df_gauge_pool_map = df_gauge_pool_map.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df_gauge_pool_map
@@ -495,12 +496,8 @@ def process_and_save():
 
     gauge_registry = GaugeRegistry(get_df_gauge_pool_map(), core_pools)
     df = pd.json_normalize(gauge_registry.format_output())
-    write_dataframe_csv(filename_curve_gauges, df, 'processed')
-    try:
-        app.config['df_curve_gauge_registry'] = df
-        app.config['gauge_registry'] = gauge_registry
-    except:
-        print_mode("could not register in app.config\n\tGauges")
+    df_to_csv(df, filename_curve_gauges, MODELS_FOLDER_PATH)
+
     return df
 
 def process_and_get():

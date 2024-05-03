@@ -1,6 +1,7 @@
 import traceback
 
 from flask import current_app as app
+from app import RAW_FOLDER_PATH
 
 from app.data.local_storage import (
     pd,
@@ -27,19 +28,19 @@ from app.data.source.harvested_core_pools import core_pools
 
 import pdb
 
-try:
-    from flask import current_app as app
+from flask import current_app as app
 
-    gauge_registry = app.config['gauge_registry']
-    convex_snapshot_proposal_choice_map = app.config['convex_snapshot_proposal_choice_map']
-    df_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates'] 
-except: 
-    from app.curve.gauges.models import gauge_registry
-    from app.convex.snapshot.models import convex_snapshot_proposal_choice_map
-    from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates as df_vote_aggregates
+gauge_registry = app.config['gauge_registry']
+convex_snapshot_proposal_choice_map = app.config['convex_snapshot_proposal_choice_map']
+df_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates'] 
+# except: 
+#     from app.curve.gauges.models import gauge_registry
+#     # from app.convex.snapshot.models import convex_snapshot_proposal_choice_map
+#     from app.convex.snapshot.models import df_convex_snapshot_vote_aggregates as df_vote_aggregates
+from app.data.source.legacy_proposal_choice_map import convex_snapshot_proposal_choice_map
 
  
-    print_mode("Loading... { convex.votium_bounties.models }")
+print_mode("Loading... { convex.votium_bounties.models }")
 
 class VBRegistry():
     def __init__(self):
@@ -234,7 +235,7 @@ class Bounty():
 
 def get_df_bounty_for_round():
     filename = filename_votium_v1  #+ current_file_title
-    resp_dict = read_csv(filename, 'raw_data')
+    resp_dict = read_csv(filename, RAW_FOLDER_PATH)
     df_stakedao_events_created = pd.json_normalize(resp_dict)
     return df_stakedao_events_created.sort_values("block_timestamp", axis = 0, ascending = True)
 

@@ -1,12 +1,10 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH
+
 from app.data.reference import filename_stakedao_staked_sdcrv
 
 from app.data.local_storage import (
     pd,
-    read_json,
-    read_csv,
-    write_dataframe_csv,
-    write_dfs_to_xlsx,
     csv_to_df
     )
 
@@ -55,14 +53,14 @@ def get_df(filename, location):
     df = format_df(df)
     return df
 
-df_stakedao_sdcrv = get_df(filename_stakedao_staked_sdcrv, 'processed')
-df_stakedao_sdcrv_known = get_df(filename_stakedao_staked_sdcrv+"_known", 'processed')
-df_stakedao_sdcrv_agg = get_df(filename_stakedao_staked_sdcrv+"_agg", 'processed')
+df_stakedao_sdcrv = get_df(filename_stakedao_staked_sdcrv, MODELS_FOLDER_PATH)
+# df_stakedao_sdcrv_known = get_df(filename_stakedao_staked_sdcrv+"_known", MODELS_FOLDER_PATH)
+# df_stakedao_sdcrv_agg = get_df(filename_stakedao_staked_sdcrv+"_agg", MODELS_FOLDER_PATH)
 
 try:
     app.config['df_stakedao_sdcrv'] = df_stakedao_sdcrv
-    app.config['df_stakedao_sdcrv_known'] = df_stakedao_sdcrv_known
-    app.config['df_stakedao_sdcrv_agg'] = df_stakedao_sdcrv_agg
+    # app.config['df_stakedao_sdcrv_known'] = df_stakedao_sdcrv_known
+    # app.config['df_stakedao_sdcrv_agg'] = df_stakedao_sdcrv_agg
 except:
     print_mode("could not register in app.config\n\tStakeDAO Staked sdCRV")
 

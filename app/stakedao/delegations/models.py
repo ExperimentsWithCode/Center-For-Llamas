@@ -1,100 +1,99 @@
 from flask import current_app as app
-from app.data.reference import filename_stakedao_delegations, filename_convex_curve_snapshot, filename_convex_locker
+from app import MODELS_FOLDER_PATH
+
+from app.data.reference import (
+    filename_stakedao_delegations, 
+    filename_stakedao_delegated_locks
+    )
 
 from app.data.local_storage import (
     pd,
-    # read_json,
-    # read_csv,
-    # write_dataframe_csv,
-    # write_dfs_to_xlsx,
     csv_to_df
     )
 
 
 from app.utilities.utility import (
-    # get_period_direct, 
-    # get_period_end_date, 
     get_date_obj, 
     get_dt_from_timestamp,
     nullify_amount,
+    nullify_list,
     print_mode
-    # shift_time_days,
-    # df_remove_nan
 )
 
-from app.stakedao.delegations.process_flipside import process_and_get
+from app.snapshot.delegations.models import format_df, bind_snapshot_context_to_delegations
 
+try: 
+    df_stakedao_snapshot_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
+except:
+    from app.stakedao.snapshot.models import df_stakedao_snapshot_vote_choice
  
-print_mode("Loading... { convex.locker.models }")
+print_mode("Loading... { stakedao.delegation.models }")
 
 
-def format_df(df):
-    # key_list = df.keys()
-    # if 'block_timestamp' in key_list:
-    #     df['block_timestamp'] = df['block_timestamp'].apply(get_date_obj)
-
-    # if 'locked_amount' in key_list:
-    #     df['locked_amount'] = df.apply(
-    #         lambda x: nullify_amount(x['locked_amount']), 
-    #         axis=1)
-    # if '_epoch' in key_list:
-    #     df['epoch_start'] = df['_epoch'].apply(get_dt_from_timestamp)
-    
-    # elif 'epoch_start' in key_list:
-    #     df['epoch_start'] = pd.to_datetime(df['epoch_start'])
-
-    # if 'epoch_end' in key_list:
-    #     # df['epoch_end'] = df['epoch_end'].apply(get_dt_from_timestamp)
-    #     df['epoch_end'] = pd.to_datetime(df['epoch_end'])
-
-    # if 'this_epoch' in key_list:
-    #     # df['epoch_end'] = df['epoch_end'].apply(get_dt_from_timestamp)
-    #     df['this_epoch'] = pd.to_datetime(df['this_epoch'])
-
-    # if 'checkpoint' in key_list:
-    #     df['checkpoint'] = df['checkpoint'].apply(get_dt_from_timestamp)
-
-    # if 'current_locked' in key_list:
-    #     df['current_locked'] = df.apply(
-    #         lambda x: nullify_amount(x['current_locked']), 
-    #         axis=1)
-
-    # if 'lock_count' in key_list:
-    #     df['lock_count'] = df['lock_count'].astype(int)
-
-    # if 'liquidity_over_votes' in key_list:
-    #     df['liquidity_over_votes'] = df['liquidity_over_votes'].astype(float)
-
-    # if 'liquidity_native_over_votes' in key_list:
-    #     df['liquidity_over_votes'] = df['liquidity_over_votes'].astype(float)
-
+def get_df(filename, location):
+    df = csv_to_df(filename, location)
+    df = format_df(df)
     return df
 
-# def get_df(filename, location):
-#     df = csv_to_df(filename, location)
-#     df = format_df(df)
-#     return df
+def get_stakedao_delegate_agg(df_stakedao_delegated_locks_per_proposal=[]):
+    if len(df_stakedao_delegated_locks_per_proposal) == 0:
+        df_stakedao_delegated_locks_per_proposal = get_df(filename_stakedao_delegated_locks, MODELS_FOLDER_PATH)
+    df = df_stakedao_delegated_locks_per_proposal.groupby([
+            'proposal_start',
+            'proposal_title',
+            'delegate_known_as',
+            'delegate',
+        ]).agg(
+            total_delegated=pd.NamedAgg(column='staked_balance', aggfunc=sum),
+            # delegated_lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
+            delegators_count=pd.NamedAgg(column='delegator', aggfunc=lambda x: len(x.unique())),
+            delegators=pd.NamedAgg(column='delegator', aggfunc=list),
+            known_delegators=pd.NamedAgg(column='delegator_known_as', aggfunc=list),
+        ).reset_index()
+    df['delegators'] = df['delegators'].apply(lambda x: nullify_list(x))
+    df['known_delegators'] = df['known_delegators'].apply(lambda x: nullify_list(x, True))
+    return df
+    # Convex Version
+    # df = df_stakedao_delegated_locks_per_proposal.groupby([
+    #         'proposal_start',
+    #         'proposal_title',
+    #         'delegate_known_as',
+    #         'delegate',
+    #         'this_epoch'
+    #     ]).agg(
+    #     total_delegated=pd.NamedAgg(column='current_locked', aggfunc=sum),
+    #     delegated_lock_count=pd.NamedAgg(column='lock_count', aggfunc=sum),
+    #     delegators_count=pd.NamedAgg(column='delegator', aggfunc=lambda x: len(x.unique())),
+    #     delegators=pd.NamedAgg(column='delegator', aggfunc=list),
+    #     known_delegators=pd.NamedAgg(column='delegator_known_as', aggfunc=list),
+    # ).reset_index()
+    # df['delegators'] = df['delegators'].apply(lambda x: nullify_list(x))
+    # df['known_delegators'] = df['known_delegators'].apply(lambda x: nullify_list(x, True))
+    # aggregate_delegates = df
+    # return
 
-df_map = process_and_get()
-# df_locker = get_df(filename_convex_locker, 'processed')
-# df_locker_user_epoch = get_df(filename_convex_locker+"_user_epoch", 'processed')
-df_stakedao_snapshot_vote_choice = df_map['df_stakedao_snapshot_vote_choice']
-# df_stakedao_locker_agg_user_epoch = df_map['df_stakedao_locker_agg_user_epoch']
-df_stakedao_delegations = df_map['df_stakedao_delegations']
-df_stakedao_delegations_agg = df_map['df_stakedao_delegations_agg']
-df_stakedao_delegation_locks_per_proposal = df_map['df_stakedao_delegation_locks_per_proposal']
+df_stakedao_delegations = get_df(filename_stakedao_delegations, MODELS_FOLDER_PATH)
+df_stakedao_delegated_locks_per_proposal = get_df(filename_stakedao_delegated_locks, MODELS_FOLDER_PATH)
 
+df_stakedao_delegations_agg = get_stakedao_delegate_agg(df_stakedao_delegated_locks_per_proposal)
+df_stakedao_snapshot_vote_choice = bind_snapshot_context_to_delegations(
+    df_stakedao_snapshot_vote_choice, 
+    df_stakedao_delegations_agg
+    )
 
+def load():
+    try:
+        app.config['df_stakedao_delegations'] = df_stakedao_delegations
+        app.config['df_stakedao_delegated_locks_per_proposal'] = df_stakedao_delegated_locks_per_proposal
+        app.config['df_stakedao_delegations_agg'] = df_stakedao_delegations_agg
+        app.config['df_stakedao_snapshot_vote_choice'] = df_stakedao_snapshot_vote_choice
 
-try:
-    app.config['df_stakedao_snapshot_vote_choice'] = df_stakedao_snapshot_vote_choice
-    # app.config['df_stakedao_locker_agg_user_epoch'] = df_stakedao_locker_agg_user_epoch
-    app.config['df_stakedao_delegations'] = df_stakedao_delegations
-    app.config['df_stakedao_delegations_agg'] = df_stakedao_delegations_agg
-    app.config['df_stakedao_delegation_locks_per_proposal'] = df_stakedao_delegation_locks_per_proposal
+    except:
+        print_mode("could not register in app.config\n\tConvex Delegations")
+    return {
+        'df_stakedao_delegations': df_stakedao_delegations,
+        'df_stakedao_delegated_locks_per_proposal': df_stakedao_delegated_locks_per_proposal,
+        'df_stakedao_snapshot_vote_choice': df_stakedao_snapshot_vote_choice
+    }
 
-except:
-    print_mode("could not register in app.config\n\tStakeDAO Delegations")
-
-
-
+load()

@@ -13,6 +13,15 @@ try:
 except:
     use_local_files = True
 
+RAW_FOLDER_PATH = 'raw_data'
+UPLOADED_FOLDER_PATH = 'imported_processed'
+if use_local_files:
+    MODELS_FOLDER_PATH = 'processed'
+else:
+    MODELS_FOLDER_PATH = UPLOADED_FOLDER_PATH
+
+
+
 try:
     from config import basic_auth_username, basic_auth_password
 except:
@@ -69,7 +78,6 @@ def init_app():
 
             from .curve.liquidity.routes import curve_liquidity_bp
 
-            from .curve.meta.routes import curve_meta_bp
 
 
             from .convex.snapshot.routes import convex_snapshot_bp
@@ -85,8 +93,14 @@ def init_app():
             from .stakedao.locker.routes import stakedao_locked_vesdt_bp
 
             from .stakedao.delegations.routes import stakedao_snapshot_delegations_bp
+
             from .address_book.routes import address_book_bp
             from .data.interface.routes import data_bp
+            
+            # Meta Dependencies
+            from .curve.meta.routes import curve_meta_bp
+
+
 
         
 

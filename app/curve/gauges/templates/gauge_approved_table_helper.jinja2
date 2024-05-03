@@ -16,18 +16,27 @@
       new gridjs.Grid({
         columns: [
           { id: 'vote_timestamp', name: 'Vote Timestamp' },
-          { id: 'first_period', name: 'Checkpoint ID' },
-
+          { id: 'first_period', name: 'Checkpoint ID',
+                {% include 'utility_sort_float.jinja2' %} 
+          },
+          { id: 'crv_type', name: 'Swap Type' },
           { id: 'source', name: 'Source' },
-
           { id: 'gauge_name', name: 'Gauge Name' },
           { id: 'gauge_addr', name: 'Gauge Address',
             formatter: (_, row) => gridjs.html(
-                `${row.cells[4].data.toString()}`
+                `${row.cells[5].data.toString()}`
             )
           },
-          { id: 'type_id', name: 'Type ID' },
-          { id: 'type_name', name: 'Type Name' },
+          { id: 'pool_addr', name: 'Pool Address',
+            formatter: (_, row) => gridjs.html(
+                `${row.cells[5].data.toString()}`
+            )
+          },
+          { id: 'type_id', name: 'Type ID',
+                {% include 'utility_sort_float.jinja2' %} 
+          },
+          { id: 'type_name', name: 'Type Name',
+           },
           { id: 'type_weight_adj', name: 'Type Weight',
           {% include 'utility_sort_float.jinja2'%}
           }
@@ -38,11 +47,11 @@
             {
               'vote_timestamp': '{{ row['vote_timestamp'] }}',
               'first_period': '{{ row['first_period'] }}',
-
+              'crv_type': '{{ row['crv_type'] }}',
               'source': '{{ row['source'] }}',
               'gauge_name': '{{ row['gauge_name'] }}',
               'gauge_addr': `<a href={{ url_for('gauge_checkpoints_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
-             
+              'pool_addr': `<a href={{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
               'type_id': '{{ row['type_id'] }}',
               'type_name': '{{ row['type_name'] }}',
               'type_weight_adj': '{{ row['type_weight_adj'] }}'

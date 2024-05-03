@@ -1,5 +1,13 @@
 from flask import current_app as app
-from app.data.reference import filename_curve_liquidity, filename_curve_liquidity_aggregate, filename_curve_liquidity_swaps, filename_curve_liquidity_oracle_aggregate
+from app import MODELS_FOLDER_PATH
+
+from app.data.reference import (
+    filename_curve_liquidity,
+    filename_curve_liquidity_aggregate, 
+    filename_curve_liquidity_swaps, 
+    filename_curve_liquidity_oracle_aggregate, 
+    filename_curve_liquidity_oracle,
+    )
 
 from datetime import datetime as dt
 from datetime import datetime, timedelta
@@ -7,13 +15,12 @@ import numpy as np
 
 import traceback
 
+from app.curve.gauge_checkpoints.aggregators import get_curve_checkpoint_aggs
 
 from app.data.local_storage import (
     pd,
-    read_json, 
-    read_csv,  
-    write_dataframe_csv,
-    write_dfs_to_xlsx
+    df_to_csv,
+    csv_to_df
     )
 from app.utilities.utility import (
     get_checkpoint_id,
@@ -35,7 +42,7 @@ class Oracle():
         self.clear_exchanges_to_free_memory()
 
     def clear_exchanges_to_free_memory(self):
-        write_dataframe_csv(filename_curve_liquidity_swaps, self.df_exchanges, 'processed')
+        df_to_csv(self.df_exchanges, filename_curve_liquidity_swaps, MODELS_FOLDER_PATH)
         self.df_exchanges = None
 
     @timed
@@ -339,10 +346,13 @@ class Liquidity():
     def load_requirements(self):
         try:
             gauge_registry = app.config['gauge_registry']
-            df_checkpoints_agg = app.config['df_checkpoints_agg']
+            df_checkpoints = app.config['df_checkpoints_agg']
         except:
             from app.curve.gauges.models import gauge_registry
-            from app.curve.gauge_checkpoints.models import df_checkpoints_agg
+            from app.curve.gauge_checkpoints.models import df_checkpoints
+
+        df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
+
 
         self.df_checkpoints_agg = df_checkpoints_agg
         self.gauge_registry = gauge_registry
@@ -455,37 +465,36 @@ class Liquidity():
 @timed
 def get_curve_liquidity_df():
     filename = filename_curve_liquidity    #+ fallback_file_title
-    resp_dict = read_csv(filename, 'source') # joined with 
-    df_liquidity_source = pd.json_normalize(resp_dict)
+    df_liquidity_source = csv_to_df(filename, 'source') # joined with 
     try:
         df_liquidity_source = df_liquidity_source.sort_values("block_timestamp", axis = 0, ascending = True)
     except:
         df_liquidity_source = df_liquidity_source.sort_values("BLOCK_TIMESTAMP", axis = 0, ascending = True)
     return df_liquidity_source
 
-def process_checkpoint_aggs(df):
-    df = df[df['balance']> 0]
-    df = df.sort_values(['checkpoint_timestamp', 'gauge_name', 'symbol'])
-    # Aggregate info down to particular gauges
-    df_aggs = df.groupby([
-                # 'final_lock_time',
-                'checkpoint_timestamp',
-                'checkpoint_id',
-                'block_timestamp',
-                'gauge_addr',
-                'gauge_name',
-                'gauge_symbol',
-                'pool_addr',
-            ]).agg(
-            total_vote_power=pd.NamedAgg(column='total_vote_power', aggfunc='mean'),
-            total_balance=pd.NamedAgg(column='balance', aggfunc=sum),
-            total_balance_usd=pd.NamedAgg(column='balance_usd', aggfunc=sum),
-            tradable_assets=pd.NamedAgg(column='symbol', aggfunc=list),
-            ).reset_index()
-    df_aggs['liquidity_over_votes'] = df_aggs['total_balance'] / df_aggs['total_vote_power']
-    df_aggs['liquidity_usd_over_votes'] = df_aggs['total_balance_usd'] / df_aggs['total_vote_power']
-    df_aggs = df_aggs.sort_values(['block_timestamp', 'total_vote_power'])
-    return df_aggs
+# def process_checkpoint_aggs(df):
+#     df = df[df['balance']> 0]
+#     df = df.sort_values(['checkpoint_timestamp', 'gauge_name', 'symbol'])
+#     # Aggregate info down to particular gauges
+#     df_aggs = df.groupby([
+#                 # 'final_lock_time',
+#                 'checkpoint_timestamp',
+#                 'checkpoint_id',
+#                 'block_timestamp',
+#                 'gauge_addr',
+#                 'gauge_name',
+#                 'gauge_symbol',
+#                 'pool_addr',
+#             ]).agg(
+#             total_vote_power=pd.NamedAgg(column='total_vote_power', aggfunc='mean'),
+#             total_balance=pd.NamedAgg(column='balance', aggfunc=sum),
+#             total_balance_usd=pd.NamedAgg(column='balance_usd', aggfunc=sum),
+#             tradable_assets=pd.NamedAgg(column='symbol', aggfunc=list),
+#             ).reset_index()
+#     df_aggs['liquidity_over_votes'] = df_aggs['total_balance'] / df_aggs['total_vote_power']
+#     df_aggs['liquidity_usd_over_votes'] = df_aggs['total_balance_usd'] / df_aggs['total_vote_power']
+#     df_aggs = df_aggs.sort_values(['block_timestamp', 'total_vote_power'])
+#     return df_aggs
 
 def process_and_save():
 
@@ -494,55 +503,24 @@ def process_and_save():
     liquidity = Liquidity(get_curve_liquidity_df())
 
     df_curve_liquidity = liquidity.df_processed_liquidity
-    df_curve_liquidity_aggregates = process_checkpoint_aggs(df_curve_liquidity)
+    # df_curve_liquidity_aggregates = process_checkpoint_aggs(df_curve_liquidity)
 
     # df_curve_swaps = liquidity.oracle.df_exchanges
+    df_curve_oracles = liquidity.oracle.df_oracles
+
     df_curve_oracles_agg = liquidity.oracle.df_oracles_agg
 
-    write_dataframe_csv(filename_curve_liquidity, df_curve_liquidity, 'processed')
-    write_dataframe_csv(filename_curve_liquidity_aggregate, df_curve_liquidity_aggregates, 'processed')
-    write_dataframe_csv(filename_curve_liquidity_oracle_aggregate, df_curve_oracles_agg, 'processed')
-    try:
-        # app.config['df_active_votes'] = df_active_votes
-        app.config['df_curve_liquidity'] = df_curve_liquidity
-        app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
-        # app.config['df_curve_swaps'] = df_curve_swaps
-        app.config['df_curve_oracles_agg'] = df_curve_oracles_agg
+    df_to_csv(df_curve_liquidity, filename_curve_liquidity, MODELS_FOLDER_PATH)
+    # df_to_csv(filename_curve_liquidity_aggregate, df_curve_liquidity_aggregates, MODELS_FOLDER_PATH)
+    df_to_csv(df_curve_oracles, filename_curve_liquidity_oracle, MODELS_FOLDER_PATH)
+    df_to_csv(df_curve_oracles_agg, filename_curve_liquidity_oracle_aggregate, MODELS_FOLDER_PATH)
 
-    except:
-        print_mode("could not register in app.config\n\tGauge Liquidity")
     return {
         # 'df_active_votes': df_active_votes,
         'df_curve_liquidity': df_curve_liquidity,
-        'df_curve_liquidity_aggregates': df_curve_liquidity_aggregates,
+        # 'df_curve_liquidity_aggregates': df_curve_liquidity_aggregates,
         # 'df_curve_swaps': df_curve_swaps,
         'df_curve_oracles_agg': df_curve_oracles_agg,
     }
-
-
-    # all_votes, active_votes = vr.format_active_output()
-    # # df_active_votes = pd.json_normalize(active_votes)
-    # df_all_votes = pd.json_normalize(all_votes)
-    # write_dataframe_csv(filename_curve_gauge_votes_all, df_all_votes, 'processed')
-
-    # df_gauge_votes_formatted = get_votes_formatted(vr)
-    # write_dataframe_csv(filename_curve_gauge_votes_formatted, df_gauge_votes_formatted, 'processed')
-
-    # df_current_gauge_votes = get_current_votes(df_gauge_votes_formatted)
-    # write_dataframe_csv(filename_curve_gauge_votes_current, df_current_gauge_votes, 'processed')
-
-    # try:
-    #     # app.config['df_active_votes'] = df_active_votes
-    #     app.config['df_all_votes'] = df_all_votes
-    #     app.config['df_gauge_votes_formatted'] = df_gauge_votes_formatted
-    #     app.config['df_current_gauge_votes'] = df_current_gauge_votes
-    # except:
-    #     print_mode("could not register in app.config\n\tGauge Votes")
-    # return {
-    #     # 'df_active_votes': df_active_votes,
-    #     'df_all_votes': df_all_votes,
-    #     'df_gauge_votes_formatted': df_gauge_votes_formatted,
-    #     'df_current_gauge_votes': df_current_gauge_votes
-    # }
 
 

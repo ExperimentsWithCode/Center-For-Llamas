@@ -1,5 +1,6 @@
 from flask import current_app as app
-from flask import Blueprint, render_template, redirect, url_for, make_response, jsonify
+from app import RAW_FOLDER_PATH, UPLOADED_FOLDER_PATH
+from flask import Blueprint, render_template, redirect, url_for, make_response, jsonify, abort
 # from flask_login import current_user, login_required
 
 from flask import Response
@@ -44,8 +45,10 @@ def allowed_file(filename):
 
 @csrf.exempt
 @basic_auth.required
-@data_bp.route('/orange_mocha_frappacino/', methods=['POST'])
-def upload_file():
+
+@data_bp.route('/orange_mocha_frappacino/<string:folder_name>', methods=['POST'])
+@data_bp.route('/orange_mocha_frappacino/', methods=['POST'], defaults={'folder_name': None})
+def upload_file(folder_name):
     """
     Need to add way to verify filenames.
         For now lazy and just accept. If filenames match, good. 
@@ -53,23 +56,30 @@ def upload_file():
         but won't provide error if local is ahead on filename. 
         So should still add verification here. 
     """
-    if not request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            # flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == '':
-            # flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            save_file(file, file.filename)
-        return jsonify(success=True)
-    
-    return jsonify(success=False)
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        # flash('No file part')
+        print_mode('No file in requests.files')
+        return abort(400)
+    file = request.files['file']
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == '':
+        # flash('No selected file')
+        print_mode('Filename Empty')
+        return abort(400)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        if folder_name:
+            path_buffer = f"{UPLOADED_FOLDER_PATH}/{folder_name}"
+        else:
+            path_buffer = UPLOADED_FOLDER_PATH
+        save_file(file, file.filename, path_buffer)
+    else:
+        print_mode('File not allowed')
+    return jsonify(success=True)
+
+
     
 @basic_auth.required
 @data_bp.route('/csv/<string:filename>/', methods=['GET'])  
@@ -79,12 +89,11 @@ def download_file(filename):
     """
     csv_file = f"{cwd}/app/data/processed/{filename}.csv"
 
-    try:
-        date = dt.fromtimestamp(csv_file)
-        (get_now() - date).days
-    except:
-        print_mode("False")
-        return jsonify(success=False)
+    # try:
+    #     if os.path.isfile(csv_file)
+    # except:
+    #     print_mode(f"No file found {filename}")
+    #     return abort(404)
 
     with open(csv_file) as fp:
         csv = fp.read()
@@ -97,7 +106,7 @@ def download_file(filename):
     # csv_file = f"{cwd}/app/data/processed/{filename}.csv"
     # # csv = 'foo,bar,baz\nhai,bai,crai\n'  
     # if not os.path.getmtime(csv_file):
-    #     return jsonify(success=False)
+    #     return abort(404)
     # response = make_response(csv_file)
     # cd = f"attachment; filename={filename}.csv"
     # response.headers['Content-Disposition'] = cd 
@@ -112,7 +121,7 @@ def download_file(filename):
 
 
 
-@data_bp.route('/male_models', methods=['GET','POST'])
+@data_bp.route('/male_models/', methods=['GET','POST'])
 def male_models():
     """Data Management in site."""
     # Bypass if user is logged in
@@ -206,24 +215,22 @@ def male_models():
 
 def generate_file_info(is_alt_path=False):
     file_info = {}
-    now_time = get_now()
+    now_time = dt.now()
     found_count = 0
     for file in core_filename_list:
         file_info[file] = {'last_modified': None, 'days': -1}
-        for path in ['raw_data']:
+        for path in [RAW_FOLDER_PATH]:
             try:
-                if is_alt_path:
-                    prefix = 'center-for-llamas/'
-                else:
-                    prefix = ''
-                date = dt.fromtimestamp(os.path.getmtime(f"{prefix}app/data/{path}/{file}.csv"))
+                date = dt.fromtimestamp(os.path.getmtime(f"{cwd}/app/data/{path}/{file}.csv"))
+                # print_mode(date)
                 file_info[file]['last_modified'] = date
                 file_info[file]['days'] = (now_time - date).days
 
                 found_count+=1
-            except:
+            except Exception as e:
+                print_mode(e)
                 pass
                 # print(f"\t\tno file found for {file}")
-    if found_count == 0 and not is_alt_path:
-        return generate_file_info(True)
+    # if found_count == 0 and not is_alt_path:
+    #     return generate_file_info(True)
     return file_info

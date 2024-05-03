@@ -16,8 +16,8 @@ from app.utilities.utility import get_address_profile
 # from matplotlib.figure import Figure
 # import io
 
-from app.curve.gauges.models import df_curve_gauge_registry
 
+from .models import format_df
 
 # Blueprint Configuration
 convex_snapshot_bp = Blueprint(
@@ -111,6 +111,7 @@ def index():
 # @login_required
 def show(choice):
     df_vote_choice = app.config['df_convex_snapshot_vote_choice']
+    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     # Filter Data
     # local_df_gauge_votes = df_gauge_votes_formatted.groupby(['voter', 'gauge_addr'], as_index=False).last()
     # local_df_gauge_votes = local_df_gauge_votes[local_df_gauge_votes['user'] == user]
@@ -305,7 +306,7 @@ def voter(voter):
         title='Convex Snapshot Voter Profile',
         template='snapshot-voter-show',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], voter),
+        actor_profile = get_address_profile(app.config['df_roles'], voter),
         df_snapshot_user = local_df_vote_choice,
         current_votes = df_current_votes.choice_power.sum(),
         votium_bounty_registry = app.config['votium_bounty_registry'],

@@ -1,4 +1,5 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH
 from app.data.reference import (
     filename_curve_liquidity, 
     filename_curve_liquidity_aggregate,
@@ -18,19 +19,10 @@ from app.data.local_storage import (
 
 from app.utilities.utility import timed
 from app.curve.liquidity.process_based import ProcessBasedLiquidity
-
-from app.curve.liquidity.process_flipside import process_checkpoint_aggs
-
-try:
-    # df_curve_liquidity = app.config['df_curve_liquidity']
-    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
-
-except:
-    # from app.curve.liquidity.models import df_curve_liquidity
-    from app.curve.gauges.models import df_curve_gauge_registry
+from app.curve.liquidity.aggregators import get_curve_liquidity_aggs
 
  
-    print("Loading... { curve.liquidity.models }")
+print("Loading... { curve.liquidity.models }")
 
 # def nullify_amount(value):
 #     if value == 'null' or value == '' or value == '-':
@@ -109,12 +101,13 @@ def format_df(df):
     return df
 
 def get_df(filename):
-    df = csv_to_df(filename, 'processed')
+    df = csv_to_df(filename, MODELS_FOLDER_PATH)
     df = format_df(df)
     return df
 
+
 df_curve_liquidity = get_df(filename_curve_liquidity)
-df_curve_liquidity_aggregates = get_df(filename_curve_liquidity_aggregate) 
+# df_curve_liquidity_aggregates = get_curve_liquidity_aggs(df_curve_liquidity)
 # df_curve_swaps = get_df(filename_curve_liquidity_swaps) 
 df_curve_oracles_agg = get_df(filename_curve_liquidity_oracle_aggregate) 
 
@@ -123,7 +116,7 @@ df_curve_oracles_agg = get_df(filename_curve_liquidity_oracle_aggregate)
 
 try:
     app.config['df_curve_liquidity'] = df_curve_liquidity
-    app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
+    # app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
     # app.config['df_curve_rebased_liquidity'] = df_curve_rebased_liquidity
     # app.config['df_curve_swaps'] = df_curve_swaps
     app.config['df_curve_oracles_agg'] = df_curve_oracles_agg

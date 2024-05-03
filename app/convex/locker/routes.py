@@ -19,7 +19,12 @@ from app.data.local_storage import pd
 # from matplotlib.figure import Figure
 # import io
 
-from app.convex.locker.models import df_locker
+from app.convex.locker.models import (
+    get_convex_locker_agg_user_epoch, 
+    get_convex_locker_agg_epoch,
+    get_convex_locker_agg_system,
+    get_convex_locker_agg_current
+    )
 
 from app.utilities.utility import (
     format_plotly_figure,
@@ -44,13 +49,13 @@ convex_vote_locker_bp = Blueprint(
 @convex_vote_locker_bp.route('/', methods=['GET'])
 # @login_required
 def index():
+    df_convex_locker = app.config['df_convex_locker']
+    df_convex_locker_user_epoch = app.config['df_convex_locker_user_epoch']
 
-    df_locker_agg_system = app.config['df_convex_locker_agg_system']
-    df_locker_agg_current = app.config['df_convex_locker_agg_current']
-    df_locker_agg_epoch = app.config['df_convex_locker_agg_epoch']
-    # df_locker = app.config['df_convex_locker']
-    df_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
-
+    df_locker_agg_user_epoch = get_convex_locker_agg_user_epoch(df_convex_locker_user_epoch)
+    df_locker_agg_system = get_convex_locker_agg_system(df_locker_agg_user_epoch)
+    df_locker_agg_epoch = get_convex_locker_agg_epoch(df_convex_locker)
+    df_locker_agg_current = get_convex_locker_agg_current(df_locker_agg_epoch)
 
     
     # Filter Data
@@ -237,13 +242,15 @@ def index():
 # @login_required
 def show(user):
     # df_locker_user_epoch = app.config['df_convex_locker_user_epoch']
-    df_locker_agg_user_epoch = app.config['df_convex_locker_agg_user_epoch']
-    df_locker = app.config['df_convex_locker']
+    df_convex_locker = app.config['df_convex_locker']
+    df_convex_locker_user_epoch = app.config['df_convex_locker_user_epoch']
+    df_locker_agg_user_epoch = get_convex_locker_agg_user_epoch(df_convex_locker_user_epoch)
+
 
     
     # Filter Data
     local_df_locker_agg_user_epoch = df_locker_agg_user_epoch[df_locker_agg_user_epoch['user'] == user]
-    local_df_locker = df_locker[df_locker['user'] == user]
+    local_df_locker = df_convex_locker[df_convex_locker['user'] == user]
 
     local_df_locker_current = local_df_locker[local_df_locker['epoch_end'] >=  get_now()]
 
@@ -364,7 +371,7 @@ def show(user):
         title='Convex Vote Locker User',
         template='convex-vote-locker-index',
         body="",
-        actor_profile = get_address_profile(app.config['df_actors'], user),
+        actor_profile = get_address_profile(app.config['df_roles'], user),
 
         # sum_current_votes = df_current_votes.total_vote_power.sum(),
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),

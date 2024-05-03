@@ -1,10 +1,11 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH
 
 from app.data.reference import filename_actors, known_large_market_actors
 
 from app.data.local_storage import (
     pd,
-    write_dataframe_csv,
+    df_to_csv,
     )
 
 from app.utilities.utility import print_mode
@@ -75,14 +76,14 @@ def process_and_save():
     print_mode("Processing... { AddressBook.gauges.models }")
     df = monster_mash()
 
-    write_dataframe_csv(filename_actors, df, 'processed')
+    df_to_csv(df, filename_actors, MODELS_FOLDER_PATH)
 
     try:
         # app.config['df_active_votes'] = df_active_votes
-        app.config['df_actors'] = df
+        app.config['df_roles'] = df
     except:
         print_mode("could not register in app.config\n\tVotium v2")
     return {
         # 'df_active_votes': df_active_votes,
-        'df_actors': df,
+        'df_roles': df,
     }

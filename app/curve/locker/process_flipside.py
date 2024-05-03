@@ -1,6 +1,9 @@
 from flask import current_app as app
+from app import MODELS_FOLDER_PATH, RAW_FOLDER_PATH
+
 from app.data.reference import (
     filename_curve_locker,
+    filename_curve_locker_decay,
     known_large_market_actors
 )
 # from ... import db
@@ -12,10 +15,10 @@ from app.data.local_storage import (
     pd,
     read_json,
     read_csv,
-    write_dataframe_csv,
+    df_to_csv,
     write_dfs_to_xlsx,
     csv_to_df,
-    write_dataframe_csv
+    df_to_csv
     )
 from app.utilities.utility import (
     timed,
@@ -54,8 +57,8 @@ class ProcessCurveLocker():
         # self.checkpoint_timestamps = []
 
         self.process_types()
-        self.process_agg()
-        self.process_agg_known_as()
+        # self.process_agg()
+        # self.process_agg_known_as()
         self.process_decay()
         pass
 
@@ -216,13 +219,13 @@ class ProcessCurveLocker():
         # self.decay_ranges_y = ranges_y
         # self.checkpoint_timestamps = checkpoint_timestamps
         self.processed_decay = pd.concat(output)
-        self.processed_decay_agg = self.processed_decay.groupby([
-                'checkpoint_timestamp',
-                'checkpoint_id',
-            ]).agg(
-                total_locked_balance=pd.NamedAgg(column='total_locked_balance', aggfunc=sum),
-                total_effective_locked_balance=pd.NamedAgg(column='total_effective_locked_balance', aggfunc=sum),
-            ).reset_index()
+        # self.processed_decay_agg = self.processed_decay.groupby([
+        #         'checkpoint_timestamp',
+        #         'checkpoint_id',
+        #     ]).agg(
+        #         total_locked_balance=pd.NamedAgg(column='total_locked_balance', aggfunc=sum),
+        #         total_effective_locked_balance=pd.NamedAgg(column='total_effective_locked_balance', aggfunc=sum),
+        #     ).reset_index()
         
         
         
@@ -232,36 +235,27 @@ class ProcessCurveLocker():
 def process_and_save(filename= filename_curve_locker, platform='curve', asset='vecrv'):
      
     print_mode("Processing... { "+platform+".locker.models }")
-    ve_asset = ProcessCurveLocker(csv_to_df(filename, 'raw_data'))
+    ve_asset = ProcessCurveLocker(csv_to_df(filename, RAW_FOLDER_PATH))
     ve_asset_base = ve_asset.processed_df
     ve_asset_known = ve_asset.processed_known
     ve_asset_agg = ve_asset.processed_agg
     ve_asset_decay = ve_asset.processed_decay
     ve_asset_decay_agg = ve_asset.processed_decay_agg
 
-    write_dataframe_csv(filename, ve_asset_base, 'processed')
-    write_dataframe_csv(filename+"_known", ve_asset_known, 'processed')
-    write_dataframe_csv(filename+"_agg", ve_asset_agg, 'processed')
-    write_dataframe_csv(filename+"_decay", ve_asset_decay, 'processed')
-    write_dataframe_csv(filename+"_decay_agg", ve_asset_decay_agg, 'processed')
+    df_to_csv(ve_asset_base, filename,  MODELS_FOLDER_PATH)
+    # df_to_csv(filename+"_known", ve_asset_known, MODELS_FOLDER_PATH)
+    # df_to_csv(filename+"_agg", ve_asset_agg, MODELS_FOLDER_PATH)
+    df_to_csv(ve_asset_decay, filename+'_decay', MODELS_FOLDER_PATH)
+    # df_to_csv(filename+"_decay_agg", ve_asset_decay_agg, MODELS_FOLDER_PATH)
 
     name_prefix = f"df_{platform}_{asset}"
-    try:
-        app.config[f"{name_prefix}"] = ve_asset_base
-        app.config[f"{name_prefix}_known"] = ve_asset_known
-        app.config[f"{name_prefix}_agg"] = ve_asset_agg
-        app.config[f"{name_prefix}_decay"] = ve_asset_decay
-        app.config[f"{name_prefix}_decay_agg"] = ve_asset_decay_agg
 
-        # app.config['df_curve_liquidity_aggregates'] = df_curve_liquidity_aggregates
-    except:
-        print_mode(f"could not register in app.config\n\t{platform} Locked {asset}")
     return {
         f"{name_prefix}" : ve_asset_base,
-        f"{name_prefix}_known" : ve_asset_known,
-        f"{name_prefix}_agg" : ve_asset_agg,
+        # f"{name_prefix}_known" : ve_asset_known,
+        # f"{name_prefix}_agg" : ve_asset_agg,
         f"{name_prefix}_decay" : ve_asset_decay,
-        f"{name_prefix}_decay_agg" : ve_asset_decay_agg,
+        # f"{name_prefix}_decay_agg" : ve_asset_decay_agg,
 
         # 'df_curve_liquidity_aggregates': df_curve_liquidity_aggregates,
     }
