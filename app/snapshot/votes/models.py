@@ -12,5 +12,5 @@ def format_df(df):
     df['checkpoint_timestamp'] = pd.to_datetime(df['checkpoint_timestamp'])
     df['proposal_start'] = df['proposal_start'].apply(get_date_obj)
     df['proposal_end'] = df['proposal_end'].apply(get_date_obj)
-
+    df['checkpoint_id'] = df['checkpoint_id'].astype(int)
     return df

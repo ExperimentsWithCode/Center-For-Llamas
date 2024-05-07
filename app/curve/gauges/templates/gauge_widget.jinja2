@@ -194,16 +194,28 @@
                     {% endif %}
                 {% endif %}
 
+                {%if gauge_info['votium_v2']  %}
+                    {%if not page_type == 'stakedao' %}
+                    <a href="{{ url_for('votium_bounties_v2_bp.show', gauge_addr= gauge_info['gauge_addr']) }}">
+                        <button type="button" class="btn btn-danger">Votium V2</button>
+                    </a>
+                    {% else %}
+                    <a href="#">
+                        <button type="button" class="btn btn-danger disabled">Votium V2</button>
+                    </a>
+                    {% endif %}
+                {% endif %}
 
-
-                {%if not page_type == 'contributing_factors' %}
-                <a href="{{ url_for('curve_meta_bp.contributing_factors_show', gauge_addr= gauge_info['gauge_addr']) }}">
-                    <button type="button" class="btn btn-danger">Contributing Factors</button>
-                </a>
-                {% else %}
-                <a href="#">
-                    <button type="button" class="btn btn-danger disabled">Contributing Factors</button>
-                </a>
+                {%if gauge_info['vecrv_votes']  %}
+                    {%if not page_type == 'contributing_factors' %}
+                    <a href="{{ url_for('curve_meta_bp.contributing_factors_show', gauge_addr= gauge_info['gauge_addr']) }}">
+                        <button type="button" class="btn btn-danger">Contributing Factors</button>
+                    </a>
+                    {% else %}
+                    <a href="#">
+                        <button type="button" class="btn btn-danger disabled">Contributing Factors</button>
+                    </a>
+                    {% endif %}
                 {% endif %}
             </div>
 

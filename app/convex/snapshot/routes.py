@@ -37,7 +37,7 @@ convex_snapshot_bp = Blueprint(
 # @login_required
 def index():
     df_vote_aggregates = app.config['df_convex_snapshot_vote_aggregates']
-
+    df_vote_aggregates = df_vote_aggregates.sort_values(['proposal_end', 'total_vote_power'], ascending=False)
     # Filter Data
 
     # local_df_gauge_votes = df_all_by_gauge.groupby(['voter', 'gauge_addr'], as_index=False).last()
@@ -58,9 +58,9 @@ def index():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     periods = df_vote_aggregates.proposal_end.unique()
-    periods.sort()
-    current_period = periods[-1]
-    prior_period = periods[-2]
+    # periods.sort()
+    current_period = periods[1]
+    prior_period = periods[2]
     df_current_votes = df_vote_aggregates[df_vote_aggregates['proposal_end'] == current_period]
     df_prior_votes = df_vote_aggregates[df_vote_aggregates['proposal_end'] == prior_period]
 

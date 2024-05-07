@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+import plotly.graph_objects as go
 from datetime import date, timedelta, tzinfo
 import numpy as np
 from functools import wraps
@@ -7,7 +8,6 @@ from app.data.local_storage import (
     pd,
     cwd
     )
-from app.data.reference import models_split_into_folders
 
 try:
     from config import activate_print_mode
@@ -242,6 +242,12 @@ def concat_all(df_list, sort_list = ["this_period"]):
     df_concat = df_concat.sort_values(sort_list, axis = 0, ascending = False)
     return df_concat
 
+def get_plotly_failed_chart(display_text):
+    fig = go.Figure(go.Indicator(
+        title = {'text': display_text},
+        ))
+    fig = format_plotly_figure(fig)
+    return fig
 
 def format_plotly_figure(fig, _height=None):
     fig.update_layout(

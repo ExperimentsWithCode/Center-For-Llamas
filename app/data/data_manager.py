@@ -3,6 +3,7 @@ from app.utilities.utility import timed, print_mode
 from app.data.local_storage import (
     read_json,
     read_csv,
+    write_json,
     csv_to_df,
     df_to_csv,
 )
@@ -12,36 +13,37 @@ from app.data.local_storage import (
 load_initial = False
 should_fetch = True
 should_process = False
-default_bool = False
+DEFAULT_BOOL = False
 
 manager_config = {
     # Curve
-    'gauge_to_lp_map': default_bool,
-    'curve_locker': default_bool,
-    'curve_gauge_votes': default_bool,
-    'curve_gauge_checkpoints': default_bool,
+    'get_all_gauges': DEFAULT_BOOL,
+    'gauge_to_lp_map': DEFAULT_BOOL,
+    'curve_locker': DEFAULT_BOOL,
+    'curve_gauge_votes': DEFAULT_BOOL,
+    'curve_gauge_checkpoints': DEFAULT_BOOL,
 
-    'curve_liquidity': default_bool, ## New Source Now
-    'curve_crv_price': default_bool,
+    'curve_liquidity': DEFAULT_BOOL, ## New Source Now
+    'curve_crv_price': DEFAULT_BOOL,
     
     # Convex
-    'convex_locker': default_bool,
-    'convex_delegations': default_bool,
-    'convex_snapshot_curve': default_bool,
+    'convex_locker': DEFAULT_BOOL,
+    'convex_delegations': DEFAULT_BOOL,
+    'convex_snapshot_curve': DEFAULT_BOOL,
     
     # StakeDAO
-    'stakedao_delegations': default_bool,
-    'stakedao_staked_sdcrv': default_bool,
-    'stakedao_locker': default_bool,
-    'stakedao_snapshot_curve': default_bool,
+    'stakedao_delegations': DEFAULT_BOOL,
+    'stakedao_staked_sdcrv': DEFAULT_BOOL,
+    'stakedao_locker': DEFAULT_BOOL,
+    'stakedao_snapshot_curve': DEFAULT_BOOL,
 
     #Votium
-    'votium_bounties_v2': default_bool,
+    'votium_bounties_v2': DEFAULT_BOOL,
     # Warden
     'warden_vesdt_boost_delegation': False,
 
     # Address Book
-    'address_book_actors': default_bool,
+    'address_book_actors': DEFAULT_BOOL,
 }
 
 # run['curve_locker'] = True
@@ -83,6 +85,7 @@ class Manager():
 
     def manage(self):
         # Curve
+        self.get_all_gauges()
         self.gauge_to_lp_map()
         self.curve_locker()
         self.curve_gauge_votes()
@@ -113,6 +116,21 @@ class Manager():
     """
     Curve
     """
+    @timed
+    def get_all_gauges(self):
+        if 'get_all_gauges' in self.config and self.config['get_all_gauges']:   
+            from app.data.reference import filename_get_all_gauges
+            import requests
+            if self.should_fetch:
+                url = 'https://api.curve.fi/api/getAllGauges'
+                r = requests.get(url)
+                resp = r.json()
+                resp['data']
+                write_json(filename_get_all_gauges, resp['data'], 'source')
+            # from app.curve.gauges.process_flipside import process_and_get 
+
+            return 
+        
     @timed
     def gauge_to_lp_map(self):
         if 'gauge_to_lp_map' in self.config and self.config['gauge_to_lp_map']:   

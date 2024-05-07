@@ -15,7 +15,9 @@
         <div class="card-header">{{action_tag}}</div>
         <div class="card-body">
         <h4 class="card-title">{{actor_profile['address']}}</h4>
-
+        <a href="{{ url_for('curve_meta_bp.compare_voter', target_voter= actor_profile['address']) }}">
+        <button type="button" class="btn btn-outline-dark">Compare Gauges Voted</button>
+        </a>
         </div>
     </div>
 
@@ -39,7 +41,7 @@
                     <div class ="tabbable Curve border-primary">
                         <ul class="nav nav-tabs">
                         {% for key in actor_profile.keys() %}
-                            {% if actor_profile[key] == 'True' %}
+                            {% if actor_profile[key] == True %}
 
 
                                 {% if key == "curve_vecrv_locker" %}
@@ -70,7 +72,7 @@
                     <div class ="tabbable Convex border-secondary">
                         <ul class="nav nav-tabs">
                         {% for key in actor_profile.keys() %}
-                            {% if actor_profile[key] == 'True' %}
+                            {% if actor_profile[key] == True %}
 
                                 {% if key == 'convex_snapshot_voter' %}
                                 <li class="nav-item">
@@ -114,7 +116,7 @@
                     <div class ="tabbable StakeDAO border-info">
                         <ul class="nav nav-tabs">
                         {% for key in actor_profile.keys() %}
-                            {% if actor_profile[key] == 'True' %}
+                            {% if actor_profile[key] == True %}
 
                                 {% if key == 'stakedao_snapshot_voter' %}
                                 <li class="nav-item">

@@ -152,6 +152,11 @@
                         <a class="nav-link {% if 'contributing_factors' == sub_active_page %} active bg-info text-white {% else %} text-info{% endif%}" 
                           href="{{ url_for('curve_meta_bp.contributing_factors') }}">Contributing Factors</a>
                       </li>
+
+                      <li class="nav-item">
+                        <a class="nav-link {% if 'compage_gauges' == sub_active_page %} active bg-info text-white {% else %} text-info{% endif%}" 
+                          href="{{ url_for('curve_meta_bp.compare_gauges') }}">Compare Gauges</a>
+                      </li>
                     </ul>
 
 

@@ -37,11 +37,16 @@ from app.curve.gauge_checkpoints.aggregators import get_curve_checkpoint_aggs
 
 print_mode("Loading... { curve.meta.models }")
 
-df_checkpoints = app.config['df_checkpoints']
-df_votium_v2 = app.config['df_votium_v2']
-df_curve_oracles_agg = app.config['df_curve_oracles_agg']
-df_curve_liquidity = app.config['df_curve_liquidity']
-
+try:
+    df_checkpoints = app.config['df_checkpoints']
+    df_votium_v2 = app.config['df_votium_v2']
+    df_curve_oracles_agg = app.config['df_curve_oracles_agg']
+    df_curve_liquidity = app.config['df_curve_liquidity']
+except:
+    from app.curve.gauge_checkpoints.models import df_checkpoints
+    from app.convex.votium_bounties_v2.models import df_votium_v2
+    from app.curve.liquidity.models import df_curve_oracles_agg, df_curve_liquidity
+    
 df_curve_liquidity_aggregates = get_curve_liquidity_aggs(df_curve_liquidity)
 df_checkpoints_agg = get_curve_checkpoint_aggs(df_checkpoints)
  
@@ -165,6 +170,8 @@ class ProcessContributingFactors():
 
     def process_all(self, target_gauge, compare_back):
         df0 = self.process(target_gauge, compare_back)
+        if len(df0) == 0:
+            return []
         df1 = self.process_issuance(df0)
         df2 = self.process_oracle(df1)
         return df2.sort_values(['checkpoint_timestamp', 'issuance_value'], ascending=False)
@@ -173,7 +180,10 @@ class ProcessContributingFactors():
         if type(target_gauge) == str:
             target_gauge = [target_gauge]
         df_checkpoints_local = df_checkpoints_agg[df_checkpoints_agg['gauge_addr'].isin(target_gauge)]
+
         df_checkpoints_local = df_checkpoints_local[df_checkpoints_local['checkpoint_id'] > df_checkpoints_local.checkpoint_id.max() - compare_back]
+        if len(df_checkpoints_local) == 0:
+            return []
         
         df_votium_v2_local = df_votium_v2[df_votium_v2['gauge_addr'].isin(target_gauge)]
         df_votium_v2_local = df_votium_v2_local[df_votium_v2_local['checkpoint_id'] > df_votium_v2_local.checkpoint_id.max() - compare_back]
@@ -273,7 +283,8 @@ class ProcessContributingFactors():
                 # idk if this is bad or not
                 # if list returns sorted list,
                 # but if string returns sorted string. 
-                return string_in.sort() 
+                string_in.sort() 
+                return str(string_in).replace("'", "")
             else:
                 for n in string_in.split(','):
                     n2 = n.strip().strip('[').strip(']')

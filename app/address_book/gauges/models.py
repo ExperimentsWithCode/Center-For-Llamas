@@ -84,7 +84,7 @@ def monster_mash():
     convex_snapshot = unique_to_df(df_snapshot_convex.gauge_addr, 'convex_snapshot')
     stakedao_snapshot = unique_to_df(df_snapshot_stakedao.gauge_addr, 'stakedao_snapshot')
     # df_votium = unique_to_df(df_votium.gauge_addr, 'df_votium')
-    df_votium_v2 = unique_to_df(df_votium_v2.gauge_addr, 'df_votium_v2')
+    df_votium_v2 = unique_to_df(df_votium_v2.gauge_addr, 'votium_v2')
 
 
     df_roles = pd.concat([
@@ -111,7 +111,7 @@ def monster_mash():
             convex_snapshot=pd.NamedAgg(column='convex_snapshot', aggfunc=sum),
             stakedao_snapshot=pd.NamedAgg(column='stakedao_snapshot', aggfunc=sum),
             # df_votium=pd.NamedAgg(column='df_votium', aggfunc=sum),
-            df_votium_v2=pd.NamedAgg(column='df_votium_v2', aggfunc=sum),
+            votium_v2=pd.NamedAgg(column='votium_v2', aggfunc=sum),
             ).reset_index()
 
     df_curve_gauge_registry_2 = pd.merge(

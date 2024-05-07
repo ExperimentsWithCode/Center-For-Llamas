@@ -16,7 +16,7 @@ from app.utilities.utility import pd
 from .forms.power_diff_form import PowerDiffForm
 from .forms.contributing_factors_form import ContributingFactorsForm, ContributingFactorsCompareForm
 from app.curve.gauges.routes import get_approved
-from app.utilities.utility import get_now
+from app.utilities.utility import get_now, get_plotly_failed_chart, format_plotly_figure
 from .models import get_meta, ProcessContributingFactors
 
 # Blueprint Configuration
@@ -85,7 +85,6 @@ def index():
         top_x = top_x, 
         compare_round = compare_round
     )
-
 
 @curve_meta_bp.route('/', methods=['POST'])
 def custom_index():
@@ -182,7 +181,7 @@ def contributing_factors():
             'contributing_factors.jinja2',
             title='Curve Meta: Contributing Factors',
             template='contributing_factors',
-            body="Gauge not found",
+            body="No votes found for gauge provided",
             form=form,
             df_approved_gauges = df_approved_gauges
             )
@@ -225,7 +224,7 @@ def contributing_factors_show(gauge_addr):
             'contributing_factors.jinja2',
             title='Curve Meta: Contributing Factors',
             template='contributing_factors',
-            body="Gauge not found",
+            body="No votes found for gauge provided",
             form=form,
             df_approved_gauges = df_approved_gauges
             )
@@ -249,8 +248,8 @@ def contributing_factors_show(gauge_addr):
 
     )
 
-@curve_meta_bp.route('/contributing_factors/compare', methods=['GET', 'POST'])
-def contributing_factors_compare():
+@curve_meta_bp.route('/compare_gauges', methods=['GET', 'POST'])
+def compare_gauges():
     df_approved_gauges = get_approved()
 
     form = ContributingFactorsCompareForm()
@@ -283,7 +282,7 @@ def contributing_factors_compare():
             'contributing_factors_compare.jinja2',
             title='Curve Meta: Contributing Factors',
             template='contributing_factors',
-            body="Gauge not found",
+            body="No votes found for at least one gauge provided",
             form=form,
             df_approved_gauges = df_approved_gauges
             )
@@ -307,8 +306,8 @@ def contributing_factors_compare():
 
     )
 
-@curve_meta_bp.route('/contributing_factors/voter/<string:target_voter>', methods=['GET'])
-def contributing_factors_voter(target_voter):
+@curve_meta_bp.route('/compare_gauges/from_voter/<string:target_voter>', methods=['GET'])
+def compare_voter(target_voter):
     df_approved_gauges = get_approved()
     target_gauges = []
     df_convex_snapshot_vote_choice = get_snapshot_votes_back(app.config['df_convex_snapshot_vote_choice'], target_voter, 16)
@@ -369,6 +368,8 @@ def contributing_factors_voter(target_voter):
 
 
 def format_input_to_list(raw_value):
+    if not raw_value:
+        return []
     x = raw_value.split(',')
     new_list = []
     for item in x:
@@ -646,94 +647,46 @@ def get_contributing_factors_graphs(df):
         graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
     return graph_list
 
-def generate_plot_per_gauge(df):
+def graph_list_helper(graph_list, fig, run_local=False):
+    if run_local:
+        graph_list.append(fig)
+    else:
+        graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
+    return graph_list
+
+def generate_plot_per_gauge(df, run_local=False):
     graph_list = []
-    df = df.sort_values(['checkpoint_id', 'total_balance_usd'], ascending=[True, False])
-    fig = px.bar(
-        df,
-        x=df.checkpoint_timestamp,
-        y=df.total_balance_usd,
-        color=df.gauge_name,
-        title=f"Compare: Gauge Balances (USD)",
-        # line_shape='hvh'
-        height=600
+    df = df.sort_values(['checkpoint_id', 'total_balance_usd'], ascending=[False, False])
+    local_df = df.dropna(subset = ['total_balance_usd'])
+    if len(local_df)> 0:
+        # Balance USD
+        fig = px.area(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.total_balance_usd,
+            color=local_df.gauge_name,
+            title=f"Compare: Gauge Balances (USD)",
+            # area_shape='hvh'
+            height=600
 
-        )
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
+            )
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+        # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
-    graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
+    graph_list = graph_list_helper(graph_list, fig, run_local)
 
-    fig = px.bar(
-        df,
-        x=df.checkpoint_timestamp,
-        y=df.issuance_value,
-        color=df.gauge_name,
-        title=f"Compare: Gauge Issuance Value (USD)",
-        # line_shape='hvh'
-        height=600
+    if len(local_df)> 0:
 
-        )
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
-    # fig.update_yaxes(range=[0,3], secondary_y=False)
-    graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
-    
-    fig = px.bar(
-        df,
-        x=df.checkpoint_timestamp,
-        y=df.total_vote_percent,
-        color=df.gauge_name,
-        title=f"Compare: Gauge Vote Percent",
-        # line_shape='hvh'
-        height=600
-
-        )
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
-    # fig.update_yaxes(range=[0,3], secondary_y=False)
-    graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
-
-    fig = px.line(
-        df,
-        x=df.checkpoint_timestamp,
-        y=df.yield_rate_adj,
-        color=df.gauge_name,
-        title=f"Compare: Yield Rate",
-        line_shape='hvh',
-        height=600
-
-        )
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
-    # fig.update_yaxes(range=[0,3], secondary_y=False)
-    graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
-    
-    local_df = df.dropna(subset = ['liquidity_usd_over_votes', 'total_balance_usd'])
-    fig = px.scatter(
-        local_df,
-        x=local_df.checkpoint_timestamp,
-        y=local_df.liquidity_usd_over_votes,
-        color=local_df.gauge_name,
-        size=local_df.total_balance_usd,
-        title=f"Compare: Gauge Balance (USD) / Votes (veCRV) [Dot Scaled by Balance (USD)]",
-        # line_shape='hvh'
-        height=600
-
-        )
-    
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    fig.update_layout(autotypenumbers='convert types')
-    # fig.update_yaxes(range=[0,3], secondary_y=False)
-    graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
-
-    if len(df.votium_round.unique()) > 1:
-        fig = px.bar(
-            df,
-            x=df.checkpoint_timestamp,
-            y=df.total_bounty_value,
-            color=df.gauge_name,
-            title=f"Compare: Votium v2 Bounty Value (USD)",
+        fig = px.scatter(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.total_balance_usd,
+            color=local_df.gauge_name,
+            size=local_df.total_vote_percent,
+            title=f"Compare: Gauge Balances (USD) [Dot Scaled by Vote Percent (veCRV))]",
             # line_shape='hvh'
             height=600
 
@@ -741,8 +694,259 @@ def generate_plot_per_gauge(df):
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(autotypenumbers='convert types')
         # fig.update_yaxes(range=[0,3], secondary_y=False)
-        graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    graph_list = graph_list_helper(graph_list, fig, run_local)
 
+    # Issuance
+    df = df.sort_values(['checkpoint_id', 'issuance_value'], ascending=[False, False])
+    local_df = df.dropna(subset = ['issuance_value'])
+
+    if len(local_df) > 0:
+        fig = px.area(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.issuance_value,
+            color=local_df.gauge_name,
+            title=f"Compare: Gauge Issuance Value (USD)",
+            # area_shape='hvh'
+            height=600
+
+            )
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+        # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+
+
+    if len(local_df) > 0:
+        try:
+            fig = px.scatter(
+                local_df,
+                x=local_df.checkpoint_timestamp,
+                y=local_df.issuance_value,
+                color=local_df.gauge_name,
+                size=local_df.total_balance_usd,
+                title=f"Compare: Issuance Value (USD) [Dot Scaled by Balance (USD)]",
+                # line_shape='hvh'
+                height=600
+
+                )
+        except:
+            fig = px.scatter(
+                            local_df,
+                            x=local_df.checkpoint_timestamp,
+                            y=local_df.issuance_value,
+                            color=local_df.gauge_name,
+                            # size=local_df.total_balance_usd,
+                            title=f"Compare: Issuance Value (USD)",
+                            # line_shape='hvh'
+                            height=600
+
+                            )
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+
+    # Vote Percent
+    df = df.sort_values(['checkpoint_id', 'total_vote_percent'], ascending=[False, False])
+    local_df = df.dropna(subset = ['total_vote_percent'])
+    if len(local_df) > 0:
+        fig = px.area(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.total_vote_percent,
+            color=local_df.gauge_name,
+            title=f"Compare: Gauge Vote Percent",
+            # area_shape='hvh'
+            height=600
+
+            )
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+
+    # Yield Rate
+    df = df.sort_values(['checkpoint_id', 'yield_rate_adj'], ascending=[False, False])
+    local_df = df.dropna(subset = ['yield_rate_adj'])
+    if len(local_df) > 0:
+        fig = px.line(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.yield_rate_adj,
+            color=local_df.gauge_name,
+            title=f"Compare: Yield Rate",
+            line_shape='hvh',
+            height=600
+
+            )
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+    
+    # Bounties
+    df = df.sort_values(['checkpoint_id', 'total_bounty_value'], ascending=[False, False])
+    local_df = df.dropna(subset = ['total_bounty_value'])
+    if len(local_df) > 0:
+        fig = px.area(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.total_bounty_value,
+            color=local_df.gauge_name,
+            title=f"Compare: Bounty Value (USD)",
+            # area_shape='hvh'
+            height=600
+
+            )
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+
+    if len(local_df) > 0:
+        try:
+            fig = px.scatter(
+                local_df,
+                x=local_df.checkpoint_timestamp,
+                y=local_df.total_bounty_value,
+                color=local_df.gauge_name,
+                size=local_df.total_balance_usd,
+                title=f"Compare: Bounty Value (USD) [Dot Scaled by Balance (USD)]",
+                # shape='hvh',
+                height=600
+
+                )
+            fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+            fig.update_layout(autotypenumbers='convert types')
+        except:
+            fig = px.scatter(
+                local_df,
+                x=local_df.checkpoint_timestamp,
+                y=local_df.total_bounty_value,
+                color=local_df.gauge_name,
+                # size=local_df.total_balance_usd,
+                title=f"Compare: Bounty Value (USD)",
+                # shape='hvh',
+                height=600
+
+                )
+            fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+            fig.update_layout(autotypenumbers='convert types')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+    # Liquidity Over Votes
+    df = df.sort_values(['checkpoint_id', 'liquidity_usd_over_votes'], ascending=[False, False])
+    local_df = df.dropna(subset = ['liquidity_usd_over_votes', 'total_balance_usd'])
+    local_df = local_df[local_df['liquidity_usd_over_votes'] < 100]
+    if len(local_df) > 0:
+        fig = px.scatter(
+            local_df,
+            x=local_df.checkpoint_timestamp,
+            y=local_df.liquidity_usd_over_votes,
+            color=local_df.gauge_name,
+            size=local_df.total_balance_usd,
+            title=f"Compare: Gauge Balance (USD) / Votes (veCRV) [Dot Scaled by Balance (USD)]",
+            # line_shape='hvh'
+            height=600
+
+            )
+        
+        fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        fig.update_layout(autotypenumbers='convert types')
+    # fig.update_yaxes(range=[0,3], secondary_y=False)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    
+    graph_list = graph_list_helper(graph_list, fig, run_local)
+    # Box Compare
+    df = df.sort_values(['checkpoint_id', 'total_balance_usd'], ascending=[False, False])
+    local_df = df.dropna(subset = ['total_balance_usd'])
+    if len(local_df) > 0:
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.update_layout(
+            title=f"Compare Meta",
+            xaxis_title="Gauge Name",
+            yaxis_title='Balance (USD) or Votes (veCRV)',
+            yaxis2_title='Issuance or Bounty Value (USD)'
+
+        #     legend_title="Legend Title",
+        )
+        fig = fig.add_trace(
+            go.Box(
+                x=local_df.gauge_name,
+                y=local_df.total_balance_usd,
+                name="Balance USD",
+                # color="pool_name"
+            ),
+            secondary_y=False
+        )
+        fig = fig.add_trace(
+            go.Box(
+                x = local_df.gauge_name,
+                y = local_df.total_vote_power, 
+                name = "Total Votes",
+                # line_shape='hvh',
+                # line_width=3,
+                # visible='legendonly'
+            ),
+            # secondary_y=True
+        )
+
+
+        fig = fig.add_trace(
+            go.Box(
+                x = local_df.gauge_name,
+                y = local_df.issuance_value, 
+                name = "Issuance Value",
+                # line_shape='hvh',
+                # line_width=3,
+                visible='legendonly'
+            ),
+            secondary_y=True
+        )
+
+        fig = fig.add_trace(
+            go.Box(
+                x = local_df.gauge_name,
+                y = local_df.total_bounty_value / 2, 
+                name = "Bounty Value",
+                # line_shape='hvh',
+                # line_width=3,
+                visible='legendonly'
+
+            ),
+            secondary_y=True
+        )
+
+        fig.update_layout(autotypenumbers='convert types')
+        fig.update_yaxes(rangemode="tozero")
+        # fig.update_yaxes(range=[0,100])
+        fig = format_plotly_figure(fig, 800)
+    else:
+        fig = get_plotly_failed_chart('could not find total balance USD')
+    
+    graph_list = graph_list_helper(graph_list, fig, run_local)
     return graph_list
 
 

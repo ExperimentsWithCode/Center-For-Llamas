@@ -195,6 +195,7 @@ filename_warden_vesdt_boost_delegation = 'warden_vesdt_boost_delegation'
 # Meta
 filename_file_meta = 'file_meta'
 filename_actors = 'actors'
+filename_get_all_gauges = 'get_all_gauges'
 
 core_filename_list = [
     # Curve

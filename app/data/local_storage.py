@@ -62,7 +62,7 @@ def write_csv(filename, data, path='output'):
 def read_json(filename, path='storage'):
     # print(cwd+"/app/data/storage/"+ filename+'.json')
     try:
-        with open(cwd+"/app/data/"+path+'/'+ filename+'.json') as f:
+        with open(f"{cwd}/app/data/{path}/{filename}.json") as f:
            data = json.load(f)
         return data
     except Exception as e:
@@ -71,10 +71,10 @@ def read_json(filename, path='storage'):
         print (e)
         return False
 
-def write_json(filename, data):
+def write_json(filename, data, path='output'):
     # print(cwd+"/app/data/source/"+ filename+'.json')
     try:
-        with open(cwd+"/app/data/output/"+ filename+'.json', "w") as f:
+        with open(f"{cwd}/app/data/{path}/{filename}.json", "w") as f:
             json.dump(data, f)
         return True
     except:
