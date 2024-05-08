@@ -22,7 +22,8 @@ def format_df(df):
 
     if 'staked_balance' in key_list:
         df['staked_balance']       = df['staked_balance'].astype(float)
-
+    if '' in df.keys():
+        df = df.drop(columns=[''])
     return df
 
 def bind_snapshot_context_to_delegations(df_snapshot_votes, aggregate_delegates):

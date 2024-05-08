@@ -113,7 +113,7 @@ def index():
 def delegate(delegate):
     # df_vote_choice = app.config['df_convex_snapshot_vote_choice']
     df_convex_delegated_locks_per_proposal = app.config['df_convex_delegated_locks_per_proposal']
-    df_convex_delegations_agg = get_convex_delegate_agg(app.config['df_convex_delegations'])
+    df_convex_delegations_agg = get_convex_delegate_agg(df_convex_delegated_locks_per_proposal)
 
     # Filter Data
 

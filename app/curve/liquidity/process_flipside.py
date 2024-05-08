@@ -113,11 +113,16 @@ class Oracle():
             #   while WETH accumulates in ETH based pools
             # So if ETH and WETH are present after flush shitcoins,
                 # then remove WETH
-        df_filtered_adddresses = df_combo_counts[df_combo_counts['symbol'].isin(['ETH', 'WETH'])]
+        filtered_eth_list = set(list(df_combo_counts[df_combo_counts['symbol'] == 'ETH' ].pool_addr.unique()))
+
+        filtered_weth_list = set(list(df_combo_counts[df_combo_counts['symbol'] == 'WETH'].pool_addr.unique()))
+
+        filtered_set = filtered_weth_list.intersection(filtered_eth_list)
+
         df_combo_counts = df_combo_counts[~(
             (df_combo_counts['symbol'] == 'WETH') &
             df_combo_counts['pool_addr'].isin(
-                list(df_filtered_adddresses.pool_addr.unique())
+                list(filtered_set)
                 )
             )]
         return df_combo_counts
@@ -254,7 +259,10 @@ class Oracle():
         df_prices = df2.groupby(
             ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
             ).resample('1D')['price'].mean().reset_index()
-        df_prices
+        # df_volume = df2.groupby(
+        #     ['symbol', 'token_addr', 'comp_symbol', 'comp_token_addr']
+        #     ).resample('1D')['amount'].sum().reset_index()
+        
         # reduce
         df_prices = df_prices.dropna()
         df_prices_reduced = df_prices[['symbol', 'token_addr', 'block_timestamp', 'price']]

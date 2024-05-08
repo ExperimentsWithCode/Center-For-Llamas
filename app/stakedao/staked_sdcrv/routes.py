@@ -188,7 +188,7 @@ def show(user):
 
 
 
-    fig = px.bar(local_df_stakedao_sdcrv,
+    fig = px.scatter(local_df_stakedao_sdcrv,
                     x=local_df_stakedao_sdcrv['date'],
                     y=local_df_stakedao_sdcrv['balance_delta'],
                     color='event_name',
@@ -198,9 +198,9 @@ def show(user):
                     )
     # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
     fig.update_layout(
-        title=f"Staked sdCRV Balance",
+        title=f"Staked sdCRV Balance Delta",
             xaxis_title="Date",
-            yaxis_title="Staked sdCRV Balance Delta",
+            yaxis_title="Staked sdCRV",
         #     legend_title="Legend Title",
         font=dict(
             family="Courier New, monospace",

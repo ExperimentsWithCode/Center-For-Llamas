@@ -107,12 +107,27 @@ class MetaSnapshotProcess():
         df['choice_power'] = df['choice_power'].astype(float)
         df['valid'] = df['valid'].astype(bool)
         df['checkpoint_timestamp'] = pd.to_datetime(df['checkpoint_timestamp'])
+        df['checkpoint_id'] = df['checkpoint_id'].astype(int)
+
         return df 
 
     def process(self):
         df_flip = self.get_df_flip_vote_choice()
         df_snap = self.get_df_snap_vote_choice()
-        return self.merge_vote_choice(df_flip, df_snap)
+        df_merge = self.merge_vote_choice(df_flip, df_snap)
+        return self.reduce_duplicate_votes(df_merge)
+    
+    def reduce_duplicate_votes(self, df):
+        df_temp = df.groupby(['checkpoint_id'])['proposal_end'].max().reset_index(name='max_end')
+        df_combo = pd.merge(
+            df, 
+            df_temp, 
+            how='left', 
+            on = ['checkpoint_id' ], 
+            )
+        df = df_combo[df_combo['proposal_end'] == df_combo['max_end']]
+        df = df.drop(columns=['max_end'])
+        return df
 
     def get_flipside_vote_choice(self, snapshot):
         vote_choice_data = snapshot.format_final_choice_output()
@@ -131,6 +146,7 @@ class MetaSnapshotProcess():
             df_flip = df_flip[~df_flip['proposal_title'].str.match(title)]
         # merge the things
         df_vote_choice = pd.concat([df_flip, df_snap])
+        
         return df_vote_choice
 
 

@@ -73,7 +73,7 @@ def index():
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    periods = df_vote_aggregates.proposal_end.unique()
+    periods = list(df_vote_aggregates.proposal_end.unique())
     periods.sort()
     current_period = periods[-1]
     prior_period = periods[-2]

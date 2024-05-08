@@ -326,9 +326,9 @@ def compare_voter(target_voter):
                        })
     if not target_gauges:
         return render_template(
-            'contributing_factors.jinja2',
+            'contributing_factors_compare.jinja2',
             title='Curve Meta: Contributing Factors',
-            template='contributing_factors',
+            template='curve-meta-compare',
             body="",
             form=form,
             df_approved_gauges = df_approved_gauges
@@ -339,9 +339,9 @@ def compare_voter(target_voter):
 
     if len(df) == 0:
         return render_template(
-            'contributing_factors.jinja2',
+            'contributing_factors_compare.jinja2',
             title='Curve Meta: Contributing Factors',
-            template='contributing_factors',
+            template='curve-meta-compare',
             body="Gauge not found",
             form=form,
             df_approved_gauges = df_approved_gauges
@@ -654,6 +654,7 @@ def graph_list_helper(graph_list, fig, run_local=False):
         graph_list.append(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
     return graph_list
 
+
 def generate_plot_per_gauge(df, run_local=False):
     graph_list = []
     df = df.sort_values(['checkpoint_id', 'total_balance_usd'], ascending=[False, False])
@@ -690,7 +691,7 @@ def generate_plot_per_gauge(df, run_local=False):
             # line_shape='hvh'
             height=600
 
-            )
+            ).update_traces(mode="lines+markers")
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(autotypenumbers='convert types')
         # fig.update_yaxes(range=[0,3], secondary_y=False)
@@ -718,7 +719,7 @@ def generate_plot_per_gauge(df, run_local=False):
         fig.update_layout(autotypenumbers='convert types')
         # fig.update_yaxes(range=[0,3], secondary_y=False)
     else:
-        fig = get_plotly_failed_chart('could not find total balance USD')
+        fig = get_plotly_failed_chart('could not find issuance value (USD)')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     graph_list = graph_list_helper(graph_list, fig, run_local)
 
@@ -735,7 +736,7 @@ def generate_plot_per_gauge(df, run_local=False):
                 # line_shape='hvh'
                 height=600
 
-                )
+                ).update_traces(mode="lines+markers")
         except:
             fig = px.scatter(
                             local_df,
@@ -747,12 +748,12 @@ def generate_plot_per_gauge(df, run_local=False):
                             # line_shape='hvh'
                             height=600
 
-                            )
+                            ).update_traces(mode="lines+markers")
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     else:
-        fig = get_plotly_failed_chart('could not find total balance USD')
+        fig = get_plotly_failed_chart('could not find issuance value (USD)')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     graph_list = graph_list_helper(graph_list, fig, run_local)
 
@@ -781,21 +782,21 @@ def generate_plot_per_gauge(df, run_local=False):
     df = df.sort_values(['checkpoint_id', 'yield_rate_adj'], ascending=[False, False])
     local_df = df.dropna(subset = ['yield_rate_adj'])
     if len(local_df) > 0:
-        fig = px.line(
+        fig = px.scatter(
             local_df,
             x=local_df.checkpoint_timestamp,
             y=local_df.yield_rate_adj,
             color=local_df.gauge_name,
             title=f"Compare: Yield Rate",
-            line_shape='hvh',
+            # line_shape='hvh',
             height=600
 
-            )
+            ).update_traces(mode="lines+markers")
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     else:
-        fig = get_plotly_failed_chart('could not find total balance USD')
+        fig = get_plotly_failed_chart('could not find yield rate')
     
     graph_list = graph_list_helper(graph_list, fig, run_local)
     
@@ -817,7 +818,7 @@ def generate_plot_per_gauge(df, run_local=False):
         fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     else:
-        fig = get_plotly_failed_chart('could not find total balance USD')
+        fig = get_plotly_failed_chart('could not total bounty value (USD)')
     
     graph_list = graph_list_helper(graph_list, fig, run_local)
 
@@ -833,7 +834,7 @@ def generate_plot_per_gauge(df, run_local=False):
                 # shape='hvh',
                 height=600
 
-                )
+                ).update_traces(mode="lines+markers")
             fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
             fig.update_layout(autotypenumbers='convert types')
         except:
@@ -847,12 +848,12 @@ def generate_plot_per_gauge(df, run_local=False):
                 # shape='hvh',
                 height=600
 
-                )
+                ).update_traces(mode="lines+markers")
             fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
             fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     else:
-        fig = get_plotly_failed_chart('could not find total balance USD')
+        fig = get_plotly_failed_chart('could not find total bounty value (USD)')
     
     graph_list = graph_list_helper(graph_list, fig, run_local)
     # Liquidity Over Votes
@@ -870,13 +871,13 @@ def generate_plot_per_gauge(df, run_local=False):
             # line_shape='hvh'
             height=600
 
-            )
+            ).update_traces(mode="lines+markers")
         
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(autotypenumbers='convert types')
     # fig.update_yaxes(range=[0,3], secondary_y=False)
     else:
-        fig = get_plotly_failed_chart('could not find total balance USD')
+        fig = get_plotly_failed_chart('could not find liquidity (USD) over votes (veCRV)')
     
     graph_list = graph_list_helper(graph_list, fig, run_local)
     # Box Compare
@@ -948,6 +949,7 @@ def generate_plot_per_gauge(df, run_local=False):
     
     graph_list = graph_list_helper(graph_list, fig, run_local)
     return graph_list
+
 
 
 def get_vecrv_votes_back(df_checkpoints, taget_voter, compare_back = None):

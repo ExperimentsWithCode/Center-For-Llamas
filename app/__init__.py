@@ -106,8 +106,6 @@ def init_app():
 
         # Register Blueprints
             app.register_blueprint(home_bp)
-            app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
-
             app.register_blueprint(gauges_bp, url_prefix='/curve/gauges')
             app.register_blueprint(curve_locker_vecrv_bp, url_prefix='/curve/locker')
             app.register_blueprint(gauge_votes_bp, url_prefix='/curve/gauge_votes')
@@ -128,6 +126,7 @@ def init_app():
             app.register_blueprint(stakedao_snapshot_delegations_bp, url_prefix='/stakedao/delegations')
 
             app.register_blueprint(address_book_bp, url_prefix='/directory')
+            app.register_blueprint(curve_meta_bp, url_prefix='/curve/meta')
 
             app.register_blueprint(data_bp, url_prefix='/data')
 

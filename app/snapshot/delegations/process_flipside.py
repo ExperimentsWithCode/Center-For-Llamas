@@ -42,32 +42,35 @@ class ProcessSnapshotDelegations():
         delegator_lock_list = []
         # lock_delegate_list = []
         # vote_deletage_list = []
-        pcl_agg_user = self.df_locker
-        
+        df_locker_agg_user_epoch = self.df_locker
+        id_list = list(self.df_delegations.id.unique())
+        id_list.sort()
         for i, row in df_proposal_aggs.iterrows():
             # delegation
 
             local_delegators = self.df_delegations[self.df_delegations['block_timestamp'] < row['proposal_start'] ]
-            local_delegators = local_delegators.sort_values(['block_timestamp', 'event_name']).groupby(['delegator']).tail(1)
+            local_delegators = local_delegators.sort_values(['block_timestamp', 'event_name'], ascending=[True, False]).groupby(['delegator', 'id']).tail(1)
             local_delegators['proposal_start'] = row['proposal_start']
             local_delegators['proposal_title'] = row['proposal_title']
             local_delegators['delegator_known_as'] = local_delegators['delegator'].apply(lambda x: self.process_known_as(x) )
             local_delegators['delegate_known_as'] = local_delegators['delegate'].apply(lambda x: self.process_known_as(x) )
 
+            local_delegators = self.prioritize_local_delegation(local_delegators, id_list)
             local_delegators_copy = local_delegators.copy()
 
             # locks
             if not self.is_not_convex:
-                df_lock_local = pcl_agg_user[pcl_agg_user['this_epoch'] < row['proposal_start'] ]
+                df_lock_local = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] < row['proposal_start'] ]
                 target_epoch = df_lock_local.this_epoch.max()
                 df_lock_local = df_lock_local[df_lock_local['this_epoch'] == target_epoch ]
                 balance_user = 'user'
                 balance_var = 'current_locked'
             else:
-                df_lock_local = pcl_agg_user[pcl_agg_user['block_timestamp'] < row['proposal_start'] ]
+                df_lock_local = df_locker_agg_user_epoch[df_locker_agg_user_epoch['block_timestamp'] < row['proposal_start'] ]
                 df_lock_local = df_lock_local.sort_values(['block_timestamp', 'event_name', 'staked_balance']).groupby(['provider']).tail(1)
                 balance_user = 'provider'
                 balance_var = 'staked_balance'
+
 
             # Join Delegators and Locks
             local_delegators_with_locks = local_delegators_copy[[
@@ -117,4 +120,40 @@ class ProcessSnapshotDelegations():
         voters_count=pd.NamedAgg(column='voter', aggfunc=lambda x: len(x.unique())),
         ).reset_index()
 
-   
+    def prioritize_local_delegation(self, local_delegators, id_list=None):
+        # Global delegation is secondary to local delegation
+        # If both are present, use local
+        if not id_list:
+            id_list = list(self.df_delegations.id.unique())
+
+        # Get All delegators with a last record of SetDelegate
+        filtered_delegators_set = set(list(local_delegators[(local_delegators['id'] == id_list[-1]) & 
+                                            (local_delegators['event_name'] == 'SetDelegate')].delegator.unique()))
+        
+        filtered_delegators_global = set(list(local_delegators[(local_delegators['id'] == id_list[0]) & 
+                                            (local_delegators['event_name'] == 'SetDelegate')].delegator.unique()))
+        # Get all local delegators with last record of ClearDelegate
+        filtered_delegators_clear = set(list(local_delegators[(local_delegators['id'] == id_list[-1]) & 
+                                            (local_delegators['event_name'] == 'ClearDelegate')].delegator.unique()))
+        # This list should prioritize local
+        filtered_set = filtered_delegators_set.intersection(filtered_delegators_global)
+        # This list should default back to global 
+        filtered_clear = filtered_delegators_clear.intersection(filtered_delegators_global)
+
+        # If global anything with global id in fitlered_set should be removed
+        local_delegators_2 = local_delegators[~(
+            (local_delegators['id'] == id_list[0]) &
+            local_delegators['delegator'].isin(
+                list(filtered_set)
+                )
+            
+            )]
+        # If local, anything with local id in filtered_clear should be removed 
+        local_delegators_2 = local_delegators_2[~(
+            (local_delegators_2['id'] == id_list[-1]) &
+            local_delegators_2['delegator'].isin(
+                list(filtered_clear)
+                )
+            
+            )]
+        return local_delegators_2.copy()

@@ -69,15 +69,16 @@ def index():
     df_current_votes = local_df_checkpoints_agg[local_df_checkpoints_agg['checkpoint_id'] == current_checkpoint]
     df_prior_votes = local_df_checkpoints_agg[local_df_checkpoints_agg['checkpoint_id'] == prior_checkpoint]
 
-
+    local_df_checkpoints_agg
     # Build chart
-    fig = px.bar(local_df_checkpoints_agg,
+    fig = px.area(local_df_checkpoints_agg,
                     x=local_df_checkpoints_agg['checkpoint_timestamp'],
                     y=local_df_checkpoints_agg['total_vote_power'],
                     color='gauge_symbol',
                     title='Gauge Round Vote Weights',
                     # facet_row=facet_row,
                     # facet_col_wrap=facet_col_wrap
+                    height=600
                     )
     # fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(autotypenumbers='convert types')

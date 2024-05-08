@@ -249,13 +249,15 @@ class ProcessContributingFactors():
             'checkpoint_id',
             'gauge_addr',
             # 'total_vote_power',
-            'tradable_assets',
+            # 'tradable_assets',
             ]).agg(
             total_balance=pd.NamedAgg(column='total_balance', aggfunc='mean'),
             total_balance_usd=pd.NamedAgg(column='total_balance_usd', aggfunc='mean'),
             liquidity_over_votes=pd.NamedAgg(column='liquidity_over_votes', aggfunc='mean'),
             liquidity_usd_over_votes=pd.NamedAgg(column='liquidity_usd_over_votes', aggfunc='mean'),
-
+            tradable_assets=pd.NamedAgg(column='tradable_assets', aggfunc=list),
+            # bounty_tokens=pd.NamedAgg(column='token_symbol', aggfunc=list),
+            # bounty_amounts=pd.NamedAgg(column='bounty_amount', aggfunc=list),
             ).reset_index()
             
         df_combo = pd.merge(
@@ -273,10 +275,10 @@ class ProcessContributingFactors():
             how='left', 
             on = ['checkpoint_id', 'gauge_addr'], 
             )
-        
+        df_combo['tradable_assets'] = df_combo['tradable_assets'].apply(self.meta_format_list)
         return df_combo
 
-    def format_list(self, string_in):
+    def format_list(self, string_in, to_string = True):
         out = []
         try:
             if type(string_in) == list:
@@ -294,8 +296,22 @@ class ProcessContributingFactors():
         except Exception as e:
             print_mode(string_in)
             print_mode(e)
+        if not to_string:
+            return out
         return str(out).replace("'", "")
 
+    def meta_format_list(self, this_list):
+        total_out = []
+        if type(this_list) == list:
+            for item in this_list:
+                f_item = self.format_list(item, False)
+                for i in f_item:
+                    if not i in  total_out:
+                        total_out.append(i)
+            total_out.sort()
+            return total_out
+        return []
+    
     def generate_issuance_map(self, annual_issuance):
         i = 1
         issuance_map = {}

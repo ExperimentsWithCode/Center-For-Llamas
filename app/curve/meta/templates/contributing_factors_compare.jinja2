@@ -232,7 +232,7 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'checkpoint_id', name: 'Display Name' },
+            { id: 'checkpoint_id', name: 'Checkpoint ID' },
             { id: 'checkpoint_timestamp', name: 'Checkpoint Timestamp'},
 
             { id: 'gauge_name', name: 'Gauge Name'},
@@ -277,6 +277,7 @@
                 formatter: (_, row) =>  `${row.cells[11].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
                 {% include 'utility_sort_float.jinja2' %} 
             },
+            { id: 'tradable_assets', name: 'Assets'},
 
 
         ],
@@ -297,6 +298,7 @@
               'total_bounty_value': '{{ row['total_bounty_value']|round(2) }}',
               'votium_round': '{{ row['votium_round']|round() }}',
               'liquidity_usd_over_votes': '{{ row['liquidity_usd_over_votes']|round() }}',
+              'tradable_assets': '{{ row['tradable_assets']|join(", ") }}',
 
 
 

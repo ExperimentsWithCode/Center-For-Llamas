@@ -97,7 +97,7 @@ def index():
     
     return render_template(
         'index_stakedao_delegations.jinja2',
-        title='stakedao Delegations',
+        title='StakeDAO Delegations',
         template='stakedao-delegations-index',
         body="",
         df_stakedao_delegations = df_stakedao_delegations,
@@ -112,7 +112,7 @@ def delegate(delegate):
     # df_vote_choice = app.config['df_stakedao_snapshot_vote_choice']
     df_stakedao_delegated_locks_per_proposal = app.config['df_stakedao_delegated_locks_per_proposal']
     df_stakedao_delegations_agg = app.config['df_stakedao_delegations_agg']
-    df_stakedao_delegations_agg = get_stakedao_delegate_agg(app.config['df_stakedao_delegations'])
+    df_stakedao_delegations_agg = get_stakedao_delegate_agg(df_stakedao_delegated_locks_per_proposal)
 
     # Filter Data
 

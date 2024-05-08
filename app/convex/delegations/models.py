@@ -24,6 +24,10 @@ from app.snapshot.delegations.models import format_df, bind_snapshot_context_to_
 
 print_mode("Loading... { convex.delegation.models }")
 
+try: 
+    df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
+except:
+    from app.convex.snapshot.models import df_convex_snapshot_vote_choice
 
 def get_df(filename, location):
     df = csv_to_df(filename, location)
@@ -82,7 +86,6 @@ def bind_snapshot_context_to_delegations(df_snapshot_votes, aggregate_delegates)
     return df
 
 
-df_convex_snapshot_vote_choice = app.config['df_convex_snapshot_vote_choice']
 
 df_convex_delegations = get_df(filename_convex_delegations, MODELS_FOLDER_PATH)
 df_convex_delegated_locks_per_proposal = get_df(filename_convex_delegated_locks, MODELS_FOLDER_PATH)

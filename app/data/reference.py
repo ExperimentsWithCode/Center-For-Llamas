@@ -80,9 +80,8 @@ known_large_market_actors = {
     '0x73eb240a06f0e0747c698a219462059be6aaccc8' : 'Llamas',
     '0x3dfc49e5112005179da613bde5973229082dac35' : 'BAO Finance',
     '0xd2c46b4c28f4b7976d9f87687863c46bb2f71dbb' : 'Convergence (alt)',
-    '0x3216D2A52f0094AA860ca090BC5C335dE36e6273' : 'Alchemix (alt)',
+    '0x3216d2a52f0094aa860ca090bc5c335de36e6273' : 'Alchemix (StakeDAO)',
     '0x21777106355ba506a31ff7984c0ae5c924deb77f' : 'Convergence',
-
     # Non Votium Delegations
     '0x14f83ff95d4ec5e8812ddf42da1232b0ba1015e6' : 'Badger (Delegate)',	
     '0x58f1cac30786754d8128ca7a1e5cf8f29a780044' : 'Bent (Delegate)',	

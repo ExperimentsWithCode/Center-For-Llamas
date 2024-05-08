@@ -4,6 +4,7 @@ from app.data.reference import (
     filename_curve_liquidity, 
     filename_curve_liquidity_aggregate,
     filename_curve_liquidity_swaps,
+    filename_curve_liquidity_oracle,
     filename_curve_liquidity_oracle_aggregate
 )
 from app.utilities.utility import nullify_amount
@@ -102,6 +103,8 @@ def format_df(df):
 
 def get_df(filename):
     df = csv_to_df(filename, MODELS_FOLDER_PATH)
+    if '' in df.keys():
+        df = df.drop(columns=[''])
     df = format_df(df)
     return df
 
@@ -123,4 +126,11 @@ try:
 
 except:
     print("could not register in app.config\n\tCurve Liquidity")
+
+
+def get_df_oracles():
+    return get_df(filename_curve_liquidity_oracle) 
+
+def get_df_swaps():
+    return get_df(filename_curve_liquidity_swaps) 
 

@@ -59,6 +59,7 @@
                 <h4 class="card-title text-primary">{{ "{:,.2f}".format( effectively_locked) }} </h4>
                 
                 <h4>
+                  {% if total_locked > 0 %}
                   {% if effectively_locked / total_locked > 1  %}
                     <span class="badge bg-primary rounded-pill">
                     + {{"{:,.2f}".format(((1)))}} %
@@ -68,6 +69,8 @@
                     {{"{:,.2f}".format(((effectively_locked / total_locked)-1)*100)}} %
                     </span>
                   {% endif %}
+                  {% endif %}
+
                 </h4>
               </li>
 
@@ -80,9 +83,10 @@
             <div class="card-header">Info</div>
             <div class="card-body">
                 {# <h4 class="card-title"> {{ "{:,.2f}".format(lockers['balance_adj'].head(1).sum()) }}</h4> #}
-
+                {% if stakedao_vesdt | length > 0 %}
                 <p class="card-text">Final Lock Time : {{ stakedao_vesdt.iloc[0]['final_lock_time'] }} </p>
                 <p class="card-text">Locking Events : {{ stakedao_vesdt.shape[0] }} </p>
+                {% endif %}
                 {# <div id="chart" class="chart"></div> #}
 
             </div>

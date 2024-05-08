@@ -25,6 +25,7 @@ from app.curve.locker.aggregators import get_ve_locker_decay_agg, get_ve_locker_
 
 from app.utilities.utility import (
     format_plotly_figure,
+    get_plotly_failed_chart,
     get_lock_diffs,
     get_address_profile
 )
@@ -281,35 +282,41 @@ def show(user):
     # Build Plotly object
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+    try:
+        fig = px.bar(local_df_stakedao_vesdt,
+                        x=local_df_stakedao_vesdt['checkpoint_timestamp'],
+                        y=local_df_stakedao_vesdt['balance_delta'],
+                        color='event_name',
+                        # line_shape='linear',
+                        # facet_row=facet_row,
+                        # facet_col_wrap=facet_col_wrap
+                        )
+                            
+        # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
+        fig.update_layout(
+            title=f"Locked veSDT Balance",
+                xaxis_title="Checkpoint Timestamp",
+                yaxis_title="Locked veSDT Balance Delta",
+            #     legend_title="Legend Title",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="RebeccaPurple"
+            ),
+            # height= 1000,
+        )
 
-
-    fig = px.bar(local_df_stakedao_vesdt,
-                    x=local_df_stakedao_vesdt['checkpoint_timestamp'],
-                    y=local_df_stakedao_vesdt['balance_delta'],
-                    color='event_name',
-                    # line_shape='linear',
-                    # facet_row=facet_row,
-                    # facet_col_wrap=facet_col_wrap
-                    )
-    # fig.add_vline(x=dt.utcnow(), line_width=2, line_dash="dash", line_color="black")
-    fig.update_layout(
-        title=f"Locked veSDT Balance",
-            xaxis_title="Checkpoint Timestamp",
-            yaxis_title="Locked veSDT Balance Delta",
-        #     legend_title="Legend Title",
-        font=dict(
-            family="Courier New, monospace",
-            size=18,
-            color="RebeccaPurple"
-        ),
-        # height= 1000,
-    )
-
+    except:
+        fig = get_plotly_failed_chart("Could not build chart for veSDT Balance Delta")
     # # Build Plotly object
     graphJSON2 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    graphJSON3 = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
+    if len(local_df_stakedao_vesdt_decay) > 0:
+        total_locked = local_df_stakedao_vesdt_decay.iloc[0]['total_locked_balance']
+        effective_locked = local_df_stakedao_vesdt_decay.iloc[0]['total_effective_locked_balance']
+    else:
+        total_locked = 0
+        effective_locked = 0
     return render_template(
         'show_stakedao_locked_vesdt.jinja2',
         title='StakeDAO Locked veSDT',
@@ -322,8 +329,8 @@ def show(user):
         # convex_agg_vote_locks = df_locker_agg_system,
         # convex_agg_epoch_vote_locks_current = df_locker_agg_current,
         stakedao_vesdt = local_df_stakedao_vesdt,
-        total_locked = local_df_stakedao_vesdt_decay.iloc[0]['total_locked_balance'],
-        effectively_locked = local_df_stakedao_vesdt_decay.iloc[0]['total_effective_locked_balance'],
+        total_locked = total_locked,
+        effectively_locked = effective_locked,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2
     )

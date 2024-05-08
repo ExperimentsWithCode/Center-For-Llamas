@@ -24,7 +24,10 @@ def generate_query(min_block_timestamp=None):
     FROM ethereum.core.ez_decoded_event_logs
     WHERE CONTRACT_ADDRESS = lower('{gnosis_delegations}')
     AND EVENT_NAME = 'SetDelegate'
-    AND id = lower('{space_id}')
+    AND (id = lower('{space_id}')
+    OR 
+    id = '0x0000000000000000000000000000000000000000000000000000000000000000'
+    )
     {filter_line}
     ),
 
@@ -40,7 +43,10 @@ def generate_query(min_block_timestamp=None):
     FROM ethereum.core.ez_decoded_event_logs
     WHERE CONTRACT_ADDRESS = lower('{{gnosis_delegations}}')
     AND EVENT_NAME = 'ClearDelegate'
-    AND id = lower('{space_id}')
+    AND (id = lower('{space_id}')
+    OR 
+    id = '0x0000000000000000000000000000000000000000000000000000000000000000'
+    )
     {filter_line}
     )
 

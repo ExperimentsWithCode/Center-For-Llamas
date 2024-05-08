@@ -50,15 +50,14 @@ def monster_mash():
         df_all_votes = app.config['df_all_votes']
 
         df_snapshot = app.config['df_convex_snapshot_vote_choice']
-        df_convex_delegations = app.config['df_convex_delegations']
         df_locker = app.config['df_locker']
+        df_convex_delegations = app.config['df_convex_delegations']
 
         df_snapshot_stakedao = app.config['df_stakedao_snapshot_vote_choice'] 
-        # df_stakedao_delegations = # app.config['df_stakedao_delegations']
         df_stakedao_vesdt = app.config['df_stakedao_vesdt']
 
         df_stakedao_sdcrv = app.config['df_stakedao_sdcrv']
-        df_stakedao_sdcrv = app.config['df_stakedao_delegations']
+        df_stakedao_delegations = app.config['df_stakedao_delegations']
 
     except:
         from app.curve.locker.models import df_curve_vecrv
@@ -69,10 +68,8 @@ def monster_mash():
         from app.convex.locker.models import df_locker
 
         from app.stakedao.snapshot.models import df_stakedao_snapshot_vote_choice as df_snapshot_stakedao
-        # from app.stakedao.delegations.models import df_stakedao_delegations
         from app.stakedao.locker.models import df_stakedao_vesdt
 
-        from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv
         from app.stakedao.staked_sdcrv.models import df_stakedao_sdcrv
         from app.stakedao.delegations.models import df_stakedao_delegations
 
@@ -86,8 +83,8 @@ def monster_mash():
     convex_vlcvx_lockers = unique_to_df(df_locker.user, 'convex_vlcvx_locker')
 
     stakedao_snapshot_voters = unique_to_df(df_snapshot_stakedao.voter, 'stakedao_snapshot_voter')
-    stakedao_vesdt_lockers = unique_to_df(df_stakedao_vesdt.provider, 'stakedao_sdcrv_staker')
-    stakedao_sdcrv_stakers = unique_to_df(df_stakedao_sdcrv.provider, 'stakedao_vesdt_locker')
+    stakedao_vesdt_lockers = unique_to_df(df_stakedao_vesdt.provider, 'stakedao_vesdt_locker')
+    stakedao_sdcrv_stakers = unique_to_df(df_stakedao_sdcrv.provider, 'stakedao_sdcrv_staker')
     stakedao_delegators = unique_to_df(df_stakedao_delegations.delegator, 'stakedao_delegator')
     stakedao_delegates = unique_to_df(df_stakedao_delegations.delegate, 'stakedao_delegate')
 
