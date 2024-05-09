@@ -34,6 +34,7 @@
         </div>
 
     </div> #}
+{% include 'search_widget.jinja2' %}
  <div class="row">
     <p></p>
     <h4 class="text-info">Gauges</h4>
@@ -103,9 +104,9 @@
 <script type='text/javascript'>
       new gridjs.Grid({
         columns: [
-            { id: 'gauge_name', name: 'Known As' ,            
+            { id: 'gauge_name', name: 'Gauge Name' ,            
             },
-            { id: 'gauge_addr', name: 'gauge_addr' ,
+            { id: 'gauge_addr', name: 'Gauge Address' ,
                 formatter: (_, row) => gridjs.html(
                 `${row.cells[1].data.toString()}`
                 )               
@@ -115,25 +116,25 @@
                     `${row.cells[2].data.toString()}`
                 )
             },
-            { id: 'vecrv_votes', name: 'veCRV Locker' } ,   
-            { id: 'curve_liquidity', name: 'veCRV Voter' } ,   
-            { id: 'convex_snapshot', name: 'vlCVX Voter' } ,   
-            { id: 'stakedao_snapshot', name: 'vlCVX Delegate' } ,   
-            { id: 'df_votium', name: 'vlCVX Delegator' } ,   
-            { id: 'votium_v2', name: 'vlCVX Locker' } ,   
+            { id: 'vecrv_votes', name: 'veCRV Votes' } ,   
+            { id: 'curve_liquidity', name: 'Liquidity Tracked' } ,   
+            { id: 'convex_snapshot', name: 'vlCVX Snapshot' } ,   
+            { id: 'stakedao_snapshot', name: 'sdCRV Snapshot' } ,   
+            {# { id: 'df_votium', name: 'Votium V1' } ,    #}
+            { id: 'votium_v2', name: 'Votium V2' } ,   
         ],
         data: [
           {% for index, row in gauges.iterrows() %}
             {
                 'gauge_name': '{{ row['gauge_name'] }}',
-                'gauge_addr': `<a href={{ url_for('gauge_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
+                'gauge_addr': `<a href={{ url_for('gauges_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['gauge_addr']}}</a>`,
                 'pool_addr': `<a href={{ url_for('curve_liquidity_bp.show', gauge_addr = row['gauge_addr']) }}>{{row['pool_addr']}}</a>`,
 
                 'vecrv_votes': '{{ row['vecrv_votes']| string }}',
                 'curve_liquidity': '{{ row['curve_liquidity']| string }}',
                 'convex_snapshot': '{{ row['convex_snapshot']| string }}',
                 'stakedao_snapshot': '{{ row['stakedao_snapshot']| string }}',
-                'df_votium': '{{ row['df_votium']| string }}',
+                {# 'df_votium': '{{ row['df_votium']| string }}', #}
                 'votium_v2': '{{ row['votium_v2']| string }}',
 
             },

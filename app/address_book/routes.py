@@ -8,6 +8,8 @@ from app.address_book.gauges.models import df_gauge_book
 
 from app.utilities.utility import get_address_profile
 
+from app.home.forms import EntryForm
+
 address_book_bp = Blueprint(
     'address_book_bp', __name__,
     url_prefix='/directory/',
@@ -70,18 +72,19 @@ def random_roles():
 
 @address_book_bp.route('/search/<string:search_target>', methods=['GET'])
 def search(search_target):
+    form = EntryForm()
     """Shows a results of search"""
     df_roles = app.config['df_roles']
     df_gauge_registry = app.config['df_curve_gauge_registry']
     roles = df_roles[
-        (df_roles['address'].str.contains(search_target)) |
-        (df_roles['known_as'].str.contains(search_target))
+        (df_roles['address'].str.contains(search_target, case=False)) |
+        (df_roles['known_as'].str.contains(search_target, case=False))
         ]
     gauges = df_gauge_registry[
         (df_gauge_registry['gauge_addr'].str.contains(search_target)) |
         (df_gauge_registry['pool_addr'].str.contains(search_target)) |
-        (df_gauge_registry['gauge_name'].str.contains(search_target)) |
-        (df_gauge_registry['pool_name'].str.contains(search_target)) 
+        (df_gauge_registry['gauge_name'].str.contains(search_target, case=False)) |
+        (df_gauge_registry['pool_name'].str.contains(search_target, case=False)) 
         ]
     return render_template(
         'search_results.jinja2',
@@ -90,6 +93,7 @@ def search(search_target):
         body="search_target",
         roles = roles,
         gauges = gauges,
+        form = form,
     )
     
     # return redirect(url_for('address_book_bp.show_roles', actor_addr=actor_addr))
