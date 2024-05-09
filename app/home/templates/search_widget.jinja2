@@ -1,0 +1,21 @@
+
+<div class="card border-info mb-3" style="height:97%">
+<div class="card-body">
+
+<form class  method="POST" action="{{ url_for('home_bp.home') }}">
+{{ form.csrf_token }}
+<div class="input-group mb-3">
+    {{ form.search_target(class="form-control", placeholder='Gauge, Pool, Particpant...',size="42" ) }}
+    {{ form.submit(class='btn btn-warning text-dark') }}
+</div>
+</form>
+
+</div>
+</div>
+
+
+
+
+
+
+{# <input type="text" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="button-addon2"> #}

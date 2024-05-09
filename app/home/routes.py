@@ -10,6 +10,7 @@ from app.home.content.to_do import to_do
 
 from app.data.reference import core_filename_list
 
+from .forms import EntryForm
 # from app.data.data_manager import Manager
 # from .forms import DataManagerForm
 
@@ -23,11 +24,15 @@ home_bp = Blueprint(
     )
 
 # Controller info
-@home_bp.route('/', methods=['GET'])
+@home_bp.route('/', methods=['GET', 'POST'])
 def home():
     """Homepage."""
     # Bypass if user is logged in
 
+    form = EntryForm()
+    if form.validate_on_submit():
+        search_target = form.search_target.data.lower() if form.search_target.data else None
+        return redirect(url_for('address_book_bp.search', search_target=search_target))
 
     return render_template(
         'index.jinja2',
@@ -35,11 +40,13 @@ def home():
         subtitle='and learn to do governance stuff good too.',
         template='home-template',
         nerd_stuff = nerd_stuff,
-        to_do = to_do
+        to_do = to_do,
+        form=form,
 
     )
 
 
+ 
 
 
 # @home_bp.route('/data/male_models', methods=['GET','POST'])

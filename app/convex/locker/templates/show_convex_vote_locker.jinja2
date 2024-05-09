@@ -69,7 +69,6 @@
 
     </div>
 
-    <h4 class="text-primary">Vote Locks by Epoch</h4>
 
     {# {% with df_snapshot=convex_snapshot_aggregate_votes %}
       {% with snapshot_space='convex' %}
@@ -79,11 +78,39 @@
       {% endwith %}
     {% endwith %} #}
 
-
+{# 
 <div class="row">
 
     <div id='vote_locker_table' ></div>
 </div>
+ #}
+
+
+<div class ="row">
+
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link active" data-bs-toggle="tab" href="#current" aria-selected="true" role="tab" tabindex="-1">Current Locks</a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" data-bs-toggle="tab" href="#deltas" aria-selected="false" role="tab">vlCVX Balance Changes</a>
+    </li>
+
+  </ul>
+  <div id="myTabContent" class="tab-content">
+    <div class="tab-pane fade active show" id="current" role="tabpanel">
+        <div id='current_locks_table' ></div>
+    </div>
+    <div class="tab-pane fade" id="deltas" role="tabpanel">
+      <div id='vote_locker_table' ></div>
+    </div>
+
+  </div>
+
+
+</div>
+
+
 
 
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
@@ -107,6 +134,8 @@
       new gridjs.Grid({
         columns: [
           { id: 'block_timestamp', name: 'Block Timestamp' },
+          { id: 'event_name', name: 'Event Name' },
+
           { id: 'known_as', name: 'Known As' },
           { id: 'user', name: 'Locker' ,
             formatter: (_, row) => gridjs.html(
@@ -114,11 +143,12 @@
             )
           },
           
-          { id: 'locked_amount', name: 'vlCVX Locked',
-            formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          { id: 'locked_amount', name: 'vlCVX Delta',
+            formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
 
             {% include 'utility_sort_float.jinja2' %} 
          },
+        { id: 'relocked', name: 'Relocked' },
         { id: 'epoch_start', name: 'Epoch Start' },
         { id: 'epoch_end', name: 'Epoch End' },
 
@@ -127,12 +157,21 @@
           {% for index, row in convex_locker.iterrows() %}
             {
               'block_timestamp': '{{ row['block_timestamp'] }}',
-              'user': `<a href="#">{{row['user']}}</a>`,
-
+              'event_name': '{{ row['event_name'] }}',
               'known_as': '{{ row['known_as'] }}',
+              'user': `<a href="#">{{row['user']}}</a>`,
+              {% if row['event_name'] == 'Withdrawn' %}
+              'locked_amount': '{{ -1 * row['withdrawn_amount']|round(2) }}',
+              'relocked': '{{ row['relocked'] }}',
+              'epoch_start': '',
+              'epoch_end': '',
+              {% else %}
               'locked_amount': '{{ row['locked_amount']|round(2) }}',
+              'relocked': '',
               'epoch_start': '{{ row['epoch_start'] }}',
               'epoch_end': '{{ row['epoch_end'] }}',
+              {% endif %}
+
 
             },
           {% endfor %}
@@ -142,5 +181,43 @@
       }).render(document.getElementById('vote_locker_table'));
 </script>
 
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+        { id: 'epoch_start', name: 'Epoch Start' },
+        { id: 'epoch_end', name: 'Epoch End' },
+        { id: 'known_as', name: 'Known As' },
+        { id: 'user', name: 'Locker' ,
+          formatter: (_, row) => gridjs.html(
+              `${row.cells[3].data.toString()}`
+          )
+        },
+          
+        { id: 'current_locked', name: 'vlCVX Locked',
+          formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+
+          {% include 'utility_sort_float.jinja2' %} 
+        },
+        { id: 'lock_count', name: 'Lock Count',
+            {% include 'utility_sort_float.jinja2' %} 
+         },
+
+        ],
+        data: [
+          {% for index, row in df_current_locks.iterrows() %}
+            {
+              'epoch_start': '{{ row['epoch_start'] }}',
+              'epoch_end': '{{ row['epoch_end'] }}',
+              'known_as': '{{ row['known_as'] }}',
+              'user': `<a href="#">{{row['user']}}</a>`,
+              'current_locked': '{{ row['current_locked']|round(2) }}',
+              'lock_count': '{{ row['lock_count'] }}',
+            },
+          {% endfor %}
+        ],
+        {% include 'table_format_helper.jinja2' %}  
+
+      }).render(document.getElementById('current_locks_table'));
+</script>
 
 {% endblock %}

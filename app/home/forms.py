@@ -9,36 +9,7 @@ from wtforms.validators import (
     Optional
 )
 
-class EntryForm(Form):
-    component_name = StringField('Component Name')
-    run_component = BooleanField('Run Component')
-
-
-class DataManagerForm(FlaskForm):
-    """Filters what to load and process"""
-    load_initial = BooleanField(
-    'Load Initial',
-    # validators=[DataRequired()]
-    )
-    should_fetch = BooleanField(
-    'Should Fetch',
-    # validators=[DataRequired()]
-    )
-    should_process = BooleanField(
-    'Should Process',
-    # validators=[DataRequired()]
-    )
-    load_cutoff = BooleanField(
-    'Load Cutoff ',
-    # validators=[DataRequired()]
-    )
-    manager_config = FieldList(FormField(EntryForm))
-
-    submit = SubmitField('Submit')
-
-
-
-    # not subclassing from flask_wtf.FlaskForm
-# in order to avoid CSRF on subforms
-
+class EntryForm(FlaskForm):
+    search_target = StringField('Search')
+    submit = SubmitField('Search')
 

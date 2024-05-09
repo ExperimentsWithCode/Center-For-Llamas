@@ -27,6 +27,8 @@ def get_cwd():
         cwd = cwd[: - len('/analysis')]   
     if temp_split[-1] == 'opperations':
         cwd = cwd[: - len('/opperations')]   
+    if temp_split[-1] == 'ze_old_stuff':
+        cwd = cwd[: - len('/ze_old_stuff')]   
     return cwd
 
 

@@ -66,3 +66,30 @@ def random_roles():
     random_index = random.randint(0,len(unique_addresses)-1)
     actor_addr = list(unique_addresses)[random_index]
     return redirect(url_for('address_book_bp.show_roles', actor_addr=actor_addr))
+
+
+@address_book_bp.route('/search/<string:search_target>', methods=['GET'])
+def search(search_target):
+    """Shows a results of search"""
+    df_roles = app.config['df_roles']
+    df_gauge_registry = app.config['df_curve_gauge_registry']
+    roles = df_roles[
+        (df_roles['address'].str.contains(search_target)) |
+        (df_roles['known_as'].str.contains(search_target))
+        ]
+    gauges = df_gauge_registry[
+        (df_gauge_registry['gauge_addr'].str.contains(search_target)) |
+        (df_gauge_registry['pool_addr'].str.contains(search_target)) |
+        (df_gauge_registry['gauge_name'].str.contains(search_target)) |
+        (df_gauge_registry['pool_name'].str.contains(search_target)) 
+        ]
+    return render_template(
+        'search_results.jinja2',
+        title='Search Results',
+        template='search-results',
+        body="search_target",
+        roles = roles,
+        gauges = gauges,
+    )
+    
+    # return redirect(url_for('address_book_bp.show_roles', actor_addr=actor_addr))

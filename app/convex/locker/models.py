@@ -56,6 +56,11 @@ def format_df(df_in):
             lambda x: nullify_amount(x['current_locked']), 
             axis=1)
 
+    if 'withdrawn_amount' in key_list:
+        df['withdrawn_amount'] = df.apply(
+            lambda x: nullify_amount(x['withdrawn_amount']), 
+            axis=1)
+        
     if 'lock_count' in key_list:
         df['lock_count'] = df['lock_count'].astype(int)
 
@@ -96,7 +101,6 @@ def get_convex_locker_agg_user_epoch(df_locker_user_epoch):
         ).reset_index()
 
 # Calculate total locked per epoch (sum all locks within an epoch)
-# And create filter for only currently locked epochs
 def get_convex_locker_agg_epoch(df_locker):
     return df_locker.groupby([
             'epoch_start',
@@ -119,8 +123,9 @@ def get_convex_locker_agg_system(df_aggregate_user_epoch=[]):
         user_count=pd.NamedAgg(column='user', aggfunc=lambda x: len(x.unique()))
         ).reset_index()
 
+# create filter for only currently locked epochs
 def get_convex_locker_agg_current(df_locker_agg_epoch=[]):
     if len(df_locker_agg_epoch) == 0:
         df_locker_agg_epoch = get_convex_locker_agg_epoch()
-    now_epoch = df_locker_agg_epoch[df_locker_agg_epoch['epoch_start'] <= get_now()].epoch_start.max()
-    return df_locker_agg_epoch[df_locker_agg_epoch['epoch_end'] >= now_epoch]
+    # now_epoch = df_locker_agg_epoch[df_locker_agg_epoch['epoch_start'] <= get_now()].epoch_start.max()
+    return df_locker_agg_epoch[df_locker_agg_epoch['epoch_end'] >= get_now()]

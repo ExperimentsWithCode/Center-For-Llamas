@@ -246,7 +246,11 @@ def show(user):
     df_convex_locker_user_epoch = app.config['df_convex_locker_user_epoch']
     df_locker_agg_user_epoch = get_convex_locker_agg_user_epoch(df_convex_locker_user_epoch)
 
-
+    local_df_convex_locker_user_epoch = df_convex_locker_user_epoch[df_convex_locker_user_epoch['user'] == user]
+    df_locker_agg_current = get_convex_locker_agg_current(local_df_convex_locker_user_epoch)
+    # Reduce to only one record per start/end
+    this_epoch = df_locker_agg_current[df_locker_agg_current['this_epoch'] < get_now()].this_epoch.max()
+    df_locker_agg_current = df_locker_agg_current[df_locker_agg_current['this_epoch'] == this_epoch ]
     
     # Filter Data
     local_df_locker_agg_user_epoch = df_locker_agg_user_epoch[df_locker_agg_user_epoch['user'] == user]
@@ -377,6 +381,7 @@ def show(user):
         # sum_prior_votes = df_prior_votes.total_vote_power.sum(),
         # convex_agg_vote_locks = df_locker_agg_system,
         # convex_agg_epoch_vote_locks_current = df_locker_agg_current,
+        df_current_locks = df_locker_agg_current,
         convex_locker = local_df_locker,
         graphJSON = graphJSON,
         graphJSON2 = graphJSON2,
