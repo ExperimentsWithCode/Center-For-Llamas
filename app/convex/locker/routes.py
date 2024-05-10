@@ -59,9 +59,9 @@ def index():
 
     
     # Filter Data
-    df_locker_agg_user_epoch_current = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] >= get_now()]
+    df_locker_agg_user_epoch_current = df_locker_agg_user_epoch[df_locker_agg_user_epoch['this_epoch'] <= get_now()]
     df_locker_agg_user_epoch_current = df_locker_agg_user_epoch_current[
-        df_locker_agg_user_epoch_current['this_epoch'] == df_locker_agg_user_epoch_current.this_epoch.min()
+        df_locker_agg_user_epoch_current['this_epoch'] == df_locker_agg_user_epoch_current.this_epoch.max()
         ]
     df_locker_agg_user_epoch_current = df_locker_agg_user_epoch_current.sort_values('current_locked', axis=0, ascending=False)
     
