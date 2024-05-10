@@ -191,9 +191,32 @@
                   href="{{ url_for('convex_snapshot_delegations_bp.index') }}">vlCVX Delegations</a>
               </li>
 
+                <li class="nav-item" role="presentation">
+                  <a class="nav-link dropdown-toggle  {% if 'convex_meta' == active_page %} active bg-secondary text-white {% else %} text-secondary{% endif%}" 
+                  data-bs-toggle="tab" 
+                  href="#convex_meta" 
+                  aria-selected="false" 
+                  tabindex="-1" 
+                  role="tab">Meta</a>
+                </li>
+
 
             </ul>
+              <div id="myTabContent Grandchild" class="tab-content" role="tabpanel">
+                  <div class="tab-pane {% if 'convex_meta' == active_page %} active in {% endif%}"
+                     id="convex_meta" role="tabpanel">
 
+
+                    <ul class="nav nav-tabs">
+
+                      <li class="nav-item">
+                        <a class="nav-link {% if 'convex_unlocks' == sub_active_page %} active bg-info text-white {% else %} text-info{% endif%}" 
+                          href="{{ url_for('convex_meta_bp.unlocks') }}">Unlocks</a>
+                      </li>
+
+
+                  </div>
+              </div>
 
           </div>
           <div class="tab-pane {% if 'stakedao' == active_category %} active in {% endif%}" 

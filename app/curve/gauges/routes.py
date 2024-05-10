@@ -138,12 +138,14 @@ def show(gauge_addr):
 
 
 
-def get_approved():
-    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+def get_approved(df_curve_gauge_registry=[]):
+    if len(df_curve_gauge_registry) == 0:
+        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     return df_curve_gauge_registry.dropna(subset=['vote_timestamp']).sort_values(['vote_timestamp'], ascending=False)
 
-def get_deployed():
-    df_curve_gauge_registry = app.config['df_curve_gauge_registry']
+def get_deployed(df_curve_gauge_registry=[]):
+    if len(df_curve_gauge_registry) == 0:
+        df_curve_gauge_registry = app.config['df_curve_gauge_registry']
     return df_curve_gauge_registry.dropna(subset=['deployed_timestamp']).sort_values(['deployed_timestamp'], ascending=False)
 
 def get_checkpoint_counts(df, is_approved=False):

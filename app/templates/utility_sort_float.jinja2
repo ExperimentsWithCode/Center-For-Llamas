@@ -1,13 +1,21 @@
 sort: {
     compare: (a, b) => {
-    const code = (x) => parseFloat(x);
+        
+    const code = (x) => parseFloat(x.replace('%', ''));
     
     if (code(a) > code(b)) {
         return 1;
     } else if (code(b) > code(a)) {
         return -1;
+    } else if (code(b) == code(a)) {
+        return 0;
+    } else if (isNaN(code(a))) {
+        return -1;
+    } else if (isNaN(code(b))) {
+        return 1;
     } else {
         return 0;
     }
     }
 } 
+

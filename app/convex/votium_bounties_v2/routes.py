@@ -216,8 +216,8 @@ def great_filter(df, tag, target):
         fig.update_layout(
             title=f"Bounty (USD) vs Vote Comparison: Last {last_x_rounds} Votium Rounds",
             xaxis_title="Gauge Symbol",
-            yaxis_title="Liquidity (USD) or Votes (veCRV)",
-            yaxis2_title='Liquidity (USD) / Votes',
+            yaxis_title="Bounty Value",
+            yaxis2_title='Votes (veCRV) / Bounty Value (USD)',
             height=600
         #     legend_title="Legend Title",
         )

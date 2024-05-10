@@ -82,6 +82,7 @@ def init_app():
 
             from .convex.snapshot.routes import convex_snapshot_bp
             from .convex.locker.routes import convex_vote_locker_bp
+            from .convex.meta.routes import convex_meta_bp
 
             from .convex.votium_bounties.routes import votium_bounties_bp
             from .convex.votium_bounties_v2.routes import votium_bounties_v2_bp
@@ -116,6 +117,7 @@ def init_app():
             app.register_blueprint(convex_snapshot_bp, url_prefix='/convex/snapshot')
             app.register_blueprint(convex_vote_locker_bp, url_prefix='/convex/vote_locker')
             app.register_blueprint(convex_snapshot_delegations_bp, url_prefix='/convex/delegations')
+            app.register_blueprint(convex_meta_bp, url_prefix='/convex/meta')
 
             app.register_blueprint(votium_bounties_bp, url_prefix='/convex/votium')
             app.register_blueprint(votium_bounties_v2_bp, url_prefix='/convex/votium_v2')

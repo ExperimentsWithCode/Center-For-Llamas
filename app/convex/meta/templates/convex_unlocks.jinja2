@@ -1,0 +1,114 @@
+{% extends "layout.jinja2" %}
+
+{#
+<!-- {% block pagestyles %}
+  {% assets "home_less_bundle" %}
+    <link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css">
+  {% endassets %}
+{% endblock %} -->
+#}
+
+{% block content %}
+  {% set active_category = "convex" -%}
+  {% set active_page = "convex_meta" -%}
+  {% set sub_active_page = 'convex_unlocks' -%}
+  {% include "navigation.jinja2" %}
+    <h1>{{ title }}</h1>
+
+    <div class="row">
+
+        <div class="card text-white bg-primary mb-3" >
+          <div class="card-header">Top 20 Unlocking Positions {{top_x}}</div>
+          <div class="card-body">
+              {# <h4 class="card-title">??}}</h4> #}
+              {# <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> #}
+              <div id="chart" class="chart"></div>
+          </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div id="this_table"></div>
+    </div>
+
+
+
+
+<script type='text/javascript'>
+      new gridjs.Grid({
+        columns: [
+            { id: 'this_epoch', name: 'Display Name' },
+            { id: 'known_as', name: 'Known As',
+              {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'user', name: 'User' ,
+                formatter: (_, row) => gridjs.html(
+                `${row.cells[2].data.toString()}`
+                )               
+            },
+
+            { id: 'current_locked', name: 'Current Locked',
+                formatter: (_, row) =>  `${row.cells[3].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'next_unlock', name: 'Next Unlocked',
+                formatter: (_, row) =>  `${row.cells[4].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'vs_02', name: 'Delta 2 Epochs',
+                formatter: (_, row) =>  `${row.cells[5].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}%`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'vs_04', name: 'Delta 4 Epochs',
+                formatter: (_, row) =>  `${row.cells[6].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}%`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'vs_08', name: 'Delta 8 Epochs',
+                formatter: (_, row) =>  `${row.cells[7].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}%`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+
+            { id: 'vs_12', name: 'Delta 12 Epochs',
+                formatter: (_, row) =>  `${row.cells[8].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}%`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+            { id: 'vs_16', name: 'Delta 16 Epochs',
+                formatter: (_, row) =>  `${row.cells[9].data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}%`,
+                {% include 'utility_sort_float.jinja2' %} 
+            },
+
+        ],
+        data: [
+          {% for index, row in df_head.iterrows() %}
+            {
+                'this_epoch': '{{ row['this_epoch'] }}',
+                'known_as': '{{ row['known_as'] }}',
+                'user': `<a href={{ url_for('address_book_bp.show_roles', actor_addr = row['user']) }}>{{row['user']}}</a>`,
+                'current_locked': '{{ row['current_locked']| round(2) }}',
+                'next_unlock': '{{ row['next_unlock']| round(2) }}',
+                'vs_02': '{{ row['vs_02']| round(2) }}',
+                'vs_04': '{{ row['vs_04']| round(2) }}',
+                'vs_08': '{{ row['vs_08']| round(2) }}',
+                'vs_12': '{{ row['vs_12']| round(2) }}',
+                'vs_16': '{{ row['vs_16']| round(2) }}',
+
+
+            },
+          {% endfor %}
+        ],
+        {% include 'table_format_helper.jinja2' %}
+
+      }).render(document.getElementById('this_table'));
+</script>
+
+
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{graphJSON | safe}};
+  Plotly.plot('chart',graphs,{});
+</script>
+
+
+{% endblock %}

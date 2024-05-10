@@ -125,7 +125,6 @@ class Manager():
                 url = 'https://api.curve.fi/api/getAllGauges'
                 r = requests.get(url)
                 resp = r.json()
-                resp['data']
                 write_json(filename_get_all_gauges, resp['data'], 'source')
             # from app.curve.gauges.process_flipside import process_and_get 
 
@@ -269,14 +268,14 @@ class Manager():
             from app.stakedao.snapshot.fetch import fetch 
             from app.snapshot.votes.process import process_and_save_helper
             from app.data.reference import (
-                filename_convex_curve_snapshot, 
-                filename_convex_curve_snapshot_origin
+                filename_stakedao_curve_snapshot, 
+                filename_stakedao_curve_snapshot_origin
                 )
             self._helper(fetch, None)
             if self.should_process:
                 process_and_save_helper(
-                    filename_convex_curve_snapshot, 
-                    filename_convex_curve_snapshot_origin
+                    filename_stakedao_curve_snapshot, 
+                    filename_stakedao_curve_snapshot_origin
                     )
     # @timed
     # def stakedao_snapshot_curve_from_snapshot(self):

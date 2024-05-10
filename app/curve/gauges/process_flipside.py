@@ -1,6 +1,6 @@
 from flask import current_app as app
 from app import MODELS_FOLDER_PATH, RAW_FOLDER_PATH
-from app.data.reference import filename_curve_gauges
+from app.data.reference import filename_curve_gauges, filename_get_all_gauges
 
 import math
 # import numpy as np 
@@ -58,9 +58,8 @@ class GaugeRegistry():
             self.process_row(row)
 
     def process_curve_api(self):
-        data = read_json('get_all_gauges', 'source')
-        d = data['data']
-        df_gauges = pd.DataFrame.from_dict(d, orient='index')
+        data = read_json(filename_get_all_gauges, 'source')
+        df_gauges = pd.DataFrame.from_dict(data, orient='index')
         for i, row in df_gauges.iterrows():
             self.process_curve_info(row)
 
