@@ -84,7 +84,7 @@
             {
                 'this_epoch': '{{ row['this_epoch'] }}',
                 'known_as': '{{ row['known_as'] }}',
-                'user': `<a href={{ url_for('address_book_bp.show_roles', actor_addr = row['user']) }}>{{row['user']}}</a>`,
+                'user': `<a href={{ url_for('convex_vote_locker_bp.show', user = row['user']) }}>{{row['user']}}</a>`,
                 'current_locked': '{{ row['current_locked']| round(2) }}',
                 'next_unlock': '{{ row['next_unlock']| round(2) }}',
                 'vs_02': '{{ row['vs_02']| round(2) }}',

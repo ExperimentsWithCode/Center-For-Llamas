@@ -116,6 +116,7 @@ def csv_to_df(filename, path='source'):
         return csv_folder_to_df(filename, path)     
     resp_dict = read_csv(filename, path)
     df = pd.json_normalize(resp_dict)
+    df.columns = df.columns.str.lower()
     return df
 
 def df_to_csv(df, filename, path='output'):
@@ -133,9 +134,12 @@ def save_file(file, filename, path='imported_processed'):
 
 def csv_folder_to_df(folder_name, path='source'):
     cwd = get_cwd()
-    Path(f"{cwd}/app/data/{path}/{folder_name}").mkdir(parents=False, exist_ok=True)
-    path = f"{cwd}/app/data/{path}/{folder_name}/"
-    csv_files = glob.glob(os.path.join(path, "*.csv")) 
+    if path:
+        full_path = f"{cwd}/app/data/{path}/{folder_name}/"
+    else:
+        full_path = f"{cwd}/app/data/{folder_name}/"
+    Path(full_path).mkdir(parents=False, exist_ok=True)
+    csv_files = glob.glob(os.path.join(full_path, "*.csv")) 
     # loop over the list of csv files 
     df_concat = []
     for f in csv_files: 

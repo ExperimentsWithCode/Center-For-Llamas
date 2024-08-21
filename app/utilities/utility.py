@@ -4,6 +4,8 @@ from datetime import date, timedelta, tzinfo
 import numpy as np
 from functools import wraps
 from time import time
+import pytz
+
 from app.data.local_storage import (
     pd,
     cwd
@@ -17,11 +19,13 @@ except:
 import PIL
 import io
 
+
+"""
+Local Reference
+"""
 def print_mode(to_print):
     if activate_print_mode:
         print(to_print)
-    
-
 
 def timed(f):
   @wraps(f)
@@ -36,26 +40,16 @@ def timed(f):
     return result
   return wrapper
 
-def df_remove_nan(df):
-    return df.where(pd.notnull(df), None)
+def get_address_profile(df, target):
+    return df[df['address'] == target]
 
-
-
-## Datetime stuff
-ZERO = timedelta(0)
-
-class UTC(tzinfo):
-  def utcoffset(self, dt):
-    return ZERO
-  def tzname(self, dt):
-    return "UTC"
-  def dst(self, dt):
-    return ZERO
-
-utc = UTC()
+"""
+Datetime Wizard
+"""
+utc = pytz.timezone('UTC')
 
 def get_now():
-    return get_datetime_obj(dt.utcnow())
+    return dt.now(tz=utc)
 
 def shift_time_days(time, days=7, forward=True):
     time = get_date_obj(time)
@@ -90,7 +84,9 @@ def get_dt_from_timestamp(timestamp):
             return None
         if '.' in timestamp:
             timestamp = timestamp[:timestamp.find('.')]
-    return dt.fromtimestamp(int(timestamp)).replace(tzinfo=utc)
+    timestamp = int(timestamp)
+    timezone = pytz.timezone('UTC')
+    return dt.fromtimestamp(timestamp, tz=timezone)
 
 # Attempts to be timezone aware
 # updated get_date_obj which can handle more variance
@@ -129,118 +125,10 @@ def get_datetime_obj(time):
     #     time = dt.strptime(time_string, '%Y-%m-%d %H:%M:%S-%Z')
     return time.replace(tzinfo=utc)
 
-# Slight issue on splitting years will split period despite single period.
-def get_period(week_num, week_day, time, target=5):
-    if week_num > -1 and week_day > -1:
-        time = get_date_obj(time)
-        week_num = int(time.strftime("%V"))
-        week_day = int(time.weekday())
-        vote_year = time.year
-        if time.month == 1 and week_num == 52:
-            week_num = 0
-        if week_day >= target:
-            week_num = week_num + 1
-        else:
-            week_num = week_num
-        if week_num < 10 or week_num == 0:
-            week_num = f"0{week_num}"
-        return f"{vote_year}.{week_num}"
-    # print('WEEK NOT FOUND')
-    # print(week_day)
-    # print(week_num)
-    return "0"
 
-
-# Slight issue on splitting years will split period despite single period.
-def get_period_direct(time, target=5):
-    time = get_date_obj(time)
-
-    week_num = int(time.strftime("%V"))
-    week_day = int(time.weekday())      # starts sunday
-    vote_year = time.year
-    if time.month == 1 and week_num == 52:
-        week_num = 0
-    if week_day >= target:
-        week_num = week_num + 1
-    else:
-        week_num = week_num
-    if week_num < 10:
-        week_num = f"0{week_num}"
-    # elif week_num % 10 = 0:
-    return f"{vote_year}.{week_num}"
-    # print('WEEK NOT FOUND')
-    # print(week_day)
-    # print(week_num)
-    # return 0
-
-def get_convex_period_direct(time, target=5):
-    # print(time)
-    # print(type(time))
-    time = get_date_obj(time)
-    week_num = int(time.strftime("%V"))
-    week_day = int(time.weekday())      # starts sunday
-    vote_year = time.year
-    if time.month == 1 and week_num == 52:
-        week_num = 0
-    if week_day >= target:
-        week_num = week_num + 1
-    else:
-        week_num = week_num
-    if week_num % 2 == 1:
-        week_num += 1
-    if week_num < 10 or week_num == 0:
-        week_num = f"0{week_num}"
-    # elif week_num % 10 = 0:
-    return f"{vote_year}.{week_num}"
-
-def get_checkpoint_end_date(this_time):
-    # set day to upcoming thursday
-    x = get_date_obj(this_time)
-    week_day = int(x.weekday())
-    if week_day >= 4:
-        week_day_adj = 4 + (7 - week_day)
-    else:
-        week_day_adj = 4 - week_day
-    return x + timedelta(days=week_day_adj)
-
-# Slow replace w/ above once function 
-#   Is wrong about year changes
-def get_period_end_date(time):
-    # this is terrible. 
-    # I know its terrible. 
-    # I think fromisocalendar starts on monday?
-    time = get_date_obj(time)
-
-    week_num = int(time.strftime("%V"))
-    week_day = int(time.weekday())      # starts sunday
-
-    month = int(time.month)
-    year = int(time.year)
-    if week_num > 50 and month == 1:
-        week_num = 1
-    if week_day >= 5:
-        week_num += 1
-    # print(time)
-    
-    try:
-        date_out = date.fromisocalendar(time.year, week_num, 1) 
-    except:
-        date_out = date.fromisocalendar(time.year, week_num-1, 1) 
-        date_out = date_out  + timedelta(days=7)
-    return date_out +  timedelta(days=3)
-
-
-def concat_all(df_list, sort_list = ["this_period"]):
-    df_concat = None
-    first = True
-    for df in df_list:
-        if first:
-            df_concat = df
-            first = False
-            continue
-        df_concat = pd.concat([df_concat, df])
-    df_concat = df_concat.sort_values(sort_list, axis = 0, ascending = False)
-    return df_concat
+"""
+Plotly Helpers
+"""
 
 def get_plotly_failed_chart(display_text):
     fig = go.Figure(go.Indicator(
@@ -314,60 +202,22 @@ def convert_animation_to_gif(fig, fig_name, path='app/generated_images/'):
             loop=1,
         )
 
-def get_address_profile(df, target):
-    return df[df['address'] == target]
-# def calc_lock_efficiency(action_time, final_lock_time):
-#     # if type(action_time) == str:
-#     action_time = get_checkpoint_timestamp(action_time)
-#     # action_time = action_time.date
-#     # if type(final_lock_time) == str:
-#     #     final_lock_time = get_checkpoint_timestamp(final_lock_time)
-#     #     # final_lock_time = final_lock_time.date
-#     # else:
-#     #     final_lock_time =  final_lock_time.date()
-#     final_lock_time = get_checkpoint_timestamp(final_lock_time)
-#     # 4 years forward date
-#     four_years_forward = action_time + timedelta(seconds=365 * 4 * 86400)
-#     # four_years_forward = four_years_forward.date()
 
-#     # time deltas
-#     diff_lock_time = final_lock_time - action_time
-#     diff_max_lock = four_years_forward - action_time
+"""
+Dataframe Helpers
+"""
 
-#     # ratio
-#     ## Add 1 to offset locks week of max lock are max locked
-#     lock_weeks = int((diff_lock_time / pd.Timedelta(seconds= 7 * 86400)))
-#     max_weeks = int(diff_max_lock / pd.Timedelta(seconds= 7 * 86400))
-
-#     if lock_weeks / max_weeks > 1:
-#         print(f"Lock Efficiency: {action_time}, {final_lock_time}")
-#     return lock_weeks / max_weeks if lock_weeks / max_weeks <= 1 else 1
-
-def get_lock_diffs(final_lock_time):
-    action_time = get_checkpoint_timestamp(dt.utcnow())
-
-        # action_time = action_time.date
-    # if type(final_lock_time) == str:
-    #     final_lock_time = get_checkpoint_end_date(final_lock_time)
-    #     # final_lock_time = final_lock_time.date
-    # else:
-    #     final_lock_time =  final_lock_time.date()
-    #     final_lock_time = get_checkpoint_end_date(final_lock_time)
-    final_lock_time = get_checkpoint_timestamp(final_lock_time)
-    # 4 years forward date
-    four_years_forward = action_time + timedelta(seconds=365 * 4 * 86400)
-    # four_years_forward = four_years_forward.date()
-
-    # time deltas
-    diff_lock_time = final_lock_time - action_time 
-    diff_max_lock = four_years_forward - action_time
-
-    # ratio
-    ## Add 1 to offset locks week of max lock are max locked
-    lock_weeks = int((diff_lock_time / pd.Timedelta(days=7)))
-    max_weeks = int(diff_max_lock / pd.Timedelta(days=7))
-    
-    return int(lock_weeks), int(max_weeks)
+def concat_all(df_list, sort_list = ["this_period"]):
+    df_concat = None
+    first = True
+    for df in df_list:
+        if first:
+            df_concat = df
+            first = False
+            continue
+        df_concat = pd.concat([df_concat, df])
+    df_concat = df_concat.sort_values(sort_list, axis = 0, ascending = False)
+    return df_concat
 
 def nullify_amount(value):
     if value == 'null' or value == '' or value == '-':
@@ -388,14 +238,23 @@ def convert_units(value, decimals=18):
         return np.nan
     return float(int(float(value)) / 10**decimals)
 
+
+def df_remove_nan(df):
+    return df.where(pd.notnull(df), None)
+
 """
 Checkpoints
 """
 # Needs more dynamic generation
-def generate_checkpoints(start_time = '2020-08-12 10:33:20+00:00'):
-    week =  7 * 86400 
-    start_date = get_datetime_obj(start_time)
-    print_mode(start_date)
+def generate_checkpoints(start_time = 1597276800):
+    if type(start_time) == int:
+        start_date = get_dt_from_timestamp(start_time)
+    else:
+        start_date = get_datetime_obj(start_time)
+    # Start Timestamp Curve is: 1597276800
+    # Lets properly update this!!!
+    week =  7 * 86400     # 604800 (gap confirmed by curve API)
+    # print_mode(start_date)
     #
     i = 0
     checkpoints = []
@@ -525,3 +384,134 @@ def calc_lock_efficiency_by_checkpoint(action_checkpoint, final_lock_checkpoint)
 
     return efficiency
 
+
+def get_lock_diffs(final_lock_time):
+    action_time = get_checkpoint_timestamp(get_now())
+
+        # action_time = action_time.date
+    # if type(final_lock_time) == str:
+    #     final_lock_time = get_checkpoint_end_date(final_lock_time)
+    #     # final_lock_time = final_lock_time.date
+    # else:
+    #     final_lock_time =  final_lock_time.date()
+    #     final_lock_time = get_checkpoint_end_date(final_lock_time)
+    final_lock_time = get_checkpoint_timestamp(final_lock_time)
+    # 4 years forward date
+    four_years_forward = action_time + timedelta(seconds=365 * 4 * 86400)
+    # four_years_forward = four_years_forward.date()
+
+    # time deltas
+    diff_lock_time = final_lock_time - action_time 
+    diff_max_lock = four_years_forward - action_time
+
+    # ratio
+    ## Add 1 to offset locks week of max lock are max locked
+    lock_weeks = int((diff_lock_time / pd.Timedelta(days=7)))
+    max_weeks = int(diff_max_lock / pd.Timedelta(days=7))
+    
+    return int(lock_weeks), int(max_weeks)
+
+
+"""
+Checkpoints (Older need to fully deprecate)
+"""
+
+# Slight issue on splitting years will split period despite single period.
+def get_period(week_num, week_day, time, target=5):
+    if week_num > -1 and week_day > -1:
+        time = get_date_obj(time)
+        week_num = int(time.strftime("%V"))
+        week_day = int(time.weekday())
+        vote_year = time.year
+        if time.month == 1 and week_num == 52:
+            week_num = 0
+        if week_day >= target:
+            week_num = week_num + 1
+        else:
+            week_num = week_num
+        if week_num < 10 or week_num == 0:
+            week_num = f"0{week_num}"
+        return f"{vote_year}.{week_num}"
+    # print('WEEK NOT FOUND')
+    # print(week_day)
+    # print(week_num)
+    return "0"
+
+
+# Slight issue on splitting years will split period despite single period.
+def get_period_direct(time, target=5):
+    time = get_date_obj(time)
+
+    week_num = int(time.strftime("%V"))
+    week_day = int(time.weekday())      # starts sunday
+    vote_year = time.year
+    if time.month == 1 and week_num == 52:
+        week_num = 0
+    if week_day >= target:
+        week_num = week_num + 1
+    else:
+        week_num = week_num
+    if week_num < 10:
+        week_num = f"0{week_num}"
+    # elif week_num % 10 = 0:
+    return f"{vote_year}.{week_num}"
+    # print('WEEK NOT FOUND')
+    # print(week_day)
+    # print(week_num)
+    # return 0
+
+def get_convex_period_direct(time, target=5):
+    # print(time)
+    # print(type(time))
+    time = get_date_obj(time)
+    week_num = int(time.strftime("%V"))
+    week_day = int(time.weekday())      # starts sunday
+    vote_year = time.year
+    if time.month == 1 and week_num == 52:
+        week_num = 0
+    if week_day >= target:
+        week_num = week_num + 1
+    else:
+        week_num = week_num
+    if week_num % 2 == 1:
+        week_num += 1
+    if week_num < 10 or week_num == 0:
+        week_num = f"0{week_num}"
+    # elif week_num % 10 = 0:
+    return f"{vote_year}.{week_num}"
+
+def get_checkpoint_end_date(this_time):
+    # set day to upcoming thursday
+    x = get_date_obj(this_time)
+    week_day = int(x.weekday())
+    if week_day >= 4:
+        week_day_adj = 4 + (7 - week_day)
+    else:
+        week_day_adj = 4 - week_day
+    return x + timedelta(days=week_day_adj)
+
+# Slow replace w/ above once function 
+#   Is wrong about year changes
+def get_period_end_date(time):
+    # this is terrible. 
+    # I know its terrible. 
+    # I think fromisocalendar starts on monday?
+    time = get_date_obj(time)
+
+    week_num = int(time.strftime("%V"))
+    week_day = int(time.weekday())      # starts sunday
+
+    month = int(time.month)
+    year = int(time.year)
+    if week_num > 50 and month == 1:
+        week_num = 1
+    if week_day >= 5:
+        week_num += 1
+    # print(time)
+    
+    try:
+        date_out = date.fromisocalendar(time.year, week_num, 1) 
+    except:
+        date_out = date.fromisocalendar(time.year, week_num-1, 1) 
+        date_out = date_out  + timedelta(days=7)
+    return date_out +  timedelta(days=3)

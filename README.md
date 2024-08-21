@@ -276,3 +276,16 @@ ___
     * Snapshot vote does not match delegation.
 * /stakedao/delegations/delegator/0x34a0da8d21af0f6caeec2c25ad07c88cfe483b54
     * Can't find info, not present on delegate page, is found on index.
+
+
+
+# https://api.curve.fi/api/getAllGauges
+
+
+
+# Mystery 
+Alchemix Voter
+'0xf872703f1c8f93fa186869bac83bac5a0c87c3c8' # Voter
+'0x9e2b6378ee8ad2a4a95fe481d63caba8fb0ebbf9' # Locker
+Locks not linking to votes?
+    > Was not tracking Zero Address delegations as global delegations
